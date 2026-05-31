@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange University Finder | Yonsei OIA</title>
+    
+    <!-- Security Scripts -->
+    <script>
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Disable keyboard shortcuts for viewing source/developer tools
+        document.addEventListener('keydown', function(e) {
+            // F12 - Developer Tools
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+I - Developer Tools
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+J - Console
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+C - Inspect Element
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+U - View Source
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+S - Save Page
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // // Detect DevTools opening (basic detection)
+        // (function() {
+        //     const threshold = 160;
+        //     const devToolsCheck = function() {
+        //         const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        //         const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        //         if (widthThreshold || heightThreshold) {
+        //             document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#003876;color:white;font-size:18px;text-align:center;padding:20px;">Developer tools are not allowed on this page.<br>개발자 도구 사용이 제한됩니다.</div>';
+        //         }
+        //     };
+        //     window.addEventListener('resize', devToolsCheck);
+        //     setInterval(devToolsCheck, 1000);
+        // })();
+
+        // Disable console methods in production
+        (function() {
+            const noop = function() {};
+            const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'trace', 'dir', 'dirxml', 'group', 'groupEnd', 'time', 'timeEnd', 'assert', 'profile'];
+            methods.forEach(function(method) {
+                console[method] = noop;
+            });
+        })();
+    </script>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Host Universities | Yonsei OIA">
+    <meta property="og:title" content="Host Universities | Yonsei OIA">
+    <meta property="og:description" content="Yonsei OIA Host Universities">
+    <meta property="og:url" content="https://oiaunivfinder.netlify.app/">
+    <meta property="og:image" content="https://oiaunivfinder.netlify.app/assets/oiaunivfinderthumbnail.png">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="400">
+
+    <!-- SNS, Kakao -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Host Universities | Yonsei OIA">
+    <meta name="twitter:description" content="Yonsei OIA Host Universities">
+    <meta name="twitter:image" content="https://oiaunivfinder.netlify.app/assets/oiaunivfinderthumbnail.png">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yonsei-blue: #003876;
+            --yonsei-light-blue: #0066CC;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-500: #6c757d;
+            --gray-700: #495057;
+            --gray-900: #212529;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--yonsei-blue);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            margin-bottom: 20px;
+        }
+
+        .subtitle-ko {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-bottom: 4px;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .subtitle-en {
+            font-size: 12px;
+            opacity: 0.75;
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+        }
+
+        .filter-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--gray-300);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            color: var(--gray-700);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--yonsei-light-blue);
+            color: var(--yonsei-blue);
+        }
+
+        .filter-btn.active {
+            background: var(--yonsei-blue);
+            border-color: var(--yonsei-blue);
+            color: white;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .input-field input,
+        .input-field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .input-field input:focus,
+        .input-field select:focus {
+            outline: none;
+            border-color: var(--yonsei-light-blue);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .result-count {
+            font-size: 16px;
+            color: var(--gray-700);
+        }
+
+        .result-count strong {
+            color: var(--yonsei-blue);
+            font-size: 18px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--yonsei-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--yonsei-light-blue);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--yonsei-blue);
+            color: var(--yonsei-blue);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Sort Select */
+        .sort-select {
+            padding: 10px 16px;
+            border: 2px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* University Grid */
+        .university-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .university-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .university-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .university-card.favorited {
+            border-color: var(--warning);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .university-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--yonsei-blue);
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .icon-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .icon-btn.active {
+            background: var(--warning);
+            color: white;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--gray-700);
+        }
+
+        .meta-icon {
+            color: var(--gray-500);
+        }
+
+        .card-specs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .spec-item {
+            font-size: 13px;
+        }
+
+        .spec-label {
+            color: var(--gray-500);
+            margin-bottom: 2px;
+        }
+
+        .spec-value {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: var(--yonsei-blue);
+            color: white;
+            padding: 25px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--yonsei-blue);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            font-size: 14px;
+        }
+
+        .info-label {
+            color: var(--gray-500);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-500);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            border: 4px solid var(--gray-200);
+            border-top: 4px solid var(--yonsei-blue);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .badge-info {
+            background: var(--yonsei-light-blue);
+            color: white;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--yonsei-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-to-top:hover {
+            background: var(--yonsei-light-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gray-200);
+            padding: 20px;
+            text-align: center;
+            margin-top: 50px;
+            border-top: 1px solid var(--gray-300);
+        }
+
+        .footer p {
+            font-size: 12px;
+            color: var(--gray-700);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .stats-bar {
+                gap: 15px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .university-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-panel {
+                padding: 20px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: space-between;
+            }
+
+            .action-buttons button,
+            .action-buttons select {
+                flex: 1;
+                min-width: calc(50% - 4px);
+            }
+
+            .action-buttons .sort-select {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+
+            .subtitle-ko {
+                font-size: 11px;
+            }
+
+            .subtitle-en {
+                font-size: 10px;
+            }
+
+            .scroll-to-top {
+                width: 45px;
+                height: 45px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 20px;
+            }
+
+            .modal {
+                max-height: 95vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px 0;
+            }
+
+            .filter-group {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+
+            .card-specs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // Google Sheets CSV URL (replace with your published CSV URL)
+        const SHEET_CSV_URL = atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXRDM0kwcmFlSUJIZm1hZFlSWVUwQkxoX25TajFFc0NDRFM5QTZDNWxnZGsvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTE3OTA0ODIzNzY=');
+        const NOTES_CSV_URL = atob('aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMXRDM0kwcmFlSUJIZm1hZFlSWVUwQkxoX25TajFFc0NDRFM5QTZDNWxnZGsvZXhwb3J0P2Zvcm1hdD1jc3YmZ2lkPTIwNDkwMjI2Mzg=');
+
+        function App() {
+            const [universities, setUniversities] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [filters, setFilters] = useState(() => {
+                // Load filters from sessionStorage on initial render
+                const savedFilters = sessionStorage.getItem('exchangeFilters');
+                if (savedFilters) {
+                    try {
+                        return JSON.parse(savedFilters);
+                    } catch (e) {
+                        console.error('Failed to parse saved filters:', e);
+                    }
+                }
+                return {
+                    studentType: '', // 'Undergraduate' or 'Graduate'
+                    languageRegion: '',
+                    semesterOption: '',
+                    continent: '',
+                    country: '',
+                    university: '',
+                    universitySearch: '',
+                    gpa: '',
+                    toefl: '',
+                    nonEnglishLanguage: '',
+                    nonEnglishScore: '',
+                    uicExclusive: false,
+                    uicExclude: false,
+                    scholarshipOnly: false,
+                    updateOnly: false,
+                };
+            });
+            const [sortBy, setSortBy] = useState(() => {
+                // Load sortBy from sessionStorage on initial render
+                return sessionStorage.getItem('exchangeSortBy') || 'quota-desc';
+            });
+            const [favorites, setFavorites] = useState([]);
+            const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+            const [selectedUniversity, setSelectedUniversity] = useState(null);
+            const [gpaWarning, setGpaWarning] = useState('');
+            const [toeflWarning, setToeflWarning] = useState('');
+            const [showScrollTop, setShowScrollTop] = useState(false);
+            const [showUpdateHistory, setShowUpdateHistory] = useState(false);
+            const [cameFromUpdateHistory, setCameFromUpdateHistory] = useState(false);
+
+            // Handle scroll to top button visibility
+            useEffect(() => {
+                const handleScroll = () => {
+                    if (window.pageYOffset > 300) {
+                        setShowScrollTop(true);
+                    } else {
+                        setShowScrollTop(false);
+                    }
+                };
+
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            // Scroll to top function
+            const scrollToTop = () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            };
+
+            // Save filters to sessionStorage whenever they change
+            useEffect(() => {
+                sessionStorage.setItem('exchangeFilters', JSON.stringify(filters));
+            }, [filters]);
+
+            // Save sortBy to sessionStorage whenever it changes
+            useEffect(() => {
+                sessionStorage.setItem('exchangeSortBy', sortBy);
+            }, [sortBy]);
+
+            // Reset language-specific filters when languageRegion changes
+            useEffect(() => {
+                if (filters.languageRegion === 'English') {
+                    // Clear non-English language filters when switching to English
+                    setFilters(prev => ({
+                        ...prev,
+                        nonEnglishLanguage: '',
+                        nonEnglishScore: ''
+                    }));
+                } else if (filters.languageRegion === 'Non-English') {
+                    // Clear TOEFL filter when switching to Non-English
+                    setFilters(prev => ({
+                        ...prev,
+                        toefl: ''
+                    }));
+                } else if (filters.languageRegion === 'Both') {
+                    // Clear all language-specific filters when Both is selected
+                    setFilters(prev => ({
+                        ...prev,
+                        toefl: '',
+                        nonEnglishLanguage: '',
+                        nonEnglishScore: ''
+                    }));
+                } else {
+                    // Clear all language-specific filters when no region is selected
+                    setFilters(prev => ({
+                        ...prev,
+                        toefl: '',
+                        nonEnglishLanguage: '',
+                        nonEnglishScore: ''
+                    }));
+                }
+            }, [filters.languageRegion]);
+
+            // Load data from Google Sheets
+            useEffect(() => {
+                loadData();
+            }, []);
+
+            const loadData = async () => {
+                try {
+                    setLoading(true);
+                    
+                    // Load university data and notes data in parallel
+                    const [uniResponse, notesResponse] = await Promise.all([
+                        fetch(SHEET_CSV_URL),
+                        fetch(NOTES_CSV_URL)
+                    ]);
+                    
+                    const uniCsvText = await uniResponse.text();
+                    const notesCsvText = await notesResponse.text();
+                    
+                    // Parse notes data first and wait for completion
+                    const notesMap = await new Promise((resolve) => {
+                        const map = {};
+                        Papa.parse(notesCsvText, {
+                            header: true,
+                            complete: (results) => {
+                                results.data
+                                    .filter(row => row['University/Institution'] && row['Label'])
+                                    .forEach(row => {
+                                        // Split labels by comma and trim whitespace
+                                        const labels = row['Label'].split(',').map(l => l.trim()).filter(l => l);
+                                        map[row['University/Institution'].trim()] = {
+                                            labels: labels,
+                                            note: row['Note'] || null,
+                                            link: row['About'] || null,
+                                            updateDate: row['Update Date'] || null,
+                                            updateDescription: row['Update Description'] || null
+                                        };
+                                    });
+                                resolve(map);
+                            }
+                        });
+                    });
+                    
+                    // Parse university data after notes are ready
+                    Papa.parse(uniCsvText, {
+                        header: true,
+                        complete: (results) => {
+                            const parsed = results.data
+                                .filter(row => row['University/Institution'])
+                                .map((row, index) => ({
+                                    id: index,
+                                    name: row['University/Institution'],
+                                    website: row['Website'],
+                                    region: row['Region'],
+                                    country: row['Country'],
+                                    language1: row['Language of Instruction 1'],
+                                    language2: row['Language of Instruction 2'],
+                                    quota: parseQuota(row['Exchange Quota for This Semester']),
+                                    quotaType: row['Semester slot/Person'],
+                                    fallOption: row['Fall program option'],
+                                    springOption: row['Spring program option (Do you accept calendar year students?)'],
+                                    acceptsUG: row['Accepts Undergraduate'],
+                                    acceptsGrad: row['Accepts Graduate'],
+                                    toefl: parseInt(row['TOEFL iBT Total']) || null,
+                                    toeflsubscores: row['TOEFL iBT Subscores'] || null,
+                                    toeflReading: parseInt(row['TOEFL Reading']) || null,
+                                    toeflListening: parseInt(row['TOEFL Listening']) || null,
+                                    toeflSpeaking: parseInt(row['TOEFL Speaking']) || null,
+                                    toeflWriting: parseInt(row['TOEFL Writing']) || null,
+                                    additionalLanguage: row['Additional language requirement (French / German / Spanish / Russian / Japanese / Chinese)'],
+                                    gpaRequired: parseGPA(row['GPA in 4.3 scale']),
+                                    admissionReq: row['Admission requirements'],
+                                    availableStudyArea: row['Available study area'],
+                                    restrictedStudyArea: row['Restricted study area'],
+                                    additionalInfoLink: row['Additional info / Promotional link'],
+                                    academicSystem: row['Semester/Quarter'],
+                                    fallNominationDeadline: row['Fall Nomination Deadline'],
+                                    fallApplicationDeadline: row['Fall Application Deadline'],
+                                    springNominationDeadline: row['Spring Nomination Deadline (MM/DD)'],
+                                    springApplicationDeadline: row['Spring Application Deadline (MM/DD)'],
+                                    academicCalendar: row['Academic Calendar'],
+                                    housingInfo: row['Housing Info / Link'],
+                                    housingGuaranteed: row['Is on-campus housing guaranteed?'] || null,
+                                    recentFactsheet: row['Recent Factsheet'] || null,
+                                    labels: notesMap[row['University/Institution']?.trim()]?.labels || [],
+                                    note: notesMap[row['University/Institution']?.trim()]?.note || null,
+                                    noteLink: notesMap[row['University/Institution']?.trim()]?.link || null,
+                                    updateDate: notesMap[row['University/Institution']?.trim()]?.updateDate || null,
+                                    updateDescription: notesMap[row['University/Institution']?.trim()]?.updateDescription || null,
+                                }));
+                            
+                            setUniversities(parsed);
+                            setLoading(false);
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    setLoading(false);
+                }
+            };
+
+            const parseQuota = (quota) => {
+                if (!quota) return 0;
+                
+                // Convert to string and clean
+                const str = String(quota).trim();
+                
+                // Handle empty or N/A values
+                if (str === '' || str === 'N/A' || str === 'TBD' || str === '-' || str === 'n/a') {
+                    return 0;
+                }
+                
+                // Use parseFloat to handle both integers and decimals properly
+                const num = parseFloat(str);
+                
+                // Return 0 if not a valid number
+                if (isNaN(num) || num < 0) {
+                    return 0;
+                }
+                
+                // Return the number as-is (could be decimal like 2.5)
+                return num;
+            };
+
+            const parseGPA = (gpa) => {
+                if (!gpa) return null;
+                const match = gpa.match(/(\d+\.?\d*)/);
+                return match ? parseFloat(match[1]) : null;
+            };
+
+            // Continent mapping (defined early to avoid hoisting issues)
+            const continentMapping = {
+                'Asia/Oceania': ['China', 'Hong Kong', 'India', 'Indonesia', 'Japan', 'Korea', 'Malaysia', 'Singapore', 'Taiwan', 'Thailand', 'Turkey', 'Australia', 'New Zealand', 'Vietnam'],
+                'Americas': ['Canada', 'United States', 'Mexico', 'Brazil', 'Chile', 'Argentina', 'Colombia', 'Peru'],
+                'Europe': ['Austria', 'Belgium', 'Croatia', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Netherlands', 'Norway', 'Poland', 'Portugal', 'Romania', 'Russia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom', 'UK'],
+                'Other': ['ISEP', 'Multi']
+            };
+
+            // Get continent from country (defined early to avoid hoisting issues)
+            const getContinentFromCountry = (country) => {
+                for (const [continent, countryList] of Object.entries(continentMapping)) {
+                    if (countryList.includes(country)) {
+                        return continent;
+                    }
+                }
+                return 'Other';
+            };
+
+            // Country flags emoji mapping (defined early)
+            const countryFlags = {
+                'Canada': '🇨🇦',
+                'United States': '🇺🇸',
+                'Mexico': '🇲🇽',
+                'Brazil': '🇧🇷',
+                'Chile': '🇨🇱',
+                'Argentina': '🇦🇷',
+                'France': '🇫🇷',
+                'Germany': '🇩🇪',
+                'Spain': '🇪🇸',
+                'Italy': '🇮🇹',
+                'United Kingdom': '🇬🇧',
+                'UK': '🇬🇧',
+                'Netherlands': '🇳🇱',
+                'Belgium': '🇧🇪',
+                'Switzerland': '🇨🇭',
+                'Austria': '🇦🇹',
+                'Sweden': '🇸🇪',
+                'Norway': '🇳🇴',
+                'Denmark': '🇩🇰',
+                'Finland': '🇫🇮',
+                'Poland': '🇵🇱',
+                'Czech Republic': '🇨🇿',
+                'Hungary': '🇭🇺',
+                'Portugal': '🇵🇹',
+                'Greece': '🇬🇷',
+                'Ireland': '🇮🇪',
+                'Iceland': '🇮🇸',
+                'Croatia': '🇭🇷',
+                'Romania': '🇷🇴',
+                'Russia': '🇷🇺',
+                'Slovakia': '🇸🇰',
+                'Slovenia': '🇸🇮',
+                'Estonia': '🇪🇪',
+                'Latvia': '🇱🇻',
+                'Lithuania': '🇱🇹',
+                'Luxembourg': '🇱🇺',
+                'China': '🇨🇳',
+                'Japan': '🇯🇵',
+                'Korea': '🇰🇷',
+                'Hong Kong': '🇭🇰',
+                'Singapore': '🇸🇬',
+                'Taiwan': '🇹🇼',
+                'Thailand': '🇹🇭',
+                'Malaysia': '🇲🇾',
+                'Indonesia': '🇮🇩',
+                'India': '🇮🇳',
+                'Australia': '🇦🇺',
+                'New Zealand': '🇳🇿',
+                'ISEP': '🌐',
+                'Multi': '🌐'
+            };
+
+            // Determine if university is English-speaking
+            const isEnglishSpeaking = (uni) => {
+                return uni.language1 === 'English' || uni.language2 === 'English';
+            };
+
+            // Determine if university is Non-English-speaking
+            const isNonEnglishSpeaking = (uni) => {
+                return (uni.language1 && uni.language1 !== 'English') || 
+                       (uni.language2 && uni.language2 !== 'English');
+            };
+
+            // Determine if university accepts one year
+            const acceptsOneYear = (uni) => {
+                if (!uni.fallOption) return false;
+                const option = uni.fallOption.toLowerCase();
+                return option.includes('one year') || option.includes('calendar year');
+            };
+
+            // Check if university is UIC Exclusive
+            const isUICExclusive = (uni) => {
+                return uni.name.includes('UIC Exclusive');
+            };
+
+            // Convert URLs in text to clickable links
+            const linkifyText = (text) => {
+                if (!text) return text;
+                
+                // URL pattern matching
+                const urlPattern = /(https?:\/\/[^\s]+)/g;
+                const parts = text.split(urlPattern);
+                
+                return parts.map((part, index) => {
+                    if (part.match(urlPattern)) {
+                        return (
+                            <a 
+                                key={index}
+                                href={part}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{color: 'var(--yonsei-light-blue)', textDecoration: 'underline'}}
+                            >
+                                {part}
+                            </a>
+                        );
+                    }
+                    return part;
+                });
+            };
+
+            // Filter universities
+            const filteredUniversities = useMemo(() => {
+                // Validate GPA
+                if (filters.gpa) {
+                    const gpaValue = parseFloat(filters.gpa);
+                    if (isNaN(gpaValue) || gpaValue < 0 || gpaValue > 4.3) {
+                        setGpaWarning('⚠️ GPA must be between 0.0 and 4.3');
+                        return [];
+                    } else {
+                        setGpaWarning('');
+                    }
+                }
+
+                // Validate TOEFL
+                if (filters.toefl) {
+                    const toeflValue = parseInt(filters.toefl);
+                    if (isNaN(toeflValue) || toeflValue < 0 || toeflValue > 120) {
+                        setToeflWarning('⚠️ TOEFL iBT must be between 0 and 120');
+                        return [];
+                    } else {
+                        setToeflWarning('');
+                    }
+                } else {
+                    setToeflWarning('');
+                }
+
+                let filtered = universities.filter(uni => {
+                    // Favorites only filter
+                    if (showFavoritesOnly && !favorites.includes(uni.id)) {
+                        return false;
+                    }
+
+                    // UIC Exclusive Filter
+                    if (filters.uicExclusive && !isUICExclusive(uni)) {
+                        return false;
+                    }
+                    // UIC Exclude Filter (show only non-UIC programs)
+                    if (filters.uicExclude && isUICExclusive(uni)) {
+                        return false;
+                    }
+                    // Scholarship Only Filter
+                    if (filters.scholarshipOnly && !uni.labels.includes('Scholarship')) {
+                        return false;
+                    }
+                    // Update Only Filter
+                    if (filters.updateOnly && !uni.labels.includes('Update')) {
+                        return false;
+                    }
+
+                    // Student Type Filter
+                    if (filters.studentType === 'Undergraduate') {
+                        // Check if accepts undergraduate - handle various formats
+                        const acceptsUG = uni.acceptsUG;
+                        if (!acceptsUG || acceptsUG.toString().toLowerCase() === 'no' || acceptsUG.toString().toLowerCase() === 'n') {
+                            return false;
+                        }
+                    }
+                    if (filters.studentType === 'Graduate') {
+                        // Check if accepts graduate - handle various formats
+                        const acceptsGrad = uni.acceptsGrad;
+                        if (!acceptsGrad || acceptsGrad.toString().toLowerCase() === 'no' || acceptsGrad.toString().toLowerCase() === 'n') {
+                            return false;
+                        }
+                    }
+
+                    // Language Region Filter (English vs Non-English vs Both)
+                    // Universities with both English and non-English should appear in both filters
+                    if (filters.languageRegion === 'English' && !isEnglishSpeaking(uni)) {
+                        return false;
+                    }
+                    if (filters.languageRegion === 'Non-English' && !isNonEnglishSpeaking(uni)) {
+                        return false;
+                    }
+                    if (filters.languageRegion === 'Both') {
+                        // Show only universities with 2+ languages of instruction
+                        if (!uni.language1 || !uni.language2) {
+                            return false;
+                        }
+                    }
+
+                    // Semester Option Filter
+                    if (filters.semesterOption === 'one-semester') {
+                        // Show universities that accept one semester (including "one semester only" and "one semester or one year")
+                        if (!uni.fallOption?.toLowerCase().includes('one semester')) {
+                            return false;
+                        }
+                    }
+                    if (filters.semesterOption === 'one-year') {
+                        if (!acceptsOneYear(uni)) {
+                            return false;
+                        }
+                    }
+
+                    // Continent Filter
+                    if (filters.continent) {
+                        const uniContinent = getContinentFromCountry(uni.country);
+                        if (uniContinent !== filters.continent) {
+                            return false;
+                        }
+                    }
+
+                    // Country Filter
+                    if (filters.country && uni.country !== filters.country) {
+                        return false;
+                    }
+
+                    // University Filter
+                    if (filters.university && uni.name !== filters.university) {
+                        return false;
+                    }
+
+                    // University Search Filter
+                    if (filters.universitySearch) {
+                        const searchTerm = filters.universitySearch.toLowerCase();
+                        if (!uni.name.toLowerCase().includes(searchTerm)) {
+                            return false;
+                        }
+                    }
+
+                    // GPA Filter
+                    if (filters.gpa && uni.gpaRequired) {
+                        const userGPA = parseFloat(filters.gpa);
+                        if (userGPA < uni.gpaRequired) {
+                            return false;
+                        }
+                    }
+
+                    // TOEFL Filter (for English-speaking)
+                    if (filters.toefl && uni.toefl) {
+                        const userTOEFL = parseInt(filters.toefl);
+                        if (userTOEFL < uni.toefl) {
+                            return false;
+                        }
+                    }
+
+                    // Non-English Language Filter
+                    if (filters.nonEnglishLanguage) {
+                        const lang = uni.additionalLanguage?.toLowerCase() || '';
+                        const lang1 = uni.language1?.toLowerCase() || '';
+                        const lang2 = uni.language2?.toLowerCase() || '';
+                        const selectedLang = filters.nonEnglishLanguage.toLowerCase();
+                        
+                        if (!lang.includes(selectedLang) && !lang1.includes(selectedLang) && !lang2.includes(selectedLang)) {
+                            return false;
+                        }
+                    }
+
+                    // Non-English Language Score Filter
+                    if (filters.nonEnglishScore) {
+                        // This would require parsing additional language requirements
+                        // For now, we'll just filter by language existence
+                        const lang = uni.additionalLanguage?.toLowerCase() || '';
+                        if (!lang.includes(filters.nonEnglishScore.toLowerCase())) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+
+                return filtered;
+            }, [universities, filters, favorites, showFavoritesOnly]);
+
+            // Sort universities
+            const sortedUniversities = useMemo(() => {
+                const sorted = [...filteredUniversities];
+                
+                switch(sortBy) {
+                    case 'quota-desc':
+                        return sorted.sort((a, b) => b.quota - a.quota);
+                    case 'quota-asc':
+                        return sorted.sort((a, b) => a.quota - b.quota);
+                    case 'name-asc':
+                        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+                    case 'name-desc':
+                        return sorted.sort((a, b) => b.name.localeCompare(a.name));
+                    case 'toefl-asc':
+                        return sorted.sort((a, b) => (a.toefl || 999) - (b.toefl || 999));
+                    case 'toefl-desc':
+                        return sorted.sort((a, b) => (b.toefl || 0) - (a.toefl || 0));
+                    case 'gpa-asc':
+                        return sorted.sort((a, b) => (a.gpaRequired || 999) - (b.gpaRequired || 999));
+                    case 'gpa-desc':
+                        return sorted.sort((a, b) => (b.gpaRequired || 0) - (a.gpaRequired || 0));
+                    default:
+                        return sorted;
+                }
+            }, [filteredUniversities, sortBy]);
+
+            // Toggle favorite
+            const toggleFavorite = (uniId) => {
+                setFavorites(prev => 
+                    prev.includes(uniId) 
+                        ? prev.filter(id => id !== uniId)
+                        : [...prev, uniId]
+                );
+            };
+
+            // Calculate match score
+            // Export to PDF
+            const exportToPDF = () => {
+                try {
+                    console.log('PDF export started...');
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    doc.setFontSize(18);
+                    doc.text('2026-1 Exchange Universities', 14, 22);
+                    
+                    doc.setFontSize(11);
+                    doc.text(`Generated: ${new Date().toLocaleDateString('ko-KR')}`, 14, 30);
+                    doc.text(`Total: ${sortedUniversities.length} universities`, 14, 36);
+                    
+                    const tableData = sortedUniversities.map(uni => [
+                        uni.name,
+                        uni.country,
+                        uni.language1 + (uni.language2 ? ', ' + uni.language2 : ''),
+                        uni.quota,
+                        uni.toefl || 'N/A',
+                        uni.gpaRequired || 'N/A',
+                        uni.fallOption || 'N/A',
+                        uni.springOption || 'N/A'
+                    ]);
+                    
+                    doc.autoTable({
+                        startY: 42,
+                        head: [['University', 'Country', 'Language', 'Quota', 'TOEFL', 'GPA', 'Fall Option', 'Spring Option']],
+                        body: tableData,
+                        styles: { fontSize: 6 },
+                        headStyles: { fillColor: [0, 56, 118] }
+                    });
+                    
+                    doc.save('exchange-universities.pdf');
+                    console.log('PDF export completed successfully');
+                    return false;
+                } catch (error) {
+                    console.error('PDF export error:', error);
+                    alert('PDF download failed. Please try again.');
+                    return false;
+                }
+            };
+
+            // Export to Excel
+            const exportToExcel = () => {
+                try {
+                    console.log('Excel export started...');
+                    const data = sortedUniversities.map(uni => ({
+                        'University': uni.name,
+                        'Country': uni.country,
+                        'Region': uni.region,
+                        'Language': uni.language1 + (uni.language2 ? ', ' + uni.language2 : ''),
+                        'Quota': uni.quota,
+                        'TOEFL': uni.toefl || 'N/A',
+                        'GPA': uni.gpaRequired || 'N/A',
+                        'Fall Option': uni.fallOption || 'N/A',
+                        'Spring Option': uni.springOption || 'N/A',
+                        'Website': uni.website
+                    }));
+                    
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Universities');
+                    XLSX.writeFile(wb, 'exchange-universities.xlsx');
+                    console.log('Excel export completed successfully');
+                    return false;
+                } catch (error) {
+                    console.error('Excel export error:', error);
+                    alert('Excel download failed. Please try again.');
+                    return false;
+                }
+            };
+
+            // Get unique countries
+            const countries = useMemo(() => {
+                const unique = [...new Set(universities.map(u => u.country))];
+                return unique.sort();
+            }, [universities]);
+
+            // Get countries filtered by continent
+            const filteredCountries = useMemo(() => {
+                if (!filters.continent) {
+                    return countries;
+                }
+                const continentCountries = continentMapping[filters.continent] || [];
+                return countries.filter(c => continentCountries.includes(c));
+            }, [countries, filters.continent]);
+
+            // Get unique universities list for dropdown (filtered by continent and country if selected)
+            const universitiesList = useMemo(() => {
+                let uniList = universities;
+                if (filters.continent) {
+                    uniList = uniList.filter(u => getContinentFromCountry(u.country) === filters.continent);
+                }
+                if (filters.country) {
+                    uniList = uniList.filter(u => u.country === filters.country);
+                }
+                return ['All Universities', ...uniList.map(u => u.name).sort()];
+            }, [universities, filters.continent, filters.country]);
+
+            // Stats
+            const stats = useMemo(() => {
+                return {
+                    total: universities.length,
+                    totalQuota: universities.reduce((sum, u) => sum + u.quota, 0),
+                    countries: new Set(universities.map(u => u.country)).size,
+                    english: universities.filter(u => isEnglishSpeaking(u)).length,
+                    nonEnglish: universities.filter(u => isNonEnglishSpeaking(u)).length,
+                    americas: universities.filter(u => getContinentFromCountry(u.country) === 'Americas').length,
+                    asiaOceania: universities.filter(u => getContinentFromCountry(u.country) === 'Asia/Oceania').length,
+                    europe: universities.filter(u => getContinentFromCountry(u.country) === 'Europe').length,
+                };
+            }, [universities]);
+
+            if (loading) {
+                return (
+                    <div className="loading">
+                        <div className="spinner"></div>
+                        <p>Loading data...</p>
+                    </div>
+                );
+            }
+
+            return (
+                <>
+                    <div className="header">
+                        <div className="header-content">
+                            <h1>2026-2 Exchange University Finder</h1>
+                            <div className="subtitle">
+                                <p className="subtitle-ko">2026학년도 2학기 연세대학교 국제처 해외파견 프로그램 배정 가능 대학 명단</p>
+                                <p className="subtitle-en">List of Host Universities for Yonsei Outbound Exchange Program, FALL 2026</p>
+                            </div>
+                            <div className="stats-bar">
+                                <div className="stat-item">
+                                    <div className="stat-label">Total Universities</div>
+                                    <div className="stat-value">{stats.total}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-label">Total Quota</div>
+                                    <div className="stat-value">{stats.totalQuota}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-label">Countries</div>
+                                    <div className="stat-value">{stats.countries}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-label">Americas</div>
+                                    <div className="stat-value">{stats.americas}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-label">Asia/Oceania</div>
+                                    <div className="stat-value">{stats.asiaOceania}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-label">Europe</div>
+                                    <div className="stat-value">{stats.europe}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-label">English</div>
+                                    <div className="stat-value">{stats.english}</div>
+                                </div>
+                                <div className="stat-item">
+                                    <div className="stat-label">Non-English</div>
+                                    <div className="stat-value">{stats.nonEnglish}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notice/Disclaimer */}
+                    <div style={{
+                        background: '#fff9e6',
+                        borderTop: '1px solid #ffe066',
+                        borderBottom: '1px solid #ffe066',
+                        padding: '12px 20px',
+                        fontSize: 11,
+                        lineHeight: 1.5,
+                        color: '#665500'
+                    }}>
+                        <div style={{maxWidth: 1400, margin: '0 auto'}}>
+                            <p style={{marginBottom: 6}}>
+                                <strong>유의사항:</strong> 연세대학교 국제처와 교환학생 협정을 맺은 해외 대학 목록입니다. 일부 단과대학 단독 교환 프로그램을 운영하는 대학은 검색되지 않을 수 있으므로, 해당 경우는 소속 단과대학으로 문의 바랍니다. 교환대학의 모집 인원, 지원 자격, 세부 조건은 매 학기 변경될 수 있습니다. 또한, 여기에 안내된 어학 성적 및 GPA 기준은 최소 요건이며, 최종 선발 여부는 상대교의 심사를 통해 결정됩니다.
+                            </p>
+                            <p style={{margin: 0}}>
+                                <strong>Notice:</strong> This list shows OIA partner universities with student exchange agreements through Yonsei University's Office of International Affairs. Some colleges or departments that operate exchange programs exclusively may not appear in this list; in such cases, please contact your college or department for further information. Exchange conditions may change each semester. The language proficiency and GPA requirements listed here represent the minimum requirements; final admission decisions are made by the host institution.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="container">
+                        {/* Filter Panel */}
+                        <div className="filter-panel">
+                            {/* Student Type Filter */}
+                            <div className="filter-section">
+                                <label className="filter-label">Student Type</label>
+                                <div className="filter-group">
+                                    <button 
+                                        className={`filter-btn ${filters.studentType === 'Undergraduate' ? 'active' : ''}`}
+                                        onClick={() => setFilters(prev => ({
+                                            ...prev, 
+                                            studentType: prev.studentType === 'Undergraduate' ? '' : 'Undergraduate'
+                                        }))}
+                                    >
+                                        Undergraduate
+                                    </button>
+                                    <button 
+                                        className={`filter-btn ${filters.studentType === 'Graduate' ? 'active' : ''}`}
+                                        onClick={() => setFilters(prev => ({
+                                            ...prev, 
+                                            studentType: prev.studentType === 'Graduate' ? '' : 'Graduate'
+                                        }))}
+                                    >
+                                        Graduate
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Language Region Filter */}
+                            <div className="filter-section">
+                                <label className="filter-label">Language Region (Select One)</label>
+                                <div className="filter-group">
+                                    <button 
+                                        className={`filter-btn ${filters.languageRegion === 'English' ? 'active' : ''}`}
+                                        onClick={() => setFilters(prev => ({
+                                            ...prev, 
+                                            languageRegion: prev.languageRegion === 'English' ? '' : 'English',
+                                            nonEnglishLanguage: '',
+                                            nonEnglishScore: ''
+                                        }))}
+                                    >
+                                        English
+                                    </button>
+                                    <button 
+                                        className={`filter-btn ${filters.languageRegion === 'Non-English' ? 'active' : ''}`}
+                                        onClick={() => setFilters(prev => ({
+                                            ...prev, 
+                                            languageRegion: prev.languageRegion === 'Non-English' ? '' : 'Non-English',
+                                            toefl: ''
+                                        }))}
+                                    >
+                                        Non-English
+                                    </button>
+                                    <button 
+                                        className={`filter-btn ${filters.languageRegion === 'Both' ? 'active' : ''}`}
+                                        onClick={() => setFilters(prev => ({
+                                            ...prev, 
+                                            languageRegion: prev.languageRegion === 'Both' ? '' : 'Both',
+                                            toefl: '',
+                                            nonEnglishLanguage: '',
+                                            nonEnglishScore: ''
+                                        }))}
+                                    >
+                                        Both
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Semester Option Filter */}
+                            <div className="filter-section">
+                                <label className="filter-label">Semester Option</label>
+                                <div className="filter-group">
+                                    <button 
+                                        className={`filter-btn ${filters.semesterOption === 'one-semester' ? 'active' : ''}`}
+                                        onClick={() => setFilters(prev => ({
+                                            ...prev, 
+                                            semesterOption: prev.semesterOption === 'one-semester' ? '' : 'one-semester'
+                                        }))}
+                                    >
+                                        One Semester Only
+                                    </button>
+                                    <button 
+                                        className={`filter-btn ${filters.semesterOption === 'one-year' ? 'active' : ''}`}
+                                        onClick={() => setFilters(prev => ({
+                                            ...prev, 
+                                            semesterOption: prev.semesterOption === 'one-year' ? '' : 'one-year'
+                                        }))}
+                                    >
+                                        One Year (Two Semesters)
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Continent & Country Filters */}
+                            <div className="filter-section">
+                                <label className="filter-label">Continent & Country</label>
+                                <div className="input-group">
+                                    <div className="input-field">
+                                        <label>Continent</label>
+                                        <select 
+                                            value={filters.continent}
+                                            onChange={(e) => setFilters(prev => ({
+                                                ...prev, 
+                                                continent: e.target.value, 
+                                                country: '',
+                                                university: ''
+                                            }))}
+                                        >
+                                            <option value="">All Continents</option>
+                                            <option value="Asia/Oceania">Asia/Oceania</option>
+                                            <option value="Americas">Americas</option>
+                                            <option value="Europe">Europe</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div className="input-field">
+                                        <label>Country</label>
+                                        <select 
+                                            value={filters.country}
+                                            onChange={(e) => setFilters(prev => ({...prev, country: e.target.value, university: ''}))}
+                                        >
+                                            <option value="">All Countries</option>
+                                            {filteredCountries.map(country => (
+                                                <option key={country} value={country}>{country}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Search University */}
+                            <div className="filter-section">
+                                <label className="filter-label">Search University</label>
+                                <div className="input-field">
+                                    <select
+                                        value={filters.university}
+                                        onChange={(e) => setFilters(prev => ({...prev, university: e.target.value}))}
+                                        style={{width: '100%'}}
+                                    >
+                                        {universitiesList.map(uni => (
+                                            <option key={uni} value={uni === 'All Universities' ? '' : uni}>
+                                                {uni}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="input-field" style={{marginTop: 10}}>
+                                    <input 
+                                        type="text"
+                                        placeholder="Type university name to search..."
+                                        value={filters.universitySearch}
+                                        onChange={(e) => setFilters(prev => ({...prev, universitySearch: e.target.value}))}
+                                        style={{width: '100%'}}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Academic Requirements */}
+                            <div className="filter-section">
+                                <label className="filter-label">My Qualifications</label>
+                                <div className="input-group">
+                                    <div className="input-field">
+                                        <label>GPA (4.3 scale)</label>
+                                        <input 
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            max="4.3"
+                                            placeholder="e.g., 3.5"
+                                            value={filters.gpa}
+                                            onChange={(e) => setFilters(prev => ({...prev, gpa: e.target.value}))}
+                                        />
+                                        {gpaWarning && (
+                                            <div style={{color: 'var(--danger)', fontSize: 12, marginTop: 4}}>
+                                                {gpaWarning}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {filters.languageRegion === 'English' && (
+                                        <div className="input-field">
+                                            <label>TOEFL iBT</label>
+                                            <input 
+                                                type="number"
+                                                min="0"
+                                                max="120"
+                                                placeholder="e.g., 90"
+                                                value={filters.toefl}
+                                                onChange={(e) => setFilters(prev => ({...prev, toefl: e.target.value}))}
+                                            />
+                                            {toeflWarning && (
+                                                <div style={{color: 'var(--danger)', fontSize: 12, marginTop: 5}}>
+                                                    {toeflWarning}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {filters.languageRegion === 'Non-English' && (
+                                        <>
+                                            <div className="input-field">
+                                                <label>Language</label>
+                                                <select 
+                                                    value={filters.nonEnglishLanguage}
+                                                    onChange={(e) => setFilters(prev => ({
+                                                        ...prev, 
+                                                        nonEnglishLanguage: e.target.value,
+                                                        nonEnglishScore: ''
+                                                    }))}
+                                                >
+                                                    <option value="">Select Language</option>
+                                                    <option value="French">French</option>
+                                                    <option value="German">German</option>
+                                                    <option value="Spanish">Spanish</option>
+                                                    <option value="Russian">Russian</option>
+                                                    <option value="Japanese">Japanese</option>
+                                                    <option value="Chinese">Chinese</option>
+                                                </select>
+                                            </div>
+                                            {filters.nonEnglishLanguage && (
+                                                <div className="input-field">
+                                                    <label>{filters.nonEnglishLanguage} Level</label>
+                                                    <select
+                                                        value={filters.nonEnglishScore}
+                                                        onChange={(e) => setFilters(prev => ({...prev, nonEnglishScore: e.target.value}))}
+                                                    >
+                                                        <option value="">Select Level</option>
+                                                        {(filters.nonEnglishLanguage === 'French' || 
+                                                          filters.nonEnglishLanguage === 'German' || 
+                                                          filters.nonEnglishLanguage === 'Spanish' ||
+                                                          filters.nonEnglishLanguage === 'Russian') && (
+                                                            <>
+                                                                <option value="A1">A1 - Beginner</option>
+                                                                <option value="A2">A2 - Elementary</option>
+                                                                <option value="B1">B1 - Intermediate</option>
+                                                                <option value="B2">B2 - Upper Intermediate</option>
+                                                                <option value="C1">C1 - Advanced</option>
+                                                                <option value="C2">C2 - Proficient</option>
+                                                            </>
+                                                        )}
+                                                        {filters.nonEnglishLanguage === 'Japanese' && (
+                                                            <>
+                                                                <option value="N5">N5 - Basic</option>
+                                                                <option value="N4">N4 - Elementary</option>
+                                                                <option value="N3">N3 - Intermediate</option>
+                                                                <option value="N2">N2 - Pre-Advanced</option>
+                                                                <option value="N1">N1 - Advanced</option>
+                                                            </>
+                                                        )}
+                                                        {filters.nonEnglishLanguage === 'Chinese' && (
+                                                            <>
+                                                                <option value="HSK1">HSK 1</option>
+                                                                <option value="HSK2">HSK 2</option>
+                                                                <option value="HSK3">HSK 3</option>
+                                                                <option value="HSK4">HSK 4</option>
+                                                                <option value="HSK5">HSK 5</option>
+                                                                <option value="HSK6">HSK 6</option>
+                                                            </>
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* UIC Exclusive Checkbox */}
+                            <div className="filter-section">
+                                <div style={{display: 'flex', flexDirection: 'column', gap: 10}}>
+                                    <label style={{display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: 14}}>
+                                        <input 
+                                            type="checkbox"
+                                            checked={filters.uicExclusive}
+                                            onChange={(e) => setFilters(prev => ({...prev, uicExclusive: e.target.checked, uicExclude: false}))}
+                                            style={{marginRight: 8, width: 18, height: 18, cursor: 'pointer'}}
+                                        />
+                                        <span style={{fontWeight: 600}}>UIC Exclusive Programs Only</span>
+                                    </label>
+                                    <label style={{display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: 14}}>
+                                        <input 
+                                            type="checkbox"
+                                            checked={filters.uicExclude}
+                                            onChange={(e) => setFilters(prev => ({...prev, uicExclude: e.target.checked, uicExclusive: false}))}
+                                            style={{marginRight: 8, width: 18, height: 18, cursor: 'pointer'}}
+                                        />
+                                        <span style={{fontWeight: 600}}>Exclude UIC Exclusive Programs</span>
+                                    </label>
+                                    <label style={{display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: 14}}>
+                                        <input 
+                                            type="checkbox"
+                                            checked={filters.scholarshipOnly}
+                                            onChange={(e) => setFilters(prev => ({...prev, scholarshipOnly: e.target.checked}))}
+                                            style={{marginRight: 8, width: 18, height: 18, cursor: 'pointer'}}
+                                        />
+                                        <span style={{fontWeight: 600}}>Scholarship Available Only</span>
+                                    </label>
+                                    <label style={{display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: 14}}>
+                                        <input 
+                                            type="checkbox"
+                                            checked={filters.updateOnly}
+                                            onChange={(e) => setFilters(prev => ({...prev, updateOnly: e.target.checked}))}
+                                            style={{marginRight: 8, width: 18, height: 18, cursor: 'pointer'}}
+                                        />
+                                        <span style={{fontWeight: 600, color: '#e83e8c'}}>Updated Universities Only</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Clear Filters and Show Favorites */}
+                            <div style={{display: 'flex', justifyContent: 'center', gap: 10, marginTop: 20, flexWrap: 'wrap'}}>
+                                <button 
+                                    className="btn btn-secondary"
+                                    onClick={() => {
+                                        setFilters({
+                                            studentType: '',
+                                            languageRegion: '',
+                                            semesterOption: '',
+                                            continent: '',
+                                            country: '',
+                                            university: '',
+                                            universitySearch: '',
+                                            gpa: '',
+                                            toefl: '',
+                                            nonEnglishLanguage: '',
+                                            nonEnglishScore: '',
+                                            uicExclusive: false,
+                                            uicExclude: false,
+                                            scholarshipOnly: false,
+                                            updateOnly: false,
+                                        });
+                                        sessionStorage.removeItem('exchangeFilters');
+                                    }}
+                                >
+                                    Clear All Filters
+                                </button>
+                                <button 
+                                    className={`btn ${showFavoritesOnly ? 'btn-primary' : 'btn-secondary'}`}
+                                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                                >
+                                    {showFavoritesOnly ? '★ Showing Favorites' : '☆ Show Favorites Only'} ({favorites.length})
+                                </button>
+                                <button 
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowUpdateHistory(true)}
+                                >
+                                    📋 Update History
+                                </button>
+                                {favorites.length > 0 && (
+                                    <button 
+                                        className="btn btn-secondary"
+                                        onClick={() => {
+                                            setFavorites([]);
+                                            setShowFavoritesOnly(false);
+                                        }}
+                                        style={{color: 'var(--danger)'}}
+                                    >
+                                        Clear All Favorites
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Action Bar */}
+                        <div className="action-bar">
+                            <div className="result-count">
+                                Found <strong>{sortedUniversities.length}</strong> universities
+                            </div>
+                            <div className="action-buttons">
+                                <select 
+                                    className="sort-select"
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                >
+                                    <option value="quota-desc">Quota (High to Low)</option>
+                                    <option value="quota-asc">Quota (Low to High)</option>
+                                    <option value="name-asc">University Name (A-Z)</option>
+                                    <option value="name-desc">University Name (Z-A)</option>
+                                    <option value="toefl-asc">TOEFL (Low to High)</option>
+                                    <option value="toefl-desc">TOEFL (High to Low)</option>
+                                    <option value="gpa-asc">GPA (Low to High)</option>
+                                    <option value="gpa-desc">GPA (High to Low)</option>
+                                </select>
+                                <button 
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        exportToPDF();
+                                        return false;
+                                    }}
+                                    disabled={sortedUniversities.length === 0}
+                                >
+                                    Download PDF
+                                </button>
+                                <button 
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        exportToExcel();
+                                        return false;
+                                    }}
+                                    disabled={sortedUniversities.length === 0}
+                                >
+                                    Download Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* University Grid */}
+                        {sortedUniversities.length === 0 ? (
+                            <div className="empty-state">
+                                <div className="empty-state-icon">🔍</div>
+                                <div className="empty-state-text">
+                                    No universities match your criteria. Try adjusting your filters.
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="university-grid">
+                                {sortedUniversities.map(uni => {
+                                    const isFavorited = favorites.includes(uni.id);
+                                    const isEnglish = isEnglishSpeaking(uni);
+
+                                    return (
+                                        <div 
+                                            key={uni.id} 
+                                            className={`university-card ${isFavorited ? 'favorited' : ''}`}
+                                        >
+                                            <div className="card-header">
+                                                <div className="university-name">
+                                                    {uni.name}
+                                                    {uni.labels.length > 0 && uni.labels.map((label, idx) => {
+                                                        const labelColors = {
+                                                            'Scholarship': '#28a745',
+                                                            'New': '#0066CC',
+                                                            'Popular': '#ff6b35',
+                                                            'Update': '#e83e8c'
+                                                        };
+                                                        const bgColor = labelColors[label] || '#6c757d';
+                                                        return (
+                                                            <span key={idx} style={{
+                                                                marginLeft: 6,
+                                                                padding: '2px 8px',
+                                                                backgroundColor: bgColor,
+                                                                color: 'white',
+                                                                borderRadius: 4,
+                                                                fontSize: 11,
+                                                                fontWeight: 600,
+                                                                verticalAlign: 'middle'
+                                                            }}>{label}</span>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <div className="card-actions">
+                                                    <button 
+                                                        className={`icon-btn ${isFavorited ? 'active' : ''}`}
+                                                        onClick={() => toggleFavorite(uni.id)}
+                                                        title="Favorite"
+                                                    >
+                                                        {isFavorited ? '★' : '☆'}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="card-meta">
+                                                <div className="meta-item">
+                                                    <span className="meta-icon">
+                                                        {countryFlags[uni.country] || '🌐'}
+                                                    </span>
+                                                    {uni.country}
+                                                </div>
+                                                <div className="meta-item">
+                                                    <span className="meta-icon">👥</span>
+                                                    {uni.quota} slots
+                                                </div>
+                                                <div className="meta-item">
+                                                    <span className="meta-icon">💬</span>
+                                                    {uni.language1}{uni.language2 ? `, ${uni.language2}` : ''}
+                                                </div>
+                                            </div>
+
+                                            <div className="card-specs">
+                                                <div className="spec-item">
+                                                    <div className="spec-label">
+                                                        {isEnglish ? 'TOEFL iBT' : 'Language Requirement'}
+                                                    </div>
+                                                    <div className="spec-value" style={{fontSize: isEnglish ? 14 : 12}}>
+                                                        {isEnglish 
+                                                            ? (uni.toefl || 'Not specified')
+                                                            : (uni.additionalLanguage || uni.language1 || 'Not specified')
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div className="spec-item">
+                                                    <div className="spec-label">GPA Required (4.3 scale)</div>
+                                                    <div className="spec-value">{uni.gpaRequired || 'Not specified'}</div>
+                                                </div>
+                                                <div className="spec-item">
+                                                    <div className="spec-label">Fall Option</div>
+                                                    <div className="spec-value" style={{fontSize: 11}}>
+                                                        {uni.fallOption ? (uni.fallOption.length > 30 ? uni.fallOption.substring(0, 30) + '...' : uni.fallOption) : 'N/A'}
+                                                    </div>
+                                                </div>
+                                                <div className="spec-item">
+                                                    <div className="spec-label">System</div>
+                                                    <div className="spec-value">{uni.academicSystem || 'N/A'}</div>
+                                                </div>
+                                            </div>
+
+                                            <div style={{marginTop: 15, display: 'flex', gap: 10}}>
+                                                <button 
+                                                    className="btn btn-primary"
+                                                    style={{flex: 1, fontSize: 13, padding: '8px 12px'}}
+                                                    onClick={() => setSelectedUniversity(uni)}
+                                                >
+                                                    View Details
+                                                </button>
+                                                {uni.website && (
+                                                    <a 
+                                                        href={uni.website}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-secondary"
+                                                        style={{flex: 1, fontSize: 13, padding: '8px 12px', textDecoration: 'none', textAlign: 'center'}}
+                                                    >
+                                                        Website
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Detail Modal */}
+                    {selectedUniversity && (
+                        <div className="modal-overlay" onClick={() => setSelectedUniversity(null)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header" style={{position: 'relative'}}>
+                                    {cameFromUpdateHistory && (
+                                        <button 
+                                            className="modal-close-btn"
+                                            onClick={() => {
+                                                setSelectedUniversity(null);
+                                                setShowUpdateHistory(true);
+                                                setCameFromUpdateHistory(false);
+                                            }}
+                                            aria-label="Back to Update History"
+                                            style={{right: 50}}
+                                        >
+                                            ←
+                                        </button>
+                                    )}
+                                    <button 
+                                        className="modal-close-btn"
+                                        onClick={() => {
+                                            setSelectedUniversity(null);
+                                            setCameFromUpdateHistory(false);
+                                        }}
+                                        aria-label="Close"
+                                    >
+                                        ×
+                                    </button>
+                                    <div className="modal-title">{selectedUniversity.name}</div>
+                                    <div className="modal-subtitle">
+                                        {selectedUniversity.country} • {selectedUniversity.region}
+                                    </div>
+                                </div>
+                                <div className="modal-body">
+                                    <div className="info-section">
+                                        <h3>Basic Information</h3>
+                                        <div className="info-grid">
+                                            <div className="info-item">
+                                                <div className="info-label">Exchange Quota</div>
+                                                <div className="info-value">{selectedUniversity.quota} {selectedUniversity.quotaType}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Language of Instruction</div>
+                                                <div className="info-value">
+                                                    {selectedUniversity.language1}
+                                                    {selectedUniversity.language2 && `, ${selectedUniversity.language2}`}
+                                                </div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Academic System</div>
+                                                <div className="info-value">{selectedUniversity.academicSystem || 'N/A'}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Spring Option</div>
+                                                <div className="info-value">{selectedUniversity.springOption || 'N/A'}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Fall Option</div>
+                                                <div className="info-value">{selectedUniversity.fallOption || 'N/A'}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Accepts</div>
+                                                <div className="info-value">
+                                                    {(() => {
+                                                        const acceptsUG = selectedUniversity.acceptsUG && selectedUniversity.acceptsUG.toString().toLowerCase() !== 'no' && selectedUniversity.acceptsUG.toString().toLowerCase() !== 'n';
+                                                        const acceptsGrad = selectedUniversity.acceptsGrad && selectedUniversity.acceptsGrad.toString().toLowerCase() !== 'no' && selectedUniversity.acceptsGrad.toString().toLowerCase() !== 'n';
+                                                        if (acceptsUG && acceptsGrad) return 'Undergraduate, Graduate';
+                                                        if (acceptsUG) return 'Undergraduate';
+                                                        if (acceptsGrad) return 'Graduate';
+                                                        return 'N/A';
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {(selectedUniversity.labels.length > 0 || selectedUniversity.note) && (
+                                        <div className="info-section">
+                                            <h3>Note</h3>
+                                            {selectedUniversity.labels.length > 0 && (
+                                                <div style={{marginBottom: selectedUniversity.note ? 10 : 0}}>
+                                                    {selectedUniversity.labels.map((label, idx) => {
+                                                        const labelColors = {
+                                                            'Scholarship': '#28a745',
+                                                            'New': '#0066CC',
+                                                            'Popular': '#ff6b35',
+                                                            'Update': '#e83e8c'
+                                                        };
+                                                        const bgColor = labelColors[label] || '#6c757d';
+                                                        return (
+                                                            <span key={idx} style={{
+                                                                marginRight: 6,
+                                                                padding: '4px 10px',
+                                                                backgroundColor: bgColor,
+                                                                color: 'white',
+                                                                borderRadius: 4,
+                                                                fontSize: 12,
+                                                                fontWeight: 600
+                                                            }}>{label}</span>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                            {selectedUniversity.note && (
+                                                selectedUniversity.noteLink ? (
+                                                    <a 
+                                                        href={selectedUniversity.noteLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{fontSize: 14, lineHeight: 1.6, color: 'var(--yonsei-light-blue)', textDecoration: 'underline', cursor: 'pointer'}}
+                                                    >
+                                                        {selectedUniversity.note}
+                                                    </a>
+                                                ) : (
+                                                    <p style={{fontSize: 14, lineHeight: 1.6}}>{selectedUniversity.note}</p>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {selectedUniversity.labels.includes('Update') && selectedUniversity.updateDate && (
+                                        <div className="info-section" style={{backgroundColor: '#e8f4fd', padding: 15, borderRadius: 8, border: '1px solid var(--yonsei-light-blue)'}}>
+                                            <h3 style={{color: 'var(--yonsei-blue)'}}>📋 Recent Update</h3>
+                                            <div style={{fontSize: 14, marginTop: 10}}>
+                                                <div style={{marginBottom: 8}}>
+                                                    <strong>Date:</strong> {selectedUniversity.updateDate}
+                                                </div>
+                                                {selectedUniversity.updateDescription && (
+                                                    <div>
+                                                        <strong>Changes:</strong> {selectedUniversity.updateDescription}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="info-section">
+                                        <h3>Academic Requirements</h3>
+                                        <div className="info-grid">
+                                            <div className="info-item">
+                                                <div className="info-label">TOEFL iBT Total</div>
+                                                <div className="info-value">{selectedUniversity.toefl || 'Not specified'}</div>
+                                            </div>
+                                            {selectedUniversity.toeflReading && (
+                                                <div className="info-item">
+                                                    <div className="info-label">TOEFL Reading</div>
+                                                    <div className="info-value">{selectedUniversity.toeflReading}</div>
+                                                </div>
+                                            )}
+                                            {selectedUniversity.toeflListening && (
+                                                <div className="info-item">
+                                                    <div className="info-label">TOEFL Listening</div>
+                                                    <div className="info-value">{selectedUniversity.toeflListening}</div>
+                                                </div>
+                                            )}
+                                            {selectedUniversity.toeflSpeaking && (
+                                                <div className="info-item">
+                                                    <div className="info-label">TOEFL Speaking</div>
+                                                    <div className="info-value">{selectedUniversity.toeflSpeaking}</div>
+                                                </div>
+                                            )}
+                                            {selectedUniversity.toeflWriting && (
+                                                <div className="info-item">
+                                                    <div className="info-label">TOEFL Writing</div>
+                                                    <div className="info-value">{selectedUniversity.toeflWriting}</div>
+                                                </div>
+                                            )}
+                                            <div className="info-item">
+                                                <div className="info-label">Subscores Requirements</div>
+                                                <div className="info-value">{selectedUniversity.toeflsubscores || 'Not specified'}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">GPA Required (4.3 scale)</div>
+                                                <div className="info-value">{selectedUniversity.gpaRequired || 'Not specified'}</div>
+                                            </div>
+                                            {selectedUniversity.additionalLanguage && selectedUniversity.additionalLanguage !== 'N/A' && (
+                                                <div className="info-item">
+                                                    <div className="info-label">Additional Language</div>
+                                                    <div className="info-value">{selectedUniversity.additionalLanguage}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {selectedUniversity.admissionReq && (
+                                        <div className="info-section">
+                                            <h3>Admission Requirements</h3>
+                                            <p style={{fontSize: 14, lineHeight: 1.6}}>{linkifyText(selectedUniversity.admissionReq)}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedUniversity.availableStudyArea && (
+                                        <div className="info-section">
+                                            <h3>Available Study Areas</h3>
+                                            <p style={{fontSize: 14, lineHeight: 1.6}}>{linkifyText(selectedUniversity.availableStudyArea)}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedUniversity.restrictedStudyArea && selectedUniversity.restrictedStudyArea !== 'N/A' && (
+                                        <div className="info-section">
+                                            <h3>Restricted Study Areas</h3>
+                                            <p style={{fontSize: 14, lineHeight: 1.6, color: 'var(--danger)'}}>{linkifyText(selectedUniversity.restrictedStudyArea)}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedUniversity.additionalInfoLink && selectedUniversity.additionalInfoLink !== 'N/A' && (
+                                        <div className="info-section">
+                                            <h3>Additional Info / Promotional Link</h3>
+                                            <p style={{fontSize: 14, lineHeight: 1.6}}>{linkifyText(selectedUniversity.additionalInfoLink)}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="info-section">
+                                        <h3>Important Dates</h3>
+                                        <div className="info-grid">
+                                            <div className="info-item">
+                                                <div className="info-label">Spring Nomination Deadline</div>
+                                                <div className="info-value">{selectedUniversity.springNominationDeadline || 'N/A'}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Spring Application Deadline</div>
+                                                <div className="info-value">{selectedUniversity.springApplicationDeadline || 'N/A'}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Fall Nomination Deadline</div>
+                                                <div className="info-value">{selectedUniversity.fallNominationDeadline || 'N/A'}</div>
+                                            </div>
+                                            <div className="info-item">
+                                                <div className="info-label">Fall Application Deadline</div>
+                                                <div className="info-value">{selectedUniversity.fallApplicationDeadline || 'N/A'}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {selectedUniversity.academicCalendar && (
+                                        <div className="info-section">
+                                            <h3>Academic Calendar</h3>
+                                            <p style={{fontSize: 14, lineHeight: 1.6}}>{linkifyText(selectedUniversity.academicCalendar)}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedUniversity.housingInfo && (
+                                        <div className="info-section">
+                                            <h3>Housing Information</h3>
+                                            <p style={{fontSize: 14, lineHeight: 1.6}}>{linkifyText(selectedUniversity.housingInfo)}</p>
+                                        </div>
+                                    )}
+
+                                    {(selectedUniversity.housingGuaranteed || selectedUniversity.recentFactsheet) && (
+                                        <div className="info-section">
+                                            <h3>Additional Information</h3>
+                                            <div className="info-grid">
+                                                {selectedUniversity.housingGuaranteed && (
+                                                    <div className="info-item">
+                                                        <div className="info-label">On-campus Housing Guaranteed?</div>
+                                                        <div className="info-value">{selectedUniversity.housingGuaranteed}</div>
+                                                    </div>
+                                                )}
+                                                {selectedUniversity.recentFactsheet && (
+                                                    <div className="info-item">
+                                                        <div className="info-label">Factsheet</div>
+                                                        <div className="info-value">
+                                                            <a 
+                                                                href={selectedUniversity.recentFactsheet}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                style={{color: 'var(--yonsei-light-blue)', textDecoration: 'underline'}}
+                                                            >
+                                                                Recent Factsheet
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="modal-footer">
+                                    {selectedUniversity.website && (
+                                        <a 
+                                            href={selectedUniversity.website}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-primary"
+                                        >
+                                            Visit Website
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Update History Modal */}
+                    {showUpdateHistory && (
+                        <div className="modal-overlay" onClick={() => setShowUpdateHistory(false)}>
+                            <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: 800, backgroundColor: 'white'}}>
+                                <div className="modal-header" style={{position: 'relative'}}>
+                                    <button 
+                                        className="modal-close-btn"
+                                        onClick={() => setShowUpdateHistory(false)}
+                                        aria-label="Close"
+                                    >
+                                        ×
+                                    </button>
+                                    <h2>📋 Update History</h2>
+                                </div>
+                                <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto'}}>
+                                    {(() => {
+                                        const updatedUniversities = universities
+                                            .filter(uni => uni.labels.includes('Update') && uni.updateDate)
+                                            .sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate))
+                                            .slice(0, 100);
+                                        
+                                        if (updatedUniversities.length === 0) {
+                                            return <p style={{textAlign: 'center', color: 'var(--gray-500)', padding: 40}}>No update history available.</p>;
+                                        }
+                                        
+                                        return (
+                                            <table style={{width: '100%', borderCollapse: 'collapse', fontSize: 14}}>
+                                                <thead>
+                                                    <tr style={{borderBottom: '2px solid var(--gray-300)', textAlign: 'left'}}>
+                                                        <th style={{padding: '12px 8px', width: '120px'}}>Date</th>
+                                                        <th style={{padding: '12px 8px'}}>University</th>
+                                                        <th style={{padding: '12px 8px'}}>Region</th>
+                                                        <th style={{padding: '12px 8px'}}>Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {updatedUniversities.map((uni, index) => (
+                                                        <tr 
+                                                            key={index} 
+                                                            style={{borderBottom: '1px solid var(--gray-200)', cursor: 'pointer'}}
+                                                            onClick={() => {
+                                                                setShowUpdateHistory(false);
+                                                                setSelectedUniversity(uni);
+                                                                setCameFromUpdateHistory(true);
+                                                            }}
+                                                            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--gray-100)'}
+                                                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                                                        >
+                                                            <td style={{padding: '12px 8px', color: 'var(--gray-500)'}}>{uni.updateDate}</td>
+                                                            <td style={{padding: '12px 8px', color: 'var(--yonsei-blue)', fontWeight: 600}}>{uni.name}</td>
+                                                            <td style={{padding: '12px 8px'}}>{uni.country || '-'}</td>
+                                                            <td style={{padding: '12px 8px'}}>{uni.updateDescription || '-'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        );
+                                    })()}
+                                </div>
+                                <div className="modal-footer">
+                                    <button 
+                                        className="btn btn-secondary"
+                                        onClick={() => setShowUpdateHistory(false)}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Scroll to Top Button */}
+                    <button 
+                        className={`scroll-to-top ${showScrollTop ? 'visible' : ''}`}
+                        onClick={scrollToTop}
+                        aria-label="Scroll to top"
+                    >
+                        ↑
+                    </button>
+
+                    {/* Footer */}
+                    <div className="footer">
+                        <p>©2025 Seo-Ah Choi, Yonsei University, Office of International Affairs. All rights reserved.</p>
+                    </div>
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,3260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring 2027 Exchange University Finder | Yonsei OIA</title>
+
+    <!-- ===================================================================
+         배포 직전 활성화용 보안 차단 블록 (현재 비활성화)
+         학생 편의(우클릭 번역, Ctrl+S 페이지 저장, 디버깅용 콘솔)를 위해
+         개발·테스트 중에는 끄고, 운영 배포 직전에 아래 <script> 한 블록을
+         활성화하면 됩니다.
+         활성화 방법: 아래 한 줄 주석 (<! - - SECURITY-OFF - ->) 만 제거.
+         실효성 한계: client-side 차단은 우회 가능하므로, 절대 비밀 보호용이
+         아니라 단순 캐주얼 노출 억제 용도임을 인지하고 사용 바람.
+    =================================================================== -->
+    <!-- SECURITY-OFF
+    <script>
+        // 우클릭 차단
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        // 키보드 단축키 차단 (F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+                e.preventDefault(); return false;
+            }
+            if (e.ctrlKey && (e.key === 'u' || e.key === 's')) { e.preventDefault(); return false; }
+        });
+        // console 메서드 무력화
+        (function() {
+            var noop = function() {};
+            var methods = ['log','debug','info','warn','error','table','trace','dir','dirxml','group','groupEnd','time','timeEnd','assert','profile'];
+            methods.forEach(function(m) { console[m] = noop; });
+        })();
+    </script>
+    SECURITY-OFF -->
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Host Universities | Yonsei OIA">
+    <meta property="og:title" content="Spring 2027 Host Universities | Yonsei OIA">
+    <meta property="og:description" content="Yonsei OIA Host Universities for Spring 2027">
+    <meta property="og:url" content="https://oiaunivfinder.netlify.app/">
+    <meta property="og:image" content="https://oiaunivfinder.netlify.app/assets/oiaunivfinderthumbnail.png">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="400">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Spring 2027 Host Universities | Yonsei OIA">
+    <meta name="twitter:description" content="Yonsei OIA Host Universities for Spring 2027">
+    <meta name="twitter:image" content="https://oiaunivfinder.netlify.app/assets/oiaunivfinderthumbnail.png">
+
+    <meta name="theme-color" content="#003876">
+    <link rel="icon" href="data:,">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* Brand */
+            --yonsei-blue: #003876;
+            --yonsei-light-blue: #0066CC;
+            --brand: #003876;
+            --brand-deep: #002554;
+            --brand-soft: #e8eef6;
+            --brand-on-dark: #b8cde6;
+            /* Surfaces */
+            --bg: #ffffff;
+            --bg-soft: #f8f9fa;
+            --bg-hover: #f1f4f8;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-500: #6c757d;
+            --gray-700: #495057;
+            --gray-900: #212529;
+            /* Ink */
+            --ink: #0f1419;
+            --ink-muted: #5b6470;
+            --ink-faint: #8a93a0;
+            --line: #e6e9ee;
+            --line-strong: #d4d9e0;
+            --focus: #5b8dc1;
+            /* Status */
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        html { -webkit-text-size-adjust: 100%; scroll-padding-top: 88px; }
+        @media (max-width: 540px) { html { scroll-padding-top: 148px; } }
+
+        body {
+            margin: 0;
+            background: var(--bg-soft);
+            color: var(--ink);
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+                system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+            font-feature-settings: "ss06" on;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.55;
+        }
+
+        a { color: inherit; }
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        .skip-link {
+            position: absolute; left: -9999px; top: 0;
+            background: var(--ink); color: #fff; padding: 8px 12px; z-index: 100;
+        }
+        .skip-link:focus { left: 16px; top: 16px; }
+
+        /* ===== Site header (sticky white, matches 27s-info-session) ===== */
+        .site-header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: saturate(180%) blur(12px);
+            -webkit-backdrop-filter: saturate(180%) blur(12px);
+            border-bottom: 1px solid var(--line);
+            padding: 18px clamp(20px, 5vw, 48px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .site-header__inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .site-header__brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 0 0 auto;
+            text-decoration: none;
+            color: inherit;
+            border-radius: 6px;
+        }
+        .site-header__brand-group:hover .site-header__org-text strong { color: var(--brand); }
+        .site-header__brand-group:focus-visible {
+            outline: 2px solid var(--brand);
+            outline-offset: 4px;
+        }
+        .site-header__logo { display: block; height: 44px; width: auto; flex: 0 0 auto; }
+        .site-header__org-text {
+            display: flex; flex-direction: column; line-height: 1.3; min-width: 0;
+        }
+        .site-header__org-text strong {
+            font-size: 15px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em;
+        }
+        .site-header__org-text span {
+            font-size: 11.5px; font-weight: 500; color: var(--ink-muted); letter-spacing: 0.02em;
+        }
+        .site-header__external {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 8px 12px; font-size: 13px; font-weight: 500;
+            color: var(--ink-muted); text-decoration: none;
+            border: 1px solid var(--line); border-radius: 6px;
+            flex: 0 0 auto; margin-left: auto;
+            transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+        }
+        .site-header__external:hover {
+            background: var(--bg-hover); color: var(--ink); border-color: var(--line-strong);
+        }
+        .site-header__external svg { width: 11px; height: 11px; opacity: 0.7; }
+
+        @media (max-width: 540px) {
+            .site-header__inner { flex-wrap: wrap; gap: 10px 14px; }
+            .site-header__external { margin-left: auto; }
+        }
+
+        /* ===== Hero (navy) ===== */
+        .hero {
+            background: var(--brand);
+            color: #fff;
+            padding: clamp(40px, 6vw, 72px) clamp(20px, 5vw, 48px) clamp(40px, 5vw, 64px);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: "";
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.06), transparent 60%);
+            pointer-events: none;
+        }
+        .hero__inner { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
+        .hero__top {
+            display: flex; justify-content: space-between; align-items: baseline;
+            gap: 16px; flex-wrap: wrap; margin: 0 0 18px;
+        }
+        .hero__eyebrow {
+            font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+            text-transform: uppercase; color: var(--brand-on-dark); margin: 0;
+        }
+        .hero__counter {
+            display: inline-flex; align-items: baseline; gap: 4px 10px;
+            font-size: 12px; color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+        }
+        .hero__counter strong {
+            color: #fff; font-weight: 700; font-variant-numeric: tabular-nums;
+            letter-spacing: 0.01em;
+        }
+        .hero__counter-label { opacity: 0.85; }
+        .hero__counter-sep { opacity: 0.4; }
+        .hero__title {
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 800; letter-spacing: -0.02em;
+            line-height: 1.15; text-wrap: balance;
+            color: #fff; margin: 0 0 14px;
+        }
+        .hero__lede {
+            font-size: clamp(14px, 1.2vw, 16px);
+            color: rgba(255, 255, 255, 0.78);
+            max-width: 70ch; margin: 0; line-height: 1.6;
+        }
+        .hero__meta {
+            margin-top: 28px;
+            display: flex; flex-wrap: wrap; gap: 6px 28px;
+            font-size: 13px; color: rgba(255, 255, 255, 0.7);
+            padding-top: 22px;
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+        }
+        .hero__meta div { display: flex; align-items: baseline; }
+        .hero__meta dt { font-weight: 600; color: #fff; margin-right: 8px; display: inline; }
+        .hero__meta dd { margin: 0; display: inline; font-variant-numeric: tabular-nums; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Notice */
+        .notice-bar {
+            background: #fff9e6;
+            border-top: 1px solid #ffe066;
+            border-bottom: 1px solid #ffe066;
+            padding: 12px 20px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #665500;
+        }
+        .notice-inner { max-width: 1400px; margin: 0 auto; }
+        .notice-bar p { margin-bottom: 6px; }
+        .notice-bar p:last-child { margin-bottom: 0; }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .filter-section { margin-bottom: 25px; }
+        .filter-section:last-child { margin-bottom: 0; }
+        .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+            display: block;
+        }
+        .filter-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--gray-300);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            color: var(--gray-700);
+        }
+        .filter-btn:hover { border-color: var(--yonsei-light-blue); color: var(--yonsei-blue); }
+        .filter-btn.active { background: var(--yonsei-blue); border-color: var(--yonsei-blue); color: white; }
+        .filter-count {
+            margin-left: 6px;
+            font-size: 12px; font-weight: 500;
+            color: var(--ink-faint);
+            font-variant-numeric: tabular-nums;
+        }
+        .filter-btn.active .filter-count { color: rgba(255, 255, 255, 0.75); }
+        .checkbox-row .filter-count { color: var(--ink-faint); }
+
+        .input-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .input-field { flex: 1; min-width: 200px; }
+        .input-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+        .input-field input,
+        .input-field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .input-field input:focus,
+        .input-field select:focus { outline: none; border-color: var(--yonsei-light-blue); }
+
+        .checkbox-list { display: flex; flex-direction: column; gap: 10px; }
+        .checkbox-row { display: flex; align-items: center; cursor: pointer; font-size: 14px; }
+        .checkbox-row input { margin-right: 8px; width: 18px; height: 18px; cursor: pointer; }
+        .checkbox-row span { font-weight: 600; }
+
+        .warning-text { color: var(--danger); font-size: 12px; margin-top: 4px; }
+
+        /* GPA scale toggle (T1-D) */
+        .input-field-head {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 8px; margin-bottom: 6px;
+        }
+        .input-field-head label { margin: 0; }
+        .scale-toggle {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 500; color: var(--ink-muted);
+            cursor: pointer; user-select: none;
+        }
+        .scale-toggle input {
+            width: auto !important; padding: 0 !important;
+            margin: 0; border: none !important; cursor: pointer;
+        }
+        .gpa-hint {
+            font-size: 12px; color: var(--ink-muted);
+            margin-top: 4px; font-variant-numeric: tabular-nums;
+        }
+        .gpa-hint strong { color: var(--brand); font-weight: 700; }
+
+        /* Mobile filter drawer trigger (T2-H) — hidden on desktop */
+        .mobile-filter-trigger { display: none; }
+        .filter-drawer-close { display: none; }
+        .filter-drawer-backdrop { display: none; }
+
+        /* First-visit banner (T2-I) */
+        .first-visit-banner {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px;
+            background: var(--brand-soft);
+            border: 1px solid #c5d3e3;
+            border-radius: 8px;
+            margin: 0 0 20px 0;
+            font-size: 14px;
+            color: var(--brand-deep);
+        }
+        .first-visit-icon { font-size: 22px; flex: 0 0 auto; line-height: 1; }
+        .first-visit-text { flex: 1; line-height: 1.5; }
+        .first-visit-text strong { font-weight: 700; }
+        .first-visit-close {
+            flex: 0 0 auto;
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            color: var(--brand-deep); opacity: 0.55;
+            cursor: pointer; font-size: 20px; line-height: 1;
+            border-radius: 4px;
+            transition: opacity 160ms ease, background-color 160ms ease;
+            font-family: inherit;
+        }
+        .first-visit-close:hover { opacity: 1; background: rgba(0, 56, 118, 0.1); }
+
+        /* Active filter chips (T1-A) */
+        .active-chips {
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+            margin: 0 0 16px 0;
+            padding: 12px 16px;
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+        .active-chips-label {
+            font-size: 13px; font-weight: 600; color: var(--ink-muted);
+            margin-right: 4px;
+        }
+        .active-chip {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 8px 6px 12px;
+            background: var(--brand-soft);
+            color: var(--brand);
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background-color 160ms ease, border-color 160ms ease;
+        }
+        .active-chip:hover {
+            background: #d8e2ee;
+            border-color: rgba(0, 56, 118, 0.2);
+        }
+        .active-chip-x {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: rgba(0, 56, 118, 0.15);
+            font-size: 14px; line-height: 1; font-weight: 700;
+        }
+        .active-chip-clear {
+            font-size: 12px; font-weight: 600;
+            padding: 5px 12px;
+            background: transparent;
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            color: var(--ink-muted); cursor: pointer;
+            margin-left: auto;
+            font-family: inherit;
+            transition: border-color 160ms ease, color 160ms ease;
+        }
+        .active-chip-clear:hover { color: var(--danger); border-color: var(--danger); }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .result-count { font-size: 16px; color: var(--gray-700); }
+        .result-count strong { color: var(--yonsei-blue); font-size: 18px; }
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            text-align: center;
+            justify-content: center;
+        }
+        .btn-primary { background: var(--yonsei-blue); color: white; }
+        .btn-primary:hover { background: var(--yonsei-light-blue); }
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+        .btn-secondary:hover { border-color: var(--yonsei-blue); color: var(--yonsei-blue); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-danger-text { color: var(--danger); }
+
+        .sort-select {
+            padding: 10px 16px;
+            border: 2px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        /* University Grid */
+        .university-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .university-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .university-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .university-card.favorited { border-color: var(--warning); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        .university-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--yonsei-blue);
+            flex: 1;
+            line-height: 1.3;
+        }
+        .card-actions { display: flex; gap: 8px; }
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+        .icon-btn:hover { background: var(--gray-200); }
+        .icon-btn.active { background: var(--warning); color: white; }
+
+        .card-meta { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-700); }
+        .meta-icon { color: var(--gray-500); }
+
+        .card-specs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .spec-item { font-size: 13px; }
+        .spec-label { color: var(--gray-500); margin-bottom: 2px; }
+        .spec-value { font-weight: 600; color: var(--gray-900); }
+
+        .label-tag {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 8px;
+            color: white;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+        .label-tag.large { padding: 4px 10px; font-size: 12px; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            background: var(--yonsei-blue);
+            color: white;
+            padding: 25px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .modal-close-btn:hover { background: rgba(255,255,255,0.3); }
+        .modal-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .modal-subtitle { font-size: 14px; opacity: 0.9; }
+        .modal-body { padding: 25px; }
+
+        .info-section { margin-bottom: 25px; }
+        .info-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--yonsei-blue);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .info-item { font-size: 14px; }
+        .info-label { color: var(--gray-500); font-size: 13px; margin-bottom: 4px; }
+        .info-value { font-weight: 600; color: var(--gray-900); }
+        .info-section.update-box {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--yonsei-light-blue);
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .modal-nav-group {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .modal-nav-counter {
+            font-size: 13px; font-weight: 600;
+            color: var(--ink-muted);
+            font-variant-numeric: tabular-nums;
+            min-width: 56px; text-align: center;
+        }
+
+        /* Modal header cover background — 학교 대표 사진을 modal-header 뒤로 은은하게 */
+        .modal-header.has-cover {
+            background-color: var(--yonsei-blue); /* 사진 로드 실패 시 fallback */
+            padding-top: 30px;
+            padding-bottom: 30px;  /* 기본 25 + 5 위·아래 = 10px 높이 증가 */
+        }
+        .modal-header-credit {
+            position: absolute;
+            bottom: 8px; right: 14px;
+            font-size: 10.5px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .detail-rich {
+            font-size: 14px; line-height: 1.65; color: var(--ink);
+        }
+        .detail-rich p {
+            margin: 0 0 12px 0;
+        }
+        .detail-rich p:last-child { margin-bottom: 0; }
+        .detail-rich strong {
+            font-weight: 700; color: var(--ink);
+        }
+        .detail-rich a {
+            color: var(--yonsei-light-blue);
+            text-decoration: underline;
+        }
+        .detail-bullet-list {
+            margin: 0 0 12px 1.5em;
+            padding: 0;
+            font-size: 14px; line-height: 1.65;
+        }
+        .detail-bullet-list li {
+            margin: 0 0 6px 0;
+        }
+        .detail-bullet-list li:last-child { margin-bottom: 0; }
+
+        .detail-video-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .detail-video-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 160ms ease, border-color 160ms ease;
+        }
+        .detail-video-card:hover {
+            background: var(--bg-soft);
+            border-color: var(--line-strong);
+        }
+        .detail-video-thumb {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            border-radius: 4px;
+            background: var(--ink);
+            display: block;
+        }
+        .detail-video-thumb-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 4px;
+            background: var(--bg-soft);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--ink-muted);
+            font-size: 22px;
+        }
+        .detail-video-meta {
+            min-width: 0;
+        }
+        .detail-video-title {
+            font-size: 13px; font-weight: 600; color: var(--brand);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .detail-video-host {
+            font-size: 11.5px; color: var(--ink-muted); margin-top: 4px;
+        }
+
+        .detail-link-list {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .detail-link-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px;
+            background: var(--brand-soft);
+            color: var(--brand);
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: 13px; font-weight: 600;
+            text-decoration: none;
+            transition: background-color 160ms ease, border-color 160ms ease;
+        }
+        .detail-link-chip:hover {
+            background: #d8e2ee;
+            border-color: rgba(0, 56, 118, 0.2);
+        }
+        .detail-link-chip::after {
+            content: '↗';
+            font-size: 11px; opacity: 0.6;
+        }
+
+        .detail-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+        }
+        .detail-gallery img {
+            width: 100%; aspect-ratio: 4/3; object-fit: cover;
+            border-radius: 4px;
+            display: block;
+        }
+
+        /* Compare modal (T2-F) */
+        .compare-modal { max-width: 1200px; width: 96vw; }
+        .compare-body {
+            padding: 0;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: calc(90vh - 200px);
+        }
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .compare-table thead th {
+            background: var(--bg-soft);
+            padding: 14px 12px;
+            border-bottom: 2px solid var(--line-strong);
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .compare-table tbody th,
+        .compare-table tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: top;
+        }
+        .compare-attr-col {
+            background: var(--bg-soft);
+            font-weight: 600;
+            color: var(--ink-muted);
+            position: sticky;
+            left: 0;
+            min-width: 130px;
+            z-index: 1;
+        }
+        .compare-table thead .compare-attr-col {
+            z-index: 3;
+        }
+        .compare-uni-col {
+            min-width: 200px;
+        }
+        .compare-uni-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 8px;
+        }
+        .compare-uni-name {
+            font-weight: 700;
+            color: var(--brand);
+            text-decoration: none;
+            font-size: 14px;
+            line-height: 1.3;
+        }
+        .compare-uni-name:hover { text-decoration: underline; }
+        .compare-remove-btn {
+            flex: 0 0 auto;
+            width: 22px; height: 22px;
+            border: none;
+            background: var(--gray-100);
+            color: var(--ink-muted);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px; line-height: 1;
+            font-family: inherit;
+            transition: background-color 160ms ease, color 160ms ease;
+        }
+        .compare-remove-btn:hover {
+            background: var(--danger); color: white;
+        }
+        .compare-cell {
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Empty / Loading / Error states */
+        .empty-state, .loading-state, .error-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-500);
+        }
+        .empty-state-icon, .error-state-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
+        .empty-state-text, .error-state-text { font-size: 16px; }
+        .error-state { color: var(--danger); }
+        .error-state-detail {
+            font-size: 13px;
+            color: var(--gray-700);
+            margin-top: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .error-retry-btn {
+            margin-top: 20px;
+            padding: 10px 24px;
+            background: var(--yonsei-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .spinner {
+            border: 4px solid var(--gray-200);
+            border-top: 4px solid var(--yonsei-blue);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scroll to Top */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--yonsei-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .scroll-to-top.visible { opacity: 1; visibility: visible; }
+        .scroll-to-top:hover {
+            background: var(--yonsei-light-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Footer (per OIA constitution 9.2) */
+        .site-footer {
+            margin-top: 60px;
+            padding: 24px 20px 32px 20px;
+            border-top: 1px solid var(--gray-300);
+            text-align: center;
+        }
+        .site-footer p {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin: 0;
+            letter-spacing: 0.02em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            /* T2-H: Mobile filter drawer */
+            .mobile-filter-trigger {
+                display: inline-flex;
+                align-items: center; justify-content: center;
+                gap: 8px;
+                width: 100%;
+                padding: 12px 16px;
+                margin-bottom: 16px;
+                background: var(--brand);
+                color: white;
+                border: none; border-radius: 8px;
+                font-size: 15px; font-weight: 600;
+                cursor: pointer;
+                font-family: inherit;
+                box-shadow: 0 2px 6px rgba(0, 56, 118, 0.2);
+            }
+            .mobile-filter-trigger-count {
+                background: rgba(255, 255, 255, 0.25);
+                padding: 2px 8px; border-radius: 999px;
+                font-size: 12px;
+            }
+            .filter-panel {
+                position: fixed;
+                top: 0; right: 0; bottom: 0;
+                width: 92vw; max-width: 400px;
+                margin: 0;
+                border-radius: 0;
+                z-index: 1001;
+                transform: translateX(100%);
+                transition: transform 280ms ease;
+                overflow-y: auto;
+                padding-top: 56px;
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.18);
+            }
+            .filter-panel.is-open { transform: translateX(0); }
+            .filter-drawer-close {
+                display: inline-flex;
+                position: fixed; top: 12px; right: 12px;
+                width: 36px; height: 36px;
+                align-items: center; justify-content: center;
+                border: none;
+                background: var(--gray-100);
+                border-radius: 50%;
+                font-size: 22px; line-height: 1; cursor: pointer;
+                color: var(--ink); font-family: inherit;
+                z-index: 1002;
+            }
+            .filter-drawer-close:hover { background: var(--gray-200); }
+            .filter-drawer-backdrop {
+                display: none;
+                position: fixed; inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                z-index: 1000;
+                animation: drawer-fade-in 200ms ease;
+            }
+            .filter-drawer-backdrop.is-open { display: block; }
+            @keyframes drawer-fade-in {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            .header h1 { font-size: 22px; }
+            .stats-bar { gap: 15px; }
+            .stat-value { font-size: 20px; }
+            .university-grid { grid-template-columns: 1fr; }
+            .filter-panel { padding: 20px; }
+            .action-bar { flex-direction: column; align-items: stretch; }
+            .action-buttons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+            .action-buttons button, .action-buttons select { flex: 1; min-width: calc(50% - 4px); }
+            .action-buttons .sort-select { flex: 1 1 100%; min-width: 100%; }
+            .subtitle-ko { font-size: 11px; }
+            .subtitle-en { font-size: 10px; }
+            .scroll-to-top { width: 45px; height: 45px; bottom: 20px; right: 20px; font-size: 20px; }
+            .modal { max-height: 95vh; }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            .header { padding: 20px 0; }
+            .filter-group { flex-direction: column; }
+            .filter-btn { width: 100%; }
+            .card-specs { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useCallback } = React;
+
+        // =========================================================================
+        // 학기 설정 — 새 학기 deploy 시 SEMESTER_CODE 한 줄만 바꾸면 모든 표기가 갱신됨
+        // =========================================================================
+        const SEMESTER_CODE = '27S'; // 27S = Spring 2027, 27F = Fall 2027 ...
+
+        function semesterCodeToYearPart(code) {
+            const year = 2000 + parseInt(code.substring(0, 2));
+            const part = code.endsWith('S') ? 1 : 2;
+            return { year, part, label: `${year}-${part}` };
+        }
+        function semesterCodeToFullName(code) {
+            const year = 2000 + parseInt(code.substring(0, 2));
+            return code.endsWith('S') ? `Spring ${year}` : `Fall ${year}`;
+        }
+        function semesterCodeToKoreanName(code) {
+            const year = 2000 + parseInt(code.substring(0, 2));
+            const part = code.endsWith('S') ? '1' : '2';
+            return `${year}학년도 ${part}학기`;
+        }
+
+        const SEMESTER = {
+            code: SEMESTER_CODE,
+            yearPart: semesterCodeToYearPart(SEMESTER_CODE).label,
+            full: semesterCodeToFullName(SEMESTER_CODE),
+            korean: semesterCodeToKoreanName(SEMESTER_CODE),
+        };
+
+        // =========================================================================
+        // 데이터 소스 — 우선순위: JSON → CSV → mock
+        //
+        // [JSON 모드] 노션 → sync_from_notion.py → JSON 파이프라인의 산출물.
+        //   - 로컬 dev (localhost): '../data/...' 상대 경로 — 같은 폴더 위계 가정
+        //   - 운영 (Netlify): GitHub raw URL (yonsei-oia/univfinder-data main)
+        //     백오피스(private)에서 매일 자동 미러링되는 public data repo.
+        // [CSV 모드] 시트 발급 후 두 URL 채우면 활성화. JSON URL이 비어있을 때만 사용.
+        // [mock 모드] JSON/CSV 모두 빈 문자열이면 로컬 미리보기.
+        // =========================================================================
+        const IS_LOCAL_DEV = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+        const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/main';
+
+        const MASTER_JSON_URL = IS_LOCAL_DEV
+            ? '../data/universities-data.json'
+            : `${DATA_RAW}/universities-data.json`;
+        const NOTES_JSON_URL = IS_LOCAL_DEV
+            ? '../data/universities-notes.json'
+            : `${DATA_RAW}/universities-notes.json`;
+
+        const MASTER_CSV_URL = '';
+        const NOTES_CSV_URL  = '';
+
+        // =========================================================================
+        // Mock data (시트 URL 비어있을 때만 사용)
+        // 27S 컬럼 스키마와 정확히 일치
+        // =========================================================================
+        const MOCK_MASTER = [
+            {
+                university_name: 'University of Washington',
+                website: 'https://www.washington.edu',
+                continent: 'Americas', country: 'United States',
+                language_of_instruction_1: 'English', language_of_instruction_2: '',
+                program_type: 'Regular',
+                quota: '2', quota_unit: 'slot',
+                accepts_undergrad: 'Y', accepts_grad: 'Y', gpa_required: '3.0',
+                fall_one_semester: 'Y', fall_calendar_year: 'Y',
+                spring_one_semester: 'Y', spring_calendar_year: 'N',
+                academic_system: 'Quarter',
+                toefl_total: '92', toefl_reading: '22', toefl_listening: '22',
+                toefl_speaking: '22', toefl_writing: '22',
+                english_notes: 'subscores must each be at least 20',
+                lang2_level: '', language_other_notes: '',
+                available_areas: 'All majors except Medicine, Dentistry',
+                restricted_areas: 'Medicine, Dentistry',
+                admission_notes: 'Strong academic record required.',
+                fall_nomination_deadline: '04/01', fall_application_deadline: '05/01',
+                spring_nomination_deadline: '10/01', spring_application_deadline: '10/15',
+                academic_calendar: 'https://www.washington.edu/students/reg/calendar.html',
+                housing_info: 'https://hfs.uw.edu/', housing_guaranteed: 'No',
+                recent_factsheet: '', additional_link: '',
+            },
+            {
+                university_name: 'The University of Tokyo',
+                website: 'https://www.u-tokyo.ac.jp/en/',
+                continent: 'Asia/Oceania', country: 'Japan',
+                language_of_instruction_1: 'English', language_of_instruction_2: 'Japanese',
+                program_type: 'Regular',
+                quota: '3', quota_unit: 'person',
+                accepts_undergrad: 'Y', accepts_grad: 'Y', gpa_required: '3.0',
+                fall_one_semester: 'Y', fall_calendar_year: 'N',
+                spring_one_semester: 'Y', spring_calendar_year: 'N',
+                academic_system: 'Semester',
+                toefl_total: '80', toefl_reading: '20', toefl_listening: '20',
+                toefl_speaking: '20', toefl_writing: '20',
+                english_notes: 'or equivalent',
+                lang2_level: 'N2', language_other_notes: 'JLPT N2 required for non-English track',
+                available_areas: 'All faculties open to exchange',
+                restricted_areas: 'Medicine, Law graduate',
+                admission_notes: 'Statement of purpose required.',
+                fall_nomination_deadline: '04/15', fall_application_deadline: '05/15',
+                spring_nomination_deadline: '10/15', spring_application_deadline: '10/30',
+                academic_calendar: 'https://www.u-tokyo.ac.jp/en/students/academic-calendar.html',
+                housing_info: 'On-campus housing available', housing_guaranteed: 'Partial',
+                recent_factsheet: '', additional_link: '',
+            },
+            {
+                university_name: 'Sciences Po',
+                website: 'https://www.sciencespo.fr/en',
+                continent: 'Europe', country: 'France',
+                language_of_instruction_1: '', language_of_instruction_2: 'French',
+                program_type: 'Regular',
+                quota: '2', quota_unit: 'slot',
+                accepts_undergrad: 'Y', accepts_grad: 'N', gpa_required: '3.3',
+                fall_one_semester: 'Y', fall_calendar_year: 'Y',
+                spring_one_semester: 'Y', spring_calendar_year: 'N',
+                academic_system: 'Semester',
+                toefl_total: '', toefl_reading: '', toefl_listening: '',
+                toefl_speaking: '', toefl_writing: '',
+                english_notes: '',
+                lang2_level: 'B2', language_other_notes: 'B2 required, C1 recommended',
+                available_areas: 'Limited to Social Sciences and Humanities',
+                restricted_areas: 'Sciences Po Law School',
+                admission_notes: 'Motivation letter in French preferred.',
+                fall_nomination_deadline: '04/10', fall_application_deadline: '05/10',
+                spring_nomination_deadline: '10/10', spring_application_deadline: '10/25',
+                academic_calendar: 'Sep - Jun',
+                housing_info: 'https://www.sciencespo.fr/housing', housing_guaranteed: 'No',
+                recent_factsheet: '', additional_link: '',
+            },
+            {
+                university_name: 'Humboldt-Universität zu Berlin',
+                website: 'https://www.hu-berlin.de/en',
+                continent: 'Europe', country: 'Germany',
+                language_of_instruction_1: 'English', language_of_instruction_2: 'German',
+                program_type: 'Regular',
+                quota: '4', quota_unit: 'slot',
+                accepts_undergrad: 'Y', accepts_grad: 'Y', gpa_required: '3.0',
+                fall_one_semester: 'Y', fall_calendar_year: 'Y',
+                spring_one_semester: 'Y', spring_calendar_year: 'Y',
+                academic_system: 'Semester',
+                toefl_total: '88', toefl_reading: '', toefl_listening: '',
+                toefl_speaking: '', toefl_writing: '',
+                english_notes: '',
+                lang2_level: 'B1', language_other_notes: 'B1 minimum for German-taught courses',
+                available_areas: 'Humanities, Social Sciences, Natural Sciences',
+                restricted_areas: 'Medicine',
+                admission_notes: '',
+                fall_nomination_deadline: '05/01', fall_application_deadline: '06/01',
+                spring_nomination_deadline: '11/01', spring_application_deadline: '11/30',
+                academic_calendar: 'Oct - Sep',
+                housing_info: '', housing_guaranteed: 'Partial',
+                recent_factsheet: '', additional_link: '',
+            },
+            {
+                university_name: 'Peking University',
+                website: 'https://english.pku.edu.cn',
+                continent: 'Asia/Oceania', country: 'China',
+                language_of_instruction_1: 'English', language_of_instruction_2: 'Chinese',
+                program_type: 'Regular',
+                quota: '3', quota_unit: 'slot',
+                accepts_undergrad: 'Y', accepts_grad: 'Y', gpa_required: '3.2',
+                fall_one_semester: 'Y', fall_calendar_year: 'Y',
+                spring_one_semester: 'Y', spring_calendar_year: 'N',
+                academic_system: 'Semester',
+                toefl_total: '85', toefl_reading: '', toefl_listening: '',
+                toefl_speaking: '', toefl_writing: '',
+                english_notes: '',
+                lang2_level: 'HSK4', language_other_notes: 'HSK4 for Chinese-taught courses',
+                available_areas: 'Most faculties',
+                restricted_areas: 'Medicine, Stomatology',
+                admission_notes: '',
+                fall_nomination_deadline: '04/20', fall_application_deadline: '05/20',
+                spring_nomination_deadline: '10/20', spring_application_deadline: '11/05',
+                academic_calendar: '',
+                housing_info: '', housing_guaranteed: 'Yes',
+                recent_factsheet: '', additional_link: '',
+            },
+            {
+                university_name: 'Sorbonne University - Faculty of Letters',
+                website: 'https://www.sorbonne-universite.fr/en/study-sorbonne-university/exchange-students',
+                continent: 'Europe', country: 'France',
+                language_of_instruction_1: '', language_of_instruction_2: 'French',
+                program_type: 'Regular',
+                quota: '2', quota_unit: 'slot',
+                accepts_undergrad: 'Y', accepts_grad: 'Y', gpa_required: '',
+                fall_one_semester: 'Y', fall_calendar_year: 'Y',
+                spring_one_semester: 'Y', spring_calendar_year: 'N',
+                academic_system: 'Semester',
+                toefl_total: '', toefl_reading: '', toefl_listening: '',
+                toefl_speaking: '', toefl_writing: '',
+                english_notes: '',
+                lang2_level: 'B2',
+                language_other_notes: 'French B2 required. Home university language certificates are accepted.',
+                available_areas: 'Courses across departments within the Faculty of Letters.',
+                restricted_areas: 'Only Faculty of Letters is open to exchange students.',
+                admission_notes: '',
+                fall_nomination_deadline: '04/15', fall_application_deadline: '05/15',
+                spring_nomination_deadline: '', spring_application_deadline: '',
+                academic_calendar: 'https://www.sorbonne-universite.fr/sites/default/files/media/2023-07/Calendrier-FL-2023-2024_0.pdf',
+                housing_info: 'https://www.sorbonne-universite.fr/en/education/student-life/housing',
+                housing_guaranteed: 'No',
+                recent_factsheet: '', additional_link: '',
+            },
+            {
+                university_name: 'University of British Columbia',
+                website: 'https://www.ubc.ca',
+                continent: 'Americas', country: 'Canada',
+                language_of_instruction_1: 'English', language_of_instruction_2: '',
+                program_type: 'Regular',
+                quota: '5', quota_unit: 'slot',
+                accepts_undergrad: 'Y', accepts_grad: 'N', gpa_required: '3.0',
+                fall_one_semester: 'Y', fall_calendar_year: 'Y',
+                spring_one_semester: 'Y', spring_calendar_year: 'N',
+                academic_system: 'Semester',
+                toefl_total: '90', toefl_reading: '22', toefl_listening: '22',
+                toefl_speaking: '21', toefl_writing: '21',
+                english_notes: '',
+                lang2_level: '', language_other_notes: '',
+                available_areas: 'All faculties',
+                restricted_areas: 'Medicine, Dentistry, Pharmacy',
+                admission_notes: '',
+                fall_nomination_deadline: '03/15', fall_application_deadline: '04/15',
+                spring_nomination_deadline: '09/15', spring_application_deadline: '10/15',
+                academic_calendar: '',
+                housing_info: '', housing_guaranteed: 'No',
+                recent_factsheet: '', additional_link: '',
+            },
+        ];
+
+        // =========================================================================
+        // Mock CONTENT data (학교별 상세 페이지) — 시트 발급 후 fetch로 교체 예정
+        //
+        // 이 데이터는 _build_content_seed.py가 노션 export HTML에서 추출한 raw 결과
+        // (sorbonne_seed.csv) 그대로입니다. 어떤 정제·번역·창작도 가하지 않았으며,
+        // 노션 본문 원문·학생 인용문 원문 그대로입니다.
+        //
+        // 빈 셀(why_yonsei, campus_location 등)은 OIA가 직접 작성해야 채워지며,
+        // 채워지기 전까지는 detail view에서 해당 섹션이 자동으로 숨겨집니다.
+        // 다른 학교는 content가 없으므로 새 섹션 자체가 보이지 않습니다.
+        // =========================================================================
+        const MOCK_CONTENT = {
+            'Sorbonne University - Faculty of Letters': {
+                cover_image_url: 'assets/universities/sorbonne-faculty-of-letters/cover.jpg',
+                cover_image_credit: '',
+                gallery_urls: '',
+                // 노션 본문 내 YouTube URL과 채널 URL 그대로
+                video_links:
+                    'Video | https://youtu.be/pQVSibpoZzw?feature=shared\nFaculté des Lettres de Sorbonne Université | https://www.youtube.com/Facult%C3%A9desLettresdeSorbonneUniversit%C3%A9',
+                // 노션 "ℹ️ About Sorbonne University" 섹션 영문 원문
+                about_text:
+`Sorbonne University is,
+
+a multidisciplinary, research-intensive, world-class university. Through the strength of its 55,000 students, 7,300 academic researchers and partner researchers, and 3,900 administrative and technical staff, Sorbonne University promotes diversity, creativity, innovation and openness to the world.
+
+Sorbonne University was created on January 1st, 2018 from the merger of ParisSorbonne and Pierre and Marie Curie (UPMC) universities. As a public institution, it fulfils the public service calling of French higher education, research and innovation.
+
+The Faculty of Arts & Humanities at Sorbonne University is today the largest and most complete faculty in France, in the field of arts, languages, literature, social sciences and humanities. Committed to the transmission of a humanist culture, its pedagogical excellence is based on the recognized quality of its research to offer the most complete and innovative teaching.
+
+International outreach
+
+As an internationally renowned institution, the Faculty of Arts and Humanities has developed numerous cultural, scientific and educational partnerships with foreign universities and takes part in various exchange programmes on every continent. The Faculty thus welcomes many foreign students each year, and provides many different French and foreign language certifications.`,
+                // 노션에 해당 섹션 없음 → 빈 칸 (섹션 자동 숨김)
+                why_yonsei: '',
+                // 노션 "📍 Campus" 섹션은 Google Maps · Campus Map · Virtual Tour 링크만 있고 본문 텍스트가 없어 빈 칸 처리
+                // (지도·캠퍼스 도면 PDF는 useful_links로 들어감)
+                campus_location: '',
+                // 노션 "🏘️ Accommodation" 섹션 본문 원문 (toggle 제목 + 본문)
+                accommodation:
+`Sorbonne University supports students to find accommodation in Paris.
+
+Sorbonne University accommodation platform
+
+Sorbonne University provides accommodation platform on their own.
+
+CROUS accommodation
+
+Accommodation is also provided based on social criteria. To obtain a CROUS accommodation, students can create a DSE before signing up to Sorbonne University.
+
+Personal housing assistance (APL)
+
+Sorbonne University provides personalised housing assistance to students. For students to benifit from the APL, they must apply to the CAF.`,
+                // 노션 "📒 Student Report Highlight" 학생 인용문 raw dump — 출처 학생 보고서 제목 포함
+                // OIA가 1-2줄 핵심으로 정제해 옮겨야 운영용으로 사용 가능
+                student_tips:
+`[☀️ 교환대학의 크기, 지리적 위치, 기후 등]
+"Campus de la Sorbonne: 주변에 뤽샹부르 공원, 팡테옹 등이 있는 중심지이며 치안 안전함, Campus de Malesherbes: 괜찮음, Campus de Clignancourt: 우범지대, 밤에는 가는 것을 피하세요, 낮에만 가도 분위기 좀 묘함"
+출처: "소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)"
+
+"4-5월 까지는 무척 추웠다. 6월부터는 한국의 5월 중순처럼 초여름의 분위기이다."
+출처: "2023-1 Sorbonne University (2023-1)"
+
+"학교는 센느강을 등지고 있으며, 강가와 매우 가까워 통학을 하는 이들은 자전거를 타고 등교하기 매우 편하다."
+출처: "파리로의 교환을 오랫동안 꿈꿨던 고학번 공대생의 파견보고서 (2021)"
+
+[🏞️ 대학 주변 환경]
+"메인 캠퍼스는 주변에 뤽샹부르 공원, 팡테옹, Sainte-Geneviève 도서관 등등 있어서 가실 일이 많은 곳이고, 끌리녕꾸흐의 경우 자주 가시지 않는 게 좋습니다."
+출처: "소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)"
+
+"딱히 놀거리는 많이 없지만 공원이 있어서 수업 중간에 가기는 좋다. 조금만 걸으면 센강이 있어서 그 쪽으로 갈 수도 있긴 한데 관광지의 센강과는 분위기가 조금 다르다."
+출처: "2023-1 Sorbonne University (2023-1)"
+
+[🍽️ 거주 형태, 식사]
+"저는 파리국제대학촌 (Cité Universitaire) 한국관에 살았습니다. 불통으로 유명한 곳이지만 이만한 가격과 교통수단 (RER B) 을 겸비한 파리 내 숙소를 찾는 것이 매우 어렵기 때문에 파리로 교환 오신다면 반드시! 신청하시는 것을 추천드립니다. (추첨을 통해 선발합니다.)"
+출처: "소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)"
+
+[📚 수업, 도서관]
+"수강신청이 굉장히 복잡했던 것으로 기억하는데, 제 경우 맨 처음 교환 신청 시 기입했던 과에서 메일이 와서 해당 coordinator 분과 계속 메일로 첨부파일을 제출하는 식으로 수강신청을 진행했고 철회도 비슷한 방식으로 했습니다."
+출처: "소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)"
+
+"수업은 100% 불어로 진행된다."
+출처: "파리로의 교환을 오랫동안 꿈꿨던 고학번 공대생의 파견보고서 (2021)"`,
+                // 노션 본문 내 외부 링크들 — 라벨은 노션 원문 (bookmark title) 그대로
+                useful_links:
+`Exchange Students | https://www.sorbonne-universite.fr/en/education/study-sorbonne-university/exchange-students
+Sorbonne Université | https://lettres.sorbonne-universite.fr/
+La Sorbonne | https://storage.net-fs.com/hosting/7219336/3/
+Offre de formation | https://lettres.sorbonne-universite.fr/formation/offre-de-formation
+Location de logements de 1 à 24 mois | https://sorbonne-universite.studapart.com/fr/
+Sorbonne Université - Faculté des Lettres | Paris | https://www.facebook.com/Lettres.Sorbonne.Universite/
+Instagram (@lettres_sorbonne) | https://www.instagram.com/lettres_sorbonne/
+Sorbonne Université (@Sorbonne_Univ_) on X | https://x.com/Sorbonne_Univ_
+Google Maps | https://maps.app.goo.gl/JpdhCp3hQByGUT9t6
+Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/files/media/2024-06/Plan Sorbonne-RdC-2024.pdf`,
+                last_updated: '2026-05-20',
+            },
+        };
+
+        const MOCK_NOTES = [
+            {
+                university_name: 'Sciences Po',
+                labels: 'Scholarship, Update',
+                note_text: 'Erasmus+ scholarship available for selected students.',
+                note_link: 'https://www.sciencespo.fr/scholarships',
+                update_date: '2027-01-15',
+                update_description: 'Quota reduced from 3 to 2; new scholarship added.',
+            },
+            {
+                university_name: 'Peking University',
+                labels: 'Popular',
+                note_text: 'Beijing Government Scholarship available.',
+                note_link: '',
+                update_date: '',
+                update_description: '',
+            },
+        ];
+
+        // =========================================================================
+        // 어학 레벨 위계 (CEFR / JLPT / HSK)
+        // =========================================================================
+        const CEFR_ORDER = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 };
+        const JLPT_ORDER = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
+        const HSK_ORDER  = { HSK1: 1, HSK2: 2, HSK3: 3, HSK4: 4, HSK5: 5, HSK6: 6 };
+
+        function getLevelSystem(level) {
+            if (!level) return null;
+            const v = String(level).trim();
+            if (v in CEFR_ORDER) return { system: 'CEFR', rank: CEFR_ORDER[v] };
+            if (v in JLPT_ORDER) return { system: 'JLPT', rank: JLPT_ORDER[v] };
+            if (v in HSK_ORDER)  return { system: 'HSK',  rank: HSK_ORDER[v]  };
+            return null;
+        }
+
+        const LANGUAGE_LEVEL_OPTIONS = {
+            French:   ['A1','A2','B1','B2','C1','C2'],
+            German:   ['A1','A2','B1','B2','C1','C2'],
+            Spanish:  ['A1','A2','B1','B2','C1','C2'],
+            Russian:  ['A1','A2','B1','B2','C1','C2'],
+            Japanese: ['N5','N4','N3','N2','N1'],
+            Chinese:  ['HSK1','HSK2','HSK3','HSK4','HSK5','HSK6'],
+        };
+
+        // =========================================================================
+        // 국기 emoji (헌법: 일반 문서엔 이모지 금지, 다만 국기는 데이터 시각화 요소로
+        // 학생 대시보드 식별성에 직접 기여하므로 카드 상의 country 표시에 한해 유지)
+        // =========================================================================
+        const COUNTRY_FLAGS = {
+            'Canada':'🇨🇦','United States':'🇺🇸','Mexico':'🇲🇽','Brazil':'🇧🇷','Chile':'🇨🇱','Argentina':'🇦🇷',
+            'France':'🇫🇷','Germany':'🇩🇪','Spain':'🇪🇸','Italy':'🇮🇹','United Kingdom':'🇬🇧','UK':'🇬🇧',
+            'Netherlands':'🇳🇱','Belgium':'🇧🇪','Switzerland':'🇨🇭','Austria':'🇦🇹','Sweden':'🇸🇪',
+            'Norway':'🇳🇴','Denmark':'🇩🇰','Finland':'🇫🇮','Poland':'🇵🇱','Czech Republic':'🇨🇿',
+            'Hungary':'🇭🇺','Portugal':'🇵🇹','Greece':'🇬🇷','Ireland':'🇮🇪','Iceland':'🇮🇸','Croatia':'🇭🇷',
+            'Romania':'🇷🇴','Russia':'🇷🇺','Slovakia':'🇸🇰','Slovenia':'🇸🇮','Estonia':'🇪🇪','Latvia':'🇱🇻',
+            'Lithuania':'🇱🇹','Luxembourg':'🇱🇺','China':'🇨🇳','Japan':'🇯🇵','Korea':'🇰🇷',
+            'Hong Kong':'🇭🇰','Singapore':'🇸🇬','Taiwan':'🇹🇼','Thailand':'🇹🇭','Malaysia':'🇲🇾',
+            'Indonesia':'🇮🇩','India':'🇮🇳','Australia':'🇦🇺','New Zealand':'🇳🇿','Turkey':'🇹🇷',
+        };
+
+        const LABEL_COLORS = {
+            Scholarship: '#28a745',
+            New: '#0066CC',
+            Popular: '#ff6b35',
+            Update: '#e83e8c',
+        };
+
+        // =========================================================================
+        // Content 섹션용 helpers — 시트의 `라벨 | URL` 줄바꿈 형식 파싱, 마크다운
+        // 풍 표기 변환, YouTube/Vimeo 임베드 URL 생성
+        // =========================================================================
+        function parsePipeLines(text) {
+            if (!text) return [];
+            return text.split('\n').map(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return null;
+                const idx = trimmed.indexOf('|');
+                if (idx === -1) return { label: trimmed, url: '' };
+                return {
+                    label: trimmed.slice(0, idx).trim(),
+                    url: trimmed.slice(idx + 1).trim(),
+                };
+            }).filter(p => p && (p.label || p.url));
+        }
+
+        function parseUrlLines(text) {
+            if (!text) return [];
+            return text.split('\n').map(s => s.trim()).filter(Boolean);
+        }
+
+        function getYouTubeId(url) {
+            if (!url) return null;
+            const m1 = url.match(/youtu\.be\/([\w-]+)/);
+            const m2 = url.match(/youtube\.com\/watch\?v=([\w-]+)/);
+            const m3 = url.match(/youtube\.com\/embed\/([\w-]+)/);
+            return (m1 && m1[1]) || (m2 && m2[1]) || (m3 && m3[1]) || null;
+        }
+
+        function getYouTubeEmbedUrl(url) {
+            const id = getYouTubeId(url);
+            return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+        }
+
+        function getVideoHost(url) {
+            if (!url) return '';
+            if (/youtu\.be|youtube\.com/.test(url)) return 'YouTube';
+            if (/vimeo\.com/.test(url)) return 'Vimeo';
+            const m = url.match(/https?:\/\/([^/]+)/);
+            return m ? m[1] : '';
+        }
+
+        function getVimeoEmbedUrl(url) {
+            if (!url) return null;
+            const m = url.match(/vimeo\.com\/(\d+)/);
+            return m ? `https://player.vimeo.com/video/${m[1]}` : null;
+        }
+
+        function getVideoEmbedUrl(url) {
+            return getYouTubeEmbedUrl(url) || getVimeoEmbedUrl(url);
+        }
+
+        // 간이 마크다운 변환 — **굵게**, [라벨](URL), 줄바꿈 단락, "- " 시작 줄은 bullet
+        function renderInlineMarkdown(text) {
+            if (!text) return null;
+            const out = [];
+            let remaining = String(text);
+            let key = 0;
+            while (remaining.length > 0) {
+                const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)]+)\)/);
+                const boldMatch = remaining.match(/\*\*([^*]+)\*\*/);
+                const linkIdx = linkMatch ? linkMatch.index : -1;
+                const boldIdx = boldMatch ? boldMatch.index : -1;
+                if (linkIdx === -1 && boldIdx === -1) {
+                    out.push(remaining);
+                    break;
+                }
+                if (linkIdx !== -1 && (boldIdx === -1 || linkIdx < boldIdx)) {
+                    if (linkIdx > 0) out.push(remaining.slice(0, linkIdx));
+                    out.push(
+                        <a key={key++} href={linkMatch[2]} target="_blank" rel="noopener noreferrer">
+                            {linkMatch[1]}
+                        </a>
+                    );
+                    remaining = remaining.slice(linkIdx + linkMatch[0].length);
+                } else {
+                    if (boldIdx > 0) out.push(remaining.slice(0, boldIdx));
+                    out.push(<strong key={key++}>{boldMatch[1]}</strong>);
+                    remaining = remaining.slice(boldIdx + boldMatch[0].length);
+                }
+            }
+            return out;
+        }
+
+        function renderRichText(text) {
+            if (!text) return null;
+            const paragraphs = String(text).split(/\n\n+/);
+            return paragraphs.map((p, i) => {
+                const trimmed = p.trim();
+                if (!trimmed) return null;
+                const lines = trimmed.split('\n');
+                const isBullets = lines.length > 0 && lines.every(l => /^\s*-\s+/.test(l));
+                if (isBullets) {
+                    return (
+                        <ul key={i} className="detail-bullet-list">
+                            {lines.map((l, j) => (
+                                <li key={j}>{renderInlineMarkdown(l.replace(/^\s*-\s+/, ''))}</li>
+                            ))}
+                        </ul>
+                    );
+                }
+                return <p key={i}>{renderInlineMarkdown(trimmed)}</p>;
+            }).filter(Boolean);
+        }
+
+        // =========================================================================
+        // 파싱 helpers
+        // =========================================================================
+        const isYes = (v) => {
+            if (v === null || v === undefined) return false;
+            const s = String(v).trim().toLowerCase();
+            return s === 'y' || s === 'yes' || s === 'true' || s === '1';
+        };
+
+        const parseQuotaNum = (v) => {
+            if (!v && v !== 0) return 0;
+            const s = String(v).trim();
+            if (!s || /^(n\/a|tbd|-)$/i.test(s)) return 0;
+            const n = parseFloat(s);
+            return isNaN(n) || n < 0 ? 0 : n;
+        };
+        const parseGpaNum = (v) => {
+            if (!v && v !== 0) return null;
+            const m = String(v).match(/(\d+\.?\d*)/);
+            return m ? parseFloat(m[1]) : null;
+        };
+        const parseIntOrNull = (v) => {
+            const n = parseInt(v, 10);
+            return isNaN(n) ? null : n;
+        };
+
+        // Normalize one master row into the internal shape used by UI/filters
+        const mapMasterRow = (row, index, notesMap, contentMap) => {
+            const name = (row.university_name || '').trim();
+            const notes = notesMap[name] || {};
+            const content = (contentMap && contentMap[name]) || null;
+            return {
+                id: index,
+                name,
+                website: row.website || '',
+                continent: (row.continent || '').trim() || 'Other',
+                country: (row.country || '').trim(),
+                language1: (row.language_of_instruction_1 || '').trim(),
+                language2: (row.language_of_instruction_2 || '').trim(),
+                programType: (row.program_type || 'Regular').trim(),
+                quota: parseQuotaNum(row.quota),
+                quotaUnit: (row.quota_unit || '').trim(),
+                acceptsUG: isYes(row.accepts_undergrad),
+                acceptsGrad: isYes(row.accepts_grad),
+                gpaRequired: parseGpaNum(row.gpa_required),
+                fallOneSemester: isYes(row.fall_one_semester),
+                fallCalendarYear: isYes(row.fall_calendar_year),
+                springOneSemester: isYes(row.spring_one_semester),
+                springCalendarYear: isYes(row.spring_calendar_year),
+                academicSystem: (row.academic_system || '').trim(),
+                toefl: parseIntOrNull(row.toefl_total),
+                toeflReading: parseIntOrNull(row.toefl_reading),
+                toeflListening: parseIntOrNull(row.toefl_listening),
+                toeflSpeaking: parseIntOrNull(row.toefl_speaking),
+                toeflWriting: parseIntOrNull(row.toefl_writing),
+                englishNotes: row.english_notes || '',
+                lang2Level: (row.lang2_level || '').trim(),
+                languageOtherNotes: row.language_other_notes || '',
+                availableAreas: row.available_areas || '',
+                restrictedAreas: row.restricted_areas || '',
+                admissionNotes: row.admission_notes || '',
+                fallNominationDeadline: row.fall_nomination_deadline || '',
+                fallApplicationDeadline: row.fall_application_deadline || '',
+                springNominationDeadline: row.spring_nomination_deadline || '',
+                springApplicationDeadline: row.spring_application_deadline || '',
+                academicCalendar: row.academic_calendar || '',
+                housingInfo: row.housing_info || '',
+                housingGuaranteed: row.housing_guaranteed || '',
+                recentFactsheet: row.recent_factsheet || '',
+                additionalLink: row.additional_link || '',
+
+                // From notes sheet
+                labels: notes.labels || [],
+                note: notes.note || null,
+                noteLink: notes.noteLink || null,
+                updateDate: notes.updateDate || null,
+                updateDescription: notes.updateDescription || null,
+
+                // From content sheet (학교별 상세 페이지) — null이면 detail view 새 섹션 자동 숨김
+                content,
+            };
+        };
+
+        const parseNotesRow = (row) => {
+            const name = (row.university_name || '').trim();
+            if (!name) return null;
+            const labelsRaw = row.labels || '';
+            const labels = labelsRaw.split(',').map(s => s.trim()).filter(Boolean);
+            return [name, {
+                labels,
+                note: row.note_text || null,
+                noteLink: row.note_link || null,
+                updateDate: row.update_date || null,
+                updateDescription: row.update_description || null,
+            }];
+        };
+
+        // =========================================================================
+        // Fetch helpers
+        // =========================================================================
+        async function fetchJson(url) {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
+            return res.json();
+        }
+
+        async function fetchAndParseCsv(url) {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
+            const text = await res.text();
+            return new Promise((resolve, reject) => {
+                Papa.parse(text, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (r) => resolve(r.data),
+                    error: reject,
+                });
+            });
+        }
+
+        // Normalize JSON payloads to the raw-row shape that mapMasterRow / parseNotesRow expect.
+        // Key differences from CSV:
+        //   - quota is int (site expects string)
+        //   - notes link by slug (site links by name)
+        //   - labels is array (site expects comma-string)
+        //   - content.useful_links / video_links are [{label,url}] (site expects "Label | URL\n..." string)
+        //   - content.gallery_urls is string[] (site expects newline-joined string)
+        //   - cover_image_url / cover_image_credit live at top level (site reads them off content)
+        const linkPairsToPipe = (arr) =>
+            (arr || []).map(p => `${p.label || ''} | ${p.url || ''}`).join('\n');
+
+        function normalizeJsonPayloads(masterJson, notesJson) {
+            const masterRowsRaw = masterJson.universities || [];
+            const slugToName = {};
+            const contentMap = {};
+            const masterRows = masterRowsRaw.map(u => {
+                slugToName[u.slug] = u.university_name;
+                const c = u.content || {};
+                contentMap[u.university_name] = {
+                    about_text: c.about_text || '',
+                    why_yonsei: c.why_yonsei || '',
+                    campus_location: c.campus_location || '',
+                    accommodation: c.accommodation || '',
+                    student_tips: c.student_tips || '',
+                    useful_links: linkPairsToPipe(c.useful_links),
+                    video_links: linkPairsToPipe(c.video_links),
+                    gallery_urls: (c.gallery_urls || []).join('\n'),
+                    cover_image_url: u.cover_image_url || '',
+                    cover_image_credit: u.cover_image_credit || '',
+                };
+                return {
+                    ...u,
+                    quota: u.quota == null ? '' : String(u.quota),
+                };
+            });
+            const notesRows = (notesJson.notes || []).map(n => ({
+                ...n,
+                university_name: slugToName[n.university_slug] || '',
+                labels: Array.isArray(n.labels) ? n.labels.join(',') : (n.labels || ''),
+            }));
+            return { masterRows, notesRows, contentMap };
+        }
+
+        async function loadAllData() {
+            // Priority 1: JSON (Notion pipeline)
+            if (MASTER_JSON_URL && NOTES_JSON_URL) {
+                const [masterJson, notesJson] = await Promise.all([
+                    fetchJson(MASTER_JSON_URL),
+                    fetchJson(NOTES_JSON_URL),
+                ]);
+                const { masterRows, notesRows, contentMap } = normalizeJsonPayloads(masterJson, notesJson);
+                return { masterRows, notesRows, contentMap, mock: false, source: 'json' };
+            }
+            // Priority 2: CSV (legacy sheet)
+            if (MASTER_CSV_URL && NOTES_CSV_URL) {
+                const [masterRows, notesRows] = await Promise.all([
+                    fetchAndParseCsv(MASTER_CSV_URL),
+                    fetchAndParseCsv(NOTES_CSV_URL),
+                ]);
+                // TODO: 시트 발급 후 CONTENT_CSV_URL을 추가하면 라이브 모드에서도 content 합쳐짐
+                return { masterRows, notesRows, contentMap: {}, mock: false, source: 'csv' };
+            }
+            // Fallback: mock
+            return {
+                masterRows: MOCK_MASTER,
+                notesRows: MOCK_NOTES,
+                contentMap: MOCK_CONTENT,
+                mock: true,
+                source: 'mock',
+            };
+        }
+
+        function buildUniversities(masterRows, notesRows, contentMap = {}) {
+            const notesMap = {};
+            for (const row of notesRows) {
+                const parsed = parseNotesRow(row);
+                if (parsed) notesMap[parsed[0]] = parsed[1];
+            }
+            return masterRows
+                .filter(r => r && r.university_name && r.university_name.trim())
+                .map((row, idx) => mapMasterRow(row, idx, notesMap, contentMap));
+        }
+
+        // =========================================================================
+        // 필터 술어 helpers (외부 pure functions — 필터링·카운팅·chip에서 재사용)
+        // =========================================================================
+        const isEnglishOffered = (u) => u.language1 === 'English';
+        const isNonEnglishOffered = (u) => !!u.language2;
+        const isUIC = (u) => /UIC Exclusive/i.test(u.name) || u.programType === 'UIC Exclusive';
+        const acceptsOneSemester = (u) => u.fallOneSemester || u.springOneSemester;
+        const acceptsCalendarYear = (u) => u.fallCalendarYear || u.springCalendarYear;
+
+        function passesFilter(u, filters, opts) {
+            const { favorites = [], showFavoritesOnly = false } = opts || {};
+            if (showFavoritesOnly && !favorites.includes(u.id)) return false;
+            if (filters.uicOnly && !isUIC(u)) return false;
+            if (filters.uicExclude && isUIC(u)) return false;
+            if (filters.scholarshipOnly && !u.labels.includes('Scholarship')) return false;
+            if (filters.updateOnly && !u.labels.includes('Update')) return false;
+
+            if (filters.studentType === 'Undergraduate' && !u.acceptsUG) return false;
+            if (filters.studentType === 'Graduate' && !u.acceptsGrad) return false;
+
+            if (filters.languageRegion === 'English' && !isEnglishOffered(u)) return false;
+            if (filters.languageRegion === 'Non-English' && !isNonEnglishOffered(u)) return false;
+            if (filters.languageRegion === 'Both' && !(isEnglishOffered(u) && isNonEnglishOffered(u))) return false;
+
+            // T2-G: 4-way semester options (OR-logic)
+            const anySemFilter = filters.wantFallOneSem || filters.wantFallCalYear ||
+                                 filters.wantSpringOneSem || filters.wantSpringCalYear;
+            if (anySemFilter) {
+                const semMatch =
+                    (filters.wantFallOneSem    && u.fallOneSemester) ||
+                    (filters.wantFallCalYear   && u.fallCalendarYear) ||
+                    (filters.wantSpringOneSem  && u.springOneSemester) ||
+                    (filters.wantSpringCalYear && u.springCalendarYear);
+                if (!semMatch) return false;
+            }
+
+            if (filters.continent && u.continent !== filters.continent) return false;
+            if (filters.country && u.country !== filters.country) return false;
+            if (filters.university && u.name !== filters.university) return false;
+
+            if (filters.universitySearch) {
+                const q = filters.universitySearch.toLowerCase();
+                if (!u.name.toLowerCase().includes(q)) return false;
+            }
+
+            if (filters.gpa && u.gpaRequired !== null) {
+                const myGpa43 = filters.gpaScaleIs45
+                    ? convertGpa45to43(filters.gpa)
+                    : parseFloat(filters.gpa);
+                if (myGpa43 !== null && myGpa43 < u.gpaRequired) return false;
+            }
+            if (filters.toefl && u.toefl !== null) {
+                if (parseInt(filters.toefl, 10) < u.toefl) return false;
+            }
+
+            if (filters.nonEnglishLanguage) {
+                if (u.language2 !== filters.nonEnglishLanguage) return false;
+                if (filters.nonEnglishLevel) {
+                    const uniLv = getLevelSystem(u.lang2Level);
+                    const myLv = getLevelSystem(filters.nonEnglishLevel);
+                    if (uniLv) {
+                        if (!myLv || uniLv.system !== myLv.system) return false;
+                        if (myLv.rank < uniLv.rank) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // =========================================================================
+        // 활성 필터 chip 빌더 (T1-A) — 그리드 위에 현재 적용된 필터를 보여주고
+        // 각 chip × 클릭으로 즉시 해제할 수 있게 함
+        // =========================================================================
+        function buildActiveChips(filters) {
+            const chips = [];
+            const add = (key, label, reset) => chips.push({ key, label, reset });
+
+            if (filters.studentType) add('studentType', `학생: ${filters.studentType}`, { studentType: '' });
+            if (filters.languageRegion) add('languageRegion', `언어권: ${filters.languageRegion}`, { languageRegion: '' });
+            if (filters.wantFallOneSem)    add('wantFallOneSem',    '학기: Fall 1학기',     { wantFallOneSem: false });
+            if (filters.wantFallCalYear)   add('wantFallCalYear',   '학기: Fall부터 1년',   { wantFallCalYear: false });
+            if (filters.wantSpringOneSem)  add('wantSpringOneSem',  '학기: Spring 1학기',   { wantSpringOneSem: false });
+            if (filters.wantSpringCalYear) add('wantSpringCalYear', '학기: Spring부터 1년', { wantSpringCalYear: false });
+            if (filters.continent) add('continent', `대륙: ${filters.continent}`, { continent: '', country: '', university: '' });
+            if (filters.country) {
+                const flag = COUNTRY_FLAGS[filters.country] || '';
+                add('country', `국가: ${flag ? flag + ' ' : ''}${filters.country}`, { country: '', university: '' });
+            }
+            if (filters.university) add('university', `학교: ${filters.university}`, { university: '' });
+            if (filters.universitySearch) add('universitySearch', `검색: "${filters.universitySearch}"`, { universitySearch: '' });
+            if (filters.gpa) {
+                const scale = filters.gpaScaleIs45 ? '4.5' : '4.3';
+                add('gpa', `GPA ≥ ${filters.gpa} (${scale})`, { gpa: '' });
+            }
+            if (filters.toefl) add('toefl', `TOEFL ≥ ${filters.toefl}`, { toefl: '' });
+            if (filters.nonEnglishLanguage) add('nonEnglishLanguage', `비영어: ${filters.nonEnglishLanguage}`, { nonEnglishLanguage: '', nonEnglishLevel: '' });
+            if (filters.nonEnglishLevel) add('nonEnglishLevel', `레벨: ${filters.nonEnglishLevel}`, { nonEnglishLevel: '' });
+            if (filters.uicOnly) add('uicOnly', 'UIC Exclusive만', { uicOnly: false });
+            if (filters.uicExclude) add('uicExclude', 'UIC 제외', { uicExclude: false });
+            if (filters.scholarshipOnly) add('scholarshipOnly', '장학금 있음', { scholarshipOnly: false });
+            if (filters.updateOnly) add('updateOnly', '업데이트만', { updateOnly: false });
+            return chips;
+        }
+
+        // =========================================================================
+        // 초기 필터 / 정렬 / 즐겨찾기 상태 (sessionStorage)
+        // =========================================================================
+        const DEFAULT_FILTERS = {
+            studentType: '',          // '' | 'Undergraduate' | 'Graduate'
+            languageRegion: '',       // '' | 'English' | 'Non-English' | 'Both'
+            // T2-G: 4-way semester options (OR-logic). 학생이 갈 수 있는 학기·기간 조합.
+            wantFallOneSem: false,
+            wantFallCalYear: false,
+            wantSpringOneSem: false,
+            wantSpringCalYear: false,
+            continent: '',
+            country: '',
+            university: '',
+            universitySearch: '',
+            gpa: '',
+            gpaScaleIs45: false,      // true면 입력한 gpa를 4.5만점으로 간주, 비교 시 4.3 환산
+            toefl: '',
+            nonEnglishLanguage: '',
+            nonEnglishLevel: '',
+            uicOnly: false,
+            uicExclude: false,
+            scholarshipOnly: false,
+            updateOnly: false,
+        };
+
+        // 4.5 만점 GPA를 4.3 만점으로 환산 (단순 비례 — 참고용)
+        // 학생들이 OIA에 제출할 때는 정확한 등급별 환산표를 별도 확인해야 함.
+        function convertGpa45to43(gpa45) {
+            const v = parseFloat(gpa45);
+            if (isNaN(v)) return null;
+            const converted = (v / 4.5) * 4.3;
+            return Math.round(converted * 100) / 100; // 소수점 2자리
+        }
+
+        function loadFromStorage(storage, key, fallback) {
+            try {
+                const raw = storage.getItem(key);
+                if (!raw) return fallback;
+                return JSON.parse(raw);
+            } catch { return fallback; }
+        }
+
+        // Keys that persist across browser sessions (localStorage):
+        //   - favorites (사용자 별표한 학교)
+        //   - qualifications (GPA / TOEFL / 비영어 어학 — 재입력 줄이기 위해)
+        // 나머지 필터(대륙·국가·체크박스 등)는 sessionStorage만 사용 (세션 한정).
+        const QUALIFICATION_KEYS = ['gpa', 'gpaScaleIs45', 'toefl', 'nonEnglishLanguage', 'nonEnglishLevel'];
+
+        // =========================================================================
+        // App
+        // =========================================================================
+        function App() {
+            const [universities, setUniversities] = useState([]);
+            const [loading, setLoading]   = useState(true);
+            const [error, setError]       = useState(null);
+            const [usingMock, setUsingMock] = useState(false);
+
+            const [filters, setFilters] = useState(() => {
+                // Active filters live in sessionStorage. If absent (new session),
+                // restore saved qualifications from localStorage so the student
+                // does not retype GPA/TOEFL/언어 every visit.
+                const fromSession = loadFromStorage(sessionStorage, '27S_filters', null);
+                if (fromSession) return fromSession;
+                const savedQuals = loadFromStorage(localStorage, '27S_qualifications', {});
+                return { ...DEFAULT_FILTERS, ...savedQuals };
+            });
+            const [sortBy, setSortBy]     = useState(() => loadFromStorage(sessionStorage, '27S_sortBy', 'quota-desc'));
+            const [favorites, setFavorites] = useState(() => loadFromStorage(localStorage, '27S_favorites', []));
+            const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+            const [selectedUniversity, setSelectedUniversity] = useState(null);
+            const [showUpdateHistory, setShowUpdateHistory] = useState(false);
+            const [cameFromUpdateHistory, setCameFromUpdateHistory] = useState(false);
+            const [showScrollTop, setShowScrollTop] = useState(false);
+
+            // T2-I: First-visit banner — dismissed flag persists in localStorage
+            const [showFirstVisitBanner, setShowFirstVisitBanner] = useState(() =>
+                !loadFromStorage(localStorage, '27S_dismissedFirstVisitBanner', false)
+            );
+            const dismissFirstVisitBanner = () => {
+                setShowFirstVisitBanner(false);
+                localStorage.setItem('27S_dismissedFirstVisitBanner', 'true');
+            };
+
+            // T2-F: Compare modal state
+            const [showCompareModal, setShowCompareModal] = useState(false);
+
+            // T2-H: Mobile filter drawer state
+            const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+            useEffect(() => {
+                // Body scroll lock while drawer is open
+                if (isFilterDrawerOpen) document.body.style.overflow = 'hidden';
+                else document.body.style.overflow = '';
+                return () => { document.body.style.overflow = ''; };
+            }, [isFilterDrawerOpen]);
+
+            // ---- persist filters/sortBy/favorites/qualifications --------------------
+            useEffect(() => { sessionStorage.setItem('27S_filters', JSON.stringify(filters)); }, [filters]);
+            useEffect(() => { sessionStorage.setItem('27S_sortBy', JSON.stringify(sortBy)); }, [sortBy]);
+            useEffect(() => { localStorage.setItem('27S_favorites', JSON.stringify(favorites)); }, [favorites]);
+
+            // Mirror just the personal qualifications into localStorage so they
+            // survive across browser sessions, separate from transient filters.
+            useEffect(() => {
+                const quals = {};
+                QUALIFICATION_KEYS.forEach(k => { quals[k] = filters[k]; });
+                localStorage.setItem('27S_qualifications', JSON.stringify(quals));
+            }, [filters.gpa, filters.gpaScaleIs45, filters.toefl, filters.nonEnglishLanguage, filters.nonEnglishLevel]);
+
+            // ---- language region change: clear incompatible language filters --------
+            useEffect(() => {
+                if (filters.languageRegion === 'English') {
+                    setFilters(prev => ({ ...prev, nonEnglishLanguage: '', nonEnglishLevel: '' }));
+                } else if (filters.languageRegion === 'Non-English') {
+                    setFilters(prev => ({ ...prev, toefl: '' }));
+                } else {
+                    setFilters(prev => ({ ...prev, toefl: '', nonEnglishLanguage: '', nonEnglishLevel: '' }));
+                }
+            }, [filters.languageRegion]);
+
+            // ---- scroll-to-top visibility -------------------------------------------
+            useEffect(() => {
+                const onScroll = () => setShowScrollTop(window.pageYOffset > 300);
+                window.addEventListener('scroll', onScroll);
+                return () => window.removeEventListener('scroll', onScroll);
+            }, []);
+
+            const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // ---- data loading -------------------------------------------------------
+            const loadData = useCallback(async () => {
+                setLoading(true);
+                setError(null);
+                try {
+                    const { masterRows, notesRows, contentMap, mock } = await loadAllData();
+                    setUniversities(buildUniversities(masterRows, notesRows, contentMap));
+                    setUsingMock(mock);
+                } catch (e) {
+                    setError(e.message || String(e));
+                } finally {
+                    setLoading(false);
+                }
+            }, []);
+
+            useEffect(() => { loadData(); }, [loadData]);
+
+            // ---- validation warnings (computed values, NOT setState in useMemo) -----
+            const gpaWarning = useMemo(() => {
+                if (!filters.gpa) return '';
+                const v = parseFloat(filters.gpa);
+                const max = filters.gpaScaleIs45 ? 4.5 : 4.3;
+                if (isNaN(v) || v < 0 || v > max) return `GPA는 0.0 ~ ${max} 사이여야 합니다.`;
+                return '';
+            }, [filters.gpa, filters.gpaScaleIs45]);
+            const toeflWarning = useMemo(() => {
+                if (!filters.toefl) return '';
+                const v = parseInt(filters.toefl, 10);
+                if (isNaN(v) || v < 0 || v > 120) return 'TOEFL iBT는 0 ~ 120 사이여야 합니다.';
+                return '';
+            }, [filters.toefl]);
+
+            // ---- helpers ------------------------------------------------------------
+            const linkify = (text) => {
+                if (!text) return text;
+                const splitRe = /(https?:\/\/[^\s]+)/g;
+                const urlRe = /^https?:\/\/[^\s]+$/;
+                return text.split(splitRe).map((part, i) =>
+                    urlRe.test(part)
+                        ? <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+                             style={{color:'var(--yonsei-light-blue)', textDecoration:'underline'}}>{part}</a>
+                        : part
+                );
+            };
+
+            // ---- filtering ----------------------------------------------------------
+            const filteredUniversities = useMemo(() => {
+                if (gpaWarning || toeflWarning) return [];
+                return universities.filter(u => passesFilter(u, filters, { favorites, showFavoritesOnly }));
+            }, [universities, filters, favorites, showFavoritesOnly, gpaWarning, toeflWarning]);
+
+            // ---- sorting ------------------------------------------------------------
+            const sortedUniversities = useMemo(() => {
+                const arr = [...filteredUniversities];
+                switch (sortBy) {
+                    case 'quota-desc': return arr.sort((a,b)=>b.quota-a.quota);
+                    case 'quota-asc':  return arr.sort((a,b)=>a.quota-b.quota);
+                    case 'name-asc':   return arr.sort((a,b)=>a.name.localeCompare(b.name));
+                    case 'name-desc':  return arr.sort((a,b)=>b.name.localeCompare(a.name));
+                    case 'toefl-asc':  return arr.sort((a,b)=>(a.toefl??999)-(b.toefl??999));
+                    case 'toefl-desc': return arr.sort((a,b)=>(b.toefl??0)-(a.toefl??0));
+                    case 'gpa-asc':    return arr.sort((a,b)=>(a.gpaRequired??999)-(b.gpaRequired??999));
+                    case 'gpa-desc':   return arr.sort((a,b)=>(b.gpaRequired??0)-(a.gpaRequired??0));
+                    default: return arr;
+                }
+            }, [filteredUniversities, sortBy]);
+
+            // ---- modal navigation (T1-B) -------------------------------------------
+            const modalIdx = useMemo(() => {
+                if (!selectedUniversity) return -1;
+                return sortedUniversities.findIndex(u => u.id === selectedUniversity.id);
+            }, [selectedUniversity, sortedUniversities]);
+
+            const navigateModal = useCallback((direction) => {
+                if (!selectedUniversity) return;
+                const idx = sortedUniversities.findIndex(u => u.id === selectedUniversity.id);
+                if (idx === -1) return;
+                const newIdx = idx + direction;
+                if (newIdx < 0 || newIdx >= sortedUniversities.length) return;
+                setSelectedUniversity(sortedUniversities[newIdx]);
+                setCameFromUpdateHistory(false);
+            }, [selectedUniversity, sortedUniversities]);
+
+            // Keyboard: ESC to close, ←/→ to navigate
+            useEffect(() => {
+                if (!selectedUniversity && !showUpdateHistory && !isFilterDrawerOpen && !showCompareModal) return;
+                const onKey = (e) => {
+                    if (e.key === 'Escape') {
+                        if (selectedUniversity) {
+                            setSelectedUniversity(null);
+                            setCameFromUpdateHistory(false);
+                        } else if (showCompareModal) {
+                            setShowCompareModal(false);
+                        } else if (showUpdateHistory) {
+                            setShowUpdateHistory(false);
+                        } else if (isFilterDrawerOpen) {
+                            setIsFilterDrawerOpen(false);
+                        }
+                        return;
+                    }
+                    if (selectedUniversity) {
+                        if (e.key === 'ArrowLeft')  { e.preventDefault(); navigateModal(-1); }
+                        if (e.key === 'ArrowRight') { e.preventDefault(); navigateModal(1); }
+                    }
+                };
+                window.addEventListener('keydown', onKey);
+                return () => window.removeEventListener('keydown', onKey);
+            }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, showCompareModal, navigateModal]);
+
+            // ---- favorites ----------------------------------------------------------
+            const toggleFavorite = (id) => {
+                setFavorites(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
+            };
+            const clearAllFavorites = () => { setFavorites([]); setShowFavoritesOnly(false); };
+
+            // ---- derived: dropdown options ------------------------------------------
+            const countries = useMemo(() => {
+                const set = new Set(universities.map(u => u.country).filter(Boolean));
+                return Array.from(set).sort();
+            }, [universities]);
+
+            const filteredCountries = useMemo(() => {
+                if (!filters.continent) return countries;
+                const set = new Set(
+                    universities.filter(u => u.continent === filters.continent).map(u => u.country)
+                );
+                return Array.from(set).filter(Boolean).sort();
+            }, [universities, countries, filters.continent]);
+
+            const universityNameOptions = useMemo(() => {
+                let list = universities;
+                if (filters.continent) list = list.filter(u => u.continent === filters.continent);
+                if (filters.country)   list = list.filter(u => u.country === filters.country);
+                return ['', ...list.map(u => u.name).sort()];
+            }, [universities, filters.continent, filters.country]);
+
+            const continentOptions = useMemo(() => {
+                const set = new Set(universities.map(u => u.continent).filter(Boolean));
+                return Array.from(set).sort();
+            }, [universities]);
+
+            // ---- filter counts (T1-C) ----------------------------------------------
+            // 각 옵션마다 "다른 필터를 그대로 둔 채 이 옵션만 켜면 결과가 N개"
+            // 라는 정확한 카운트를 계산. 학교 ~수백 개라 부담 없음.
+            const counts = useMemo(() => {
+                if (gpaWarning || toeflWarning) return null;
+                const opts = { favorites, showFavoritesOnly };
+                const countWith = (override) => {
+                    const f = { ...filters, ...override };
+                    let c = 0;
+                    for (const u of universities) if (passesFilter(u, f, opts)) c++;
+                    return c;
+                };
+
+                const continentCounts = {};
+                for (const c of continentOptions) {
+                    continentCounts[c] = countWith({ continent: c, country: '', university: '' });
+                }
+                const countryCounts = {};
+                for (const c of filteredCountries) {
+                    countryCounts[c] = countWith({ country: c, university: '' });
+                }
+
+                return {
+                    studentType: {
+                        Undergraduate: countWith({ studentType: 'Undergraduate' }),
+                        Graduate: countWith({ studentType: 'Graduate' }),
+                    },
+                    languageRegion: {
+                        English: countWith({ languageRegion: 'English' }),
+                        'Non-English': countWith({ languageRegion: 'Non-English' }),
+                        Both: countWith({ languageRegion: 'Both' }),
+                    },
+                    semesterOption: {
+                        // "현재 필터 그대로 둔 채 이 옵션만 토글" 카운트
+                        wantFallOneSem:    countWith({ wantFallOneSem:    !filters.wantFallOneSem }),
+                        wantFallCalYear:   countWith({ wantFallCalYear:   !filters.wantFallCalYear }),
+                        wantSpringOneSem:  countWith({ wantSpringOneSem:  !filters.wantSpringOneSem }),
+                        wantSpringCalYear: countWith({ wantSpringCalYear: !filters.wantSpringCalYear }),
+                    },
+                    continent: continentCounts,
+                    country: countryCounts,
+                    uicOnly:        countWith({ uicOnly: true,  uicExclude: false }),
+                    uicExclude:     countWith({ uicExclude: true, uicOnly: false }),
+                    scholarshipOnly:countWith({ scholarshipOnly: true }),
+                    updateOnly:     countWith({ updateOnly: true }),
+                };
+            }, [universities, filters, favorites, showFavoritesOnly, gpaWarning, toeflWarning, continentOptions, filteredCountries]);
+
+            // ---- stats (reactive to filters) ----------------------------------------
+            // Stats reflect the currently filtered result set so the header summary
+            // updates live as the user adjusts filters.
+            const stats = useMemo(() => ({
+                total: filteredUniversities.length,
+                totalQuota: filteredUniversities.reduce((s,u)=>s+u.quota, 0),
+                countries: new Set(filteredUniversities.map(u=>u.country)).size,
+                americas:   filteredUniversities.filter(u => u.continent === 'Americas').length,
+                asiaOceania:filteredUniversities.filter(u => u.continent === 'Asia/Oceania').length,
+                europe:     filteredUniversities.filter(u => u.continent === 'Europe').length,
+                english:    filteredUniversities.filter(u => isEnglishOffered(u)).length,
+                nonEnglish: filteredUniversities.filter(u => isNonEnglishOffered(u)).length,
+            }), [filteredUniversities]);
+
+            // ---- exports (dynamic per semester) -------------------------------------
+            const exportFileBase = `${SEMESTER.yearPart}_exchange-universities`;
+            const exportTitle    = `${SEMESTER.yearPart} Exchange Universities`;
+
+            const exportToPDF = () => {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    doc.setFontSize(18);
+                    doc.text(exportTitle, 14, 22);
+                    doc.setFontSize(11);
+                    doc.text(`Generated: ${new Date().toLocaleDateString('ko-KR')}`, 14, 30);
+                    doc.text(`Total: ${sortedUniversities.length} universities`, 14, 36);
+
+                    const tableData = sortedUniversities.map(u => [
+                        u.name, u.country,
+                        u.language1 + (u.language2 ? ', ' + u.language2 : ''),
+                        u.quota,
+                        u.toefl ?? 'N/A',
+                        u.gpaRequired ?? 'N/A',
+                        [u.fallOneSemester?'Fall 1-sem':null, u.fallCalendarYear?'Fall 1-yr':null,
+                         u.springOneSemester?'Spring 1-sem':null, u.springCalendarYear?'Spring 1-yr':null]
+                         .filter(Boolean).join(', ') || 'N/A',
+                    ]);
+                    doc.autoTable({
+                        startY: 42,
+                        head: [['University','Country','Language','Quota','TOEFL','GPA','Options']],
+                        body: tableData,
+                        styles: { fontSize: 6 },
+                        headStyles: { fillColor: [0, 56, 118] },
+                    });
+                    doc.save(`${exportFileBase}.pdf`);
+                } catch (e) {
+                    alert(`PDF 다운로드에 실패했습니다: ${e.message || e}`);
+                }
+            };
+
+            const exportToExcel = () => {
+                try {
+                    const data = sortedUniversities.map(u => ({
+                        University: u.name,
+                        Country: u.country,
+                        Continent: u.continent,
+                        Language: u.language1 + (u.language2 ? ', ' + u.language2 : ''),
+                        Quota: u.quota,
+                        TOEFL: u.toefl ?? 'N/A',
+                        GPA: u.gpaRequired ?? 'N/A',
+                        'Fall One Semester':   u.fallOneSemester  ? 'Y' : 'N',
+                        'Fall Calendar Year':  u.fallCalendarYear ? 'Y' : 'N',
+                        'Spring One Semester': u.springOneSemester  ? 'Y' : 'N',
+                        'Spring Calendar Year':u.springCalendarYear ? 'Y' : 'N',
+                        Website: u.website,
+                    }));
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Universities');
+                    XLSX.writeFile(wb, `${exportFileBase}.xlsx`);
+                } catch (e) {
+                    alert(`Excel 다운로드에 실패했습니다: ${e.message || e}`);
+                }
+            };
+
+            // Active filter chips (T1-A) — MUST be declared before any early return
+            // so the hook order stays stable across loading/error/loaded renders.
+            const activeChips = useMemo(() => buildActiveChips(filters), [filters]);
+
+            // ---- early-return states ------------------------------------------------
+            if (loading) {
+                return (
+                    <div className="loading-state">
+                        <div className="spinner"></div>
+                        <p>Loading data...</p>
+                    </div>
+                );
+            }
+            if (error) {
+                return (
+                    <div className="error-state">
+                        <div className="error-state-icon">⚠️</div>
+                        <div className="error-state-text">데이터를 불러오지 못했습니다.</div>
+                        <div className="error-state-detail">{error}</div>
+                        <button className="error-retry-btn" onClick={loadData}>다시 시도</button>
+                    </div>
+                );
+            }
+
+            const clearAllFilters = () => {
+                setFilters(DEFAULT_FILTERS);
+                sessionStorage.removeItem('27S_filters');
+            };
+
+            const removeChip = (reset) => setFilters(prev => ({ ...prev, ...reset }));
+
+            // ============================== RENDER ===================================
+            return (
+                <>
+                    <a href="#main" className="skip-link">본문으로 건너뛰기</a>
+
+                    <header className="site-header">
+                        <div className="site-header__inner">
+                            <a href="#" className="site-header__brand-group" aria-label="홈으로">
+                                <img
+                                    src="assets/yonsei-logo.png"
+                                    alt="Yonsei University"
+                                    className="site-header__logo"
+                                    translate="no" />
+                                <div className="site-header__org-text">
+                                    <strong>{SEMESTER.korean} 해외파견 배정 가능 대학</strong>
+                                    <span translate="no">Yonsei University · Office of International Affairs</span>
+                                </div>
+                            </a>
+                            <a
+                                href="https://oia.yonsei.ac.kr"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="site-header__external">
+                                국제처 홈페이지
+                                <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                    <path d="M3 3h6v6M3 9l6-6"
+                                        stroke="currentColor" strokeWidth="1.5"
+                                        strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </a>
+                        </div>
+                    </header>
+
+                    <section className="hero" aria-labelledby="page-title">
+                        <div className="hero__inner">
+                            <div className="hero__top">
+                                <p className="hero__eyebrow">{SEMESTER.korean} · {SEMESTER.full}</p>
+                                <div className="hero__counter" aria-label="결과 카운터">
+                                    <span className="hero__counter-item">
+                                        <span className="hero__counter-label">결과</span>
+                                        <strong>{sortedUniversities.length}</strong>
+                                    </span>
+                                    <span className="hero__counter-sep" aria-hidden="true">·</span>
+                                    <span className="hero__counter-item">
+                                        <span className="hero__counter-label">전체</span>
+                                        <strong>{universities.length}</strong>
+                                    </span>
+                                </div>
+                            </div>
+                            <h1 id="page-title" className="hero__title">
+                                해외파견 프로그램 배정 가능 대학
+                            </h1>
+                            <p className="hero__lede">
+                                연세대학교 국제처가 운영하는 교환학생 프로그램에서 지원 가능한 해외 파트너 대학 명단입니다.
+                                대륙·언어·학점·어학 요건으로 좁혀 검색하고, 관심 학교는 즐겨찾기에 담아 비교해 보세요.
+                            </p>
+                            <dl className="hero__meta">
+                                <div><dt>Total</dt><dd>{stats.total}</dd></div>
+                                <div><dt>Quota</dt><dd>{stats.totalQuota}</dd></div>
+                                <div><dt>Countries</dt><dd>{stats.countries}</dd></div>
+                                <div><dt>Americas</dt><dd>{stats.americas}</dd></div>
+                                <div><dt>Asia/Oceania</dt><dd>{stats.asiaOceania}</dd></div>
+                                <div><dt>Europe</dt><dd>{stats.europe}</dd></div>
+                                <div><dt>English</dt><dd>{stats.english}</dd></div>
+                                <div><dt>Non-English</dt><dd>{stats.nonEnglish}</dd></div>
+                            </dl>
+                        </div>
+                    </section>
+
+                    <div className="notice-bar">
+                        <div className="notice-inner">
+                            <p>
+                                <strong>유의사항:</strong> 연세대학교 국제처와 교환학생 협정을 맺은 해외 대학 목록입니다. 일부 단과대학 단독 교환 프로그램을 운영하는 대학은 검색되지 않을 수 있으므로, 해당 경우는 소속 단과대학으로 문의 바랍니다. 교환대학의 모집 인원, 지원 자격, 세부 조건은 매 학기 변경될 수 있습니다. 또한, 여기에 안내된 어학 성적 및 GPA 기준은 최소 요건이며, 최종 선발 여부는 상대교의 심사를 통해 결정됩니다.
+                            </p>
+                            <p>
+                                <strong>Notice:</strong> This list shows OIA partner universities with student exchange agreements through Yonsei University's Office of International Affairs. Some colleges or departments that operate exchange programs exclusively may not appear in this list; in such cases, please contact your college or department for further information. Exchange conditions may change each semester. The language proficiency and GPA requirements listed here represent the minimum requirements; final admission decisions are made by the host institution.
+                            </p>
+                            {usingMock && (
+                                <p style={{marginTop:8, color:'#a06000'}}>
+                                    <strong>(개발 모드)</strong> 현재 mock 데이터로 동작 중입니다. Google Sheets URL이 코드에 설정되지 않았습니다.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <main id="main" className="container">
+                        {/* ===== First-visit banner (T2-I) ===== */}
+                        {showFirstVisitBanner && (
+                            <div className="first-visit-banner">
+                                <span className="first-visit-icon" aria-hidden="true">💡</span>
+                                <span className="first-visit-text">
+                                    <strong>처음이신가요?</strong> 아래에서 <strong>학생 유형 → 언어권 → GPA</strong> 순서로 입력하면 결과가 빠르게 좁혀집니다. 관심 학교는 ☆ 별표로 담아두세요.
+                                </span>
+                                <button className="first-visit-close" onClick={dismissFirstVisitBanner} aria-label="안내 닫기">×</button>
+                            </div>
+                        )}
+
+                        {/* ===== Mobile filter trigger (T2-H) ===== */}
+                        <button className="mobile-filter-trigger"
+                            onClick={() => setIsFilterDrawerOpen(true)}
+                            aria-label="필터 열기">
+                            🔍 필터
+                            {activeChips.length > 0 && (
+                                <span className="mobile-filter-trigger-count">{activeChips.length}</span>
+                            )}
+                        </button>
+
+                        {/* Mobile drawer backdrop */}
+                        <div
+                            className={`filter-drawer-backdrop ${isFilterDrawerOpen ? 'is-open' : ''}`}
+                            onClick={() => setIsFilterDrawerOpen(false)}
+                            aria-hidden="true" />
+
+                        {/* ===== Filter Panel (drawer on mobile, inline on desktop) ===== */}
+                        <section className={`filter-panel ${isFilterDrawerOpen ? 'is-open' : ''}`}>
+                            <button className="filter-drawer-close"
+                                onClick={() => setIsFilterDrawerOpen(false)}
+                                aria-label="필터 닫기">
+                                ×
+                            </button>
+                            {/* Student Type */}
+                            <div className="filter-section">
+                                <label className="filter-label">Student Type</label>
+                                <div className="filter-group">
+                                    {['Undergraduate','Graduate'].map(t => (
+                                        <button key={t}
+                                            className={`filter-btn ${filters.studentType===t?'active':''}`}
+                                            onClick={() => setFilters(p => ({...p, studentType: p.studentType===t?'':t}))}>
+                                            {t}
+                                            {counts && <span className="filter-count">({counts.studentType[t]})</span>}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Language Region */}
+                            <div className="filter-section">
+                                <label className="filter-label">Language Region (Select One)</label>
+                                <div className="filter-group">
+                                    {['English','Non-English','Both'].map(t => (
+                                        <button key={t}
+                                            className={`filter-btn ${filters.languageRegion===t?'active':''}`}
+                                            onClick={() => setFilters(p => ({...p, languageRegion: p.languageRegion===t?'':t}))}>
+                                            {t}
+                                            {counts && <span className="filter-count">({counts.languageRegion[t]})</span>}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Semester Option (T2-G — 4-way checkboxes) */}
+                            <div className="filter-section">
+                                <label className="filter-label">파견 가능 학기·기간 (복수 선택 가능)</label>
+                                <div className="checkbox-list">
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.wantFallOneSem}
+                                            onChange={(e)=>setFilters(p=>({...p, wantFallOneSem:e.target.checked}))} />
+                                        <span>Fall 1학기만 (가을학기 한 학기)</span>
+                                        {counts && <span className="filter-count">({counts.semesterOption.wantFallOneSem})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.wantFallCalYear}
+                                            onChange={(e)=>setFilters(p=>({...p, wantFallCalYear:e.target.checked}))} />
+                                        <span>Fall부터 1년 (Fall → Spring)</span>
+                                        {counts && <span className="filter-count">({counts.semesterOption.wantFallCalYear})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.wantSpringOneSem}
+                                            onChange={(e)=>setFilters(p=>({...p, wantSpringOneSem:e.target.checked}))} />
+                                        <span>Spring 1학기만 (봄학기 한 학기)</span>
+                                        {counts && <span className="filter-count">({counts.semesterOption.wantSpringOneSem})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.wantSpringCalYear}
+                                            onChange={(e)=>setFilters(p=>({...p, wantSpringCalYear:e.target.checked}))} />
+                                        <span>Spring부터 1년 (Spring → 다음 Fall)</span>
+                                        {counts && <span className="filter-count">({counts.semesterOption.wantSpringCalYear})</span>}
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Continent & Country */}
+                            <div className="filter-section">
+                                <label className="filter-label">Continent &amp; Country</label>
+                                <div className="input-group">
+                                    <div className="input-field">
+                                        <label>Continent</label>
+                                        <select value={filters.continent}
+                                            onChange={(e)=>setFilters(p=>({...p, continent:e.target.value, country:'', university:''}))}>
+                                            <option value="">All Continents</option>
+                                            {continentOptions.map(c => (
+                                                <option key={c} value={c}>
+                                                    {c}{counts ? ` (${counts.continent[c] ?? 0})` : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="input-field">
+                                        <label>Country</label>
+                                        <select value={filters.country}
+                                            onChange={(e)=>setFilters(p=>({...p, country:e.target.value, university:''}))}>
+                                            <option value="">All Countries</option>
+                                            {filteredCountries.map(c => (
+                                                <option key={c} value={c}>
+                                                    {c}{counts ? ` (${counts.country[c] ?? 0})` : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* University Search */}
+                            <div className="filter-section">
+                                <label className="filter-label">Search University</label>
+                                <div className="input-field">
+                                    <select value={filters.university}
+                                        onChange={(e)=>setFilters(p=>({...p, university:e.target.value}))}>
+                                        <option value="">All Universities</option>
+                                        {universityNameOptions.filter(Boolean).map(n => <option key={n} value={n}>{n}</option>)}
+                                    </select>
+                                </div>
+                                <div className="input-field" style={{marginTop:10}}>
+                                    <input type="text" placeholder="Type university name to search..."
+                                        value={filters.universitySearch}
+                                        onChange={(e)=>setFilters(p=>({...p, universitySearch:e.target.value}))} />
+                                </div>
+                            </div>
+
+                            {/* My Qualifications */}
+                            <div className="filter-section">
+                                <label className="filter-label">My Qualifications</label>
+                                <div className="input-group">
+                                    <div className="input-field">
+                                        <div className="input-field-head">
+                                            <label>GPA ({filters.gpaScaleIs45 ? '4.5 scale 입력' : '4.3 scale 입력'})</label>
+                                            <label className="scale-toggle" title="내 학교가 4.5 만점 기준이면 체크. 비교 시 자동 4.3 환산">
+                                                <input type="checkbox"
+                                                    checked={filters.gpaScaleIs45}
+                                                    onChange={(e)=>setFilters(p=>({...p, gpaScaleIs45: e.target.checked}))} />
+                                                내 GPA는 4.5 만점
+                                            </label>
+                                        </div>
+                                        <input type="number" step="0.01" min="0"
+                                            max={filters.gpaScaleIs45 ? '4.5' : '4.3'}
+                                            placeholder={filters.gpaScaleIs45 ? 'e.g., 4.0 (4.5점 기준)' : 'e.g., 3.5'}
+                                            value={filters.gpa}
+                                            onChange={(e)=>setFilters(p=>({...p, gpa:e.target.value}))} />
+                                        {filters.gpa && filters.gpaScaleIs45 && !gpaWarning && (
+                                            <div className="gpa-hint">
+                                                ≈ <strong>{convertGpa45to43(filters.gpa)}</strong> (4.3 환산, 참고용)
+                                            </div>
+                                        )}
+                                        {gpaWarning && <div className="warning-text">{gpaWarning}</div>}
+                                    </div>
+
+                                    {filters.languageRegion === 'English' && (
+                                        <div className="input-field">
+                                            <label>TOEFL iBT</label>
+                                            <input type="number" min="0" max="120" placeholder="e.g., 90"
+                                                value={filters.toefl}
+                                                onChange={(e)=>setFilters(p=>({...p, toefl:e.target.value}))} />
+                                            {toeflWarning && <div className="warning-text">{toeflWarning}</div>}
+                                        </div>
+                                    )}
+
+                                    {filters.languageRegion === 'Non-English' && (
+                                        <>
+                                            <div className="input-field">
+                                                <label>Language</label>
+                                                <select value={filters.nonEnglishLanguage}
+                                                    onChange={(e)=>setFilters(p=>({...p, nonEnglishLanguage:e.target.value, nonEnglishLevel:''}))}>
+                                                    <option value="">Select Language</option>
+                                                    {Object.keys(LANGUAGE_LEVEL_OPTIONS).map(l => <option key={l} value={l}>{l}</option>)}
+                                                </select>
+                                            </div>
+                                            {filters.nonEnglishLanguage && (
+                                                <div className="input-field">
+                                                    <label>{filters.nonEnglishLanguage} Level</label>
+                                                    <select value={filters.nonEnglishLevel}
+                                                        onChange={(e)=>setFilters(p=>({...p, nonEnglishLevel:e.target.value}))}>
+                                                        <option value="">Select Level</option>
+                                                        {LANGUAGE_LEVEL_OPTIONS[filters.nonEnglishLanguage].map(lv =>
+                                                            <option key={lv} value={lv}>{lv}</option>)}
+                                                    </select>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Toggle checkboxes */}
+                            <div className="filter-section">
+                                <div className="checkbox-list">
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.uicOnly}
+                                            onChange={(e)=>setFilters(p=>({...p, uicOnly:e.target.checked, uicExclude:false}))} />
+                                        <span>UIC Exclusive Programs Only</span>
+                                        {counts && <span className="filter-count">({counts.uicOnly})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.uicExclude}
+                                            onChange={(e)=>setFilters(p=>({...p, uicExclude:e.target.checked, uicOnly:false}))} />
+                                        <span>Exclude UIC Exclusive Programs</span>
+                                        {counts && <span className="filter-count">({counts.uicExclude})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.scholarshipOnly}
+                                            onChange={(e)=>setFilters(p=>({...p, scholarshipOnly:e.target.checked}))} />
+                                        <span>Scholarship Available Only</span>
+                                        {counts && <span className="filter-count">({counts.scholarshipOnly})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.updateOnly}
+                                            onChange={(e)=>setFilters(p=>({...p, updateOnly:e.target.checked}))} />
+                                        <span style={{color:'#e83e8c'}}>Updated Universities Only</span>
+                                        {counts && <span className="filter-count">({counts.updateOnly})</span>}
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Buttons */}
+                            <div style={{display:'flex', justifyContent:'center', gap:10, marginTop:20, flexWrap:'wrap'}}>
+                                <button className="btn btn-secondary" onClick={clearAllFilters}>
+                                    Clear All Filters
+                                </button>
+                                <button
+                                    className={`btn ${showFavoritesOnly?'btn-primary':'btn-secondary'}`}
+                                    onClick={()=>setShowFavoritesOnly(v=>!v)}>
+                                    {showFavoritesOnly ? '★ Showing Favorites' : '☆ Show Favorites Only'} ({favorites.length})
+                                </button>
+                                <button className="btn btn-secondary"
+                                    onClick={() => setShowCompareModal(true)}
+                                    disabled={favorites.length < 2}
+                                    title={favorites.length < 2 ? '비교하려면 ☆ 별표한 학교가 2개 이상 필요합니다' : '즐겨찾기 학교 비교'}>
+                                    🔀 Compare ({favorites.length})
+                                </button>
+                                <button className="btn btn-secondary" onClick={()=>setShowUpdateHistory(true)}>
+                                    📋 Update History
+                                </button>
+                                {favorites.length > 0 && (
+                                    <button className="btn btn-secondary btn-danger-text" onClick={clearAllFavorites}>
+                                        Clear All Favorites
+                                    </button>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* ===== Active Filter Chips (T1-A) ===== */}
+                        {activeChips.length > 0 && (
+                            <div className="active-chips" role="region" aria-label="현재 적용된 필터">
+                                <span className="active-chips-label">활성 필터</span>
+                                {activeChips.map(chip => (
+                                    <button key={chip.key} className="active-chip"
+                                        onClick={() => removeChip(chip.reset)}
+                                        aria-label={`${chip.label} 필터 제거`}>
+                                        <span>{chip.label}</span>
+                                        <span className="active-chip-x" aria-hidden="true">×</span>
+                                    </button>
+                                ))}
+                                <button className="active-chip-clear" onClick={clearAllFilters}>
+                                    모두 지우기
+                                </button>
+                            </div>
+                        )}
+
+                        {/* ===== Action Bar ===== */}
+                        <div className="action-bar">
+                            <div className="result-count">
+                                Found <strong>{sortedUniversities.length}</strong> universities
+                            </div>
+                            <div className="action-buttons">
+                                <select className="sort-select" value={sortBy} onChange={(e)=>setSortBy(e.target.value)}>
+                                    <option value="quota-desc">Quota (High to Low)</option>
+                                    <option value="quota-asc">Quota (Low to High)</option>
+                                    <option value="name-asc">University Name (A-Z)</option>
+                                    <option value="name-desc">University Name (Z-A)</option>
+                                    <option value="toefl-asc">TOEFL (Low to High)</option>
+                                    <option value="toefl-desc">TOEFL (High to Low)</option>
+                                    <option value="gpa-asc">GPA (Low to High)</option>
+                                    <option value="gpa-desc">GPA (High to Low)</option>
+                                </select>
+                                <button type="button" className="btn btn-secondary"
+                                    onClick={exportToPDF}
+                                    disabled={sortedUniversities.length === 0}>
+                                    Download PDF
+                                </button>
+                                <button type="button" className="btn btn-secondary"
+                                    onClick={exportToExcel}
+                                    disabled={sortedUniversities.length === 0}>
+                                    Download Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* ===== Grid ===== */}
+                        {sortedUniversities.length === 0 ? (
+                            <div className="empty-state">
+                                <div className="empty-state-icon">🔍</div>
+                                <div className="empty-state-text">
+                                    No universities match your criteria. Try adjusting your filters.
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="university-grid">
+                                {sortedUniversities.map(u => (
+                                    <UniversityCard
+                                        key={u.id} u={u}
+                                        isFavorited={favorites.includes(u.id)}
+                                        onToggleFavorite={() => toggleFavorite(u.id)}
+                                        onOpenDetail={() => setSelectedUniversity(u)} />
+                                ))}
+                            </div>
+                        )}
+                    </main>
+
+                    {/* ===== Detail Modal ===== */}
+                    {selectedUniversity && (
+                        <DetailModal
+                            u={selectedUniversity}
+                            onClose={() => { setSelectedUniversity(null); setCameFromUpdateHistory(false); }}
+                            cameFromUpdateHistory={cameFromUpdateHistory}
+                            onBack={() => {
+                                setSelectedUniversity(null);
+                                setShowUpdateHistory(true);
+                                setCameFromUpdateHistory(false);
+                            }}
+                            linkify={linkify}
+                            onPrev={() => navigateModal(-1)}
+                            onNext={() => navigateModal(1)}
+                            hasPrev={modalIdx > 0}
+                            hasNext={modalIdx >= 0 && modalIdx < sortedUniversities.length - 1}
+                            modalIdx={modalIdx}
+                            modalTotal={sortedUniversities.length} />
+                    )}
+
+                    {/* ===== Compare Modal (T2-F) ===== */}
+                    {showCompareModal && (
+                        <CompareModal
+                            universities={universities.filter(u => favorites.includes(u.id))}
+                            onClose={() => setShowCompareModal(false)}
+                            onRemove={(id) => {
+                                toggleFavorite(id);
+                                // If this was the last one or now <2, auto-close
+                                if (favorites.length - 1 < 2) setShowCompareModal(false);
+                            }} />
+                    )}
+
+                    {/* ===== Update History Modal ===== */}
+                    {showUpdateHistory && (
+                        <UpdateHistoryModal
+                            universities={universities}
+                            onClose={() => setShowUpdateHistory(false)}
+                            onPickUniversity={(u) => {
+                                setShowUpdateHistory(false);
+                                setSelectedUniversity(u);
+                                setCameFromUpdateHistory(true);
+                            }} />
+                    )}
+
+                    <button className={`scroll-to-top ${showScrollTop?'visible':''}`} onClick={scrollToTop} aria-label="Scroll to top">
+                        ↑
+                    </button>
+
+                    <footer className="site-footer">
+                        <p>© 2025 Yonsei University, Office of International Affairs · Developed by Seo-Ah Choi 최서아</p>
+                    </footer>
+                </>
+            );
+        }
+
+        // =========================================================================
+        // Sub-components
+        // =========================================================================
+        function Stat({ label, value }) {
+            return (
+                <div className="stat-item">
+                    <div className="stat-label">{label}</div>
+                    <div className="stat-value">{value}</div>
+                </div>
+            );
+        }
+
+        function LabelTag({ label, size }) {
+            const bg = LABEL_COLORS[label] || '#6c757d';
+            return (
+                <span className={`label-tag ${size==='large'?'large':''}`} style={{backgroundColor: bg}}>
+                    {label}
+                </span>
+            );
+        }
+
+        function UniversityCard({ u, isFavorited, onToggleFavorite, onOpenDetail }) {
+            const isEnglish = u.language1 === 'English';
+            return (
+                <div className={`university-card ${isFavorited?'favorited':''}`}>
+                    <div className="card-header">
+                        <div className="university-name">
+                            {u.name}
+                            {u.labels.map(l => <LabelTag key={l} label={l} />)}
+                        </div>
+                        <div className="card-actions">
+                            <button className={`icon-btn ${isFavorited?'active':''}`}
+                                onClick={onToggleFavorite} title="Favorite">
+                                {isFavorited?'★':'☆'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="card-meta">
+                        <div className="meta-item">
+                            <span className="meta-icon">{COUNTRY_FLAGS[u.country] || '🌐'}</span>
+                            {u.country}
+                        </div>
+                        <div className="meta-item">
+                            <span className="meta-icon">👥</span>
+                            {u.quota} {u.quotaUnit ? `(${u.quotaUnit})` : ''}
+                        </div>
+                        <div className="meta-item">
+                            <span className="meta-icon">💬</span>
+                            {[u.language1, u.language2].filter(Boolean).join(', ') || '—'}
+                        </div>
+                    </div>
+
+                    <div className="card-specs">
+                        <div className="spec-item">
+                            <div className="spec-label">{isEnglish ? 'TOEFL iBT' : 'Language Requirement'}</div>
+                            <div className="spec-value" style={{fontSize: isEnglish?14:12}}>
+                                {isEnglish
+                                    ? (u.toefl ?? 'Not specified')
+                                    : (u.lang2Level || u.language2 || 'Not specified')}
+                            </div>
+                        </div>
+                        <div className="spec-item">
+                            <div className="spec-label">GPA Required (4.3)</div>
+                            <div className="spec-value">{u.gpaRequired ?? 'Not specified'}</div>
+                        </div>
+                        <div className="spec-item">
+                            <div className="spec-label">Semester Options</div>
+                            <div className="spec-value" style={{fontSize:11}}>
+                                {[
+                                    u.fallOneSemester?'Fall 1-sem':null,
+                                    u.fallCalendarYear?'Fall 1-yr':null,
+                                    u.springOneSemester?'Spring 1-sem':null,
+                                    u.springCalendarYear?'Spring 1-yr':null,
+                                ].filter(Boolean).join(', ') || 'N/A'}
+                            </div>
+                        </div>
+                        <div className="spec-item">
+                            <div className="spec-label">Academic System</div>
+                            <div className="spec-value">{u.academicSystem || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <div style={{marginTop:15, display:'flex', gap:10}}>
+                        <button className="btn btn-primary" style={{flex:1, fontSize:13, padding:'8px 12px'}}
+                            onClick={onOpenDetail}>
+                            View Details
+                        </button>
+                        {u.website && (
+                            <a href={u.website} target="_blank" rel="noopener noreferrer"
+                                className="btn btn-secondary" style={{flex:1, fontSize:13, padding:'8px 12px'}}>
+                                Website
+                            </a>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function DetailModal({ u, onClose, cameFromUpdateHistory, onBack, linkify,
+                              onPrev, onNext, hasPrev, hasNext, modalIdx, modalTotal }) {
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e)=>e.stopPropagation()}>
+                        <div
+                            className={`modal-header ${u.content && u.content.cover_image_url ? 'has-cover' : ''}`}
+                            style={u.content && u.content.cover_image_url ? {
+                                backgroundImage: `linear-gradient(135deg, rgba(0,56,118,0.55) 0%, rgba(0,37,84,0.75) 100%), url('${u.content.cover_image_url}')`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                            } : undefined}>
+                            {cameFromUpdateHistory && (
+                                <button className="modal-close-btn" onClick={onBack}
+                                    aria-label="Back to Update History" style={{right:50}}>
+                                    ←
+                                </button>
+                            )}
+                            <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
+                            <div className="modal-title">{u.name}</div>
+                            <div className="modal-subtitle">{u.country} · {u.continent}</div>
+                            {u.content && u.content.cover_image_credit && (
+                                <div className="modal-header-credit">{u.content.cover_image_credit}</div>
+                            )}
+                        </div>
+
+                        <div className="modal-body">
+                            <section className="info-section">
+                                <h3>Basic Information</h3>
+                                <div className="info-grid">
+                                    <InfoItem label="Exchange Quota" value={`${u.quota} ${u.quotaUnit||''}`} />
+                                    <InfoItem label="Language of Instruction" value={[u.language1,u.language2].filter(Boolean).join(', ')||'—'} />
+                                    <InfoItem label="Academic System" value={u.academicSystem || 'N/A'} />
+                                    <InfoItem label="Fall Options"
+                                        value={[u.fallOneSemester?'One semester':null, u.fallCalendarYear?'Calendar year':null].filter(Boolean).join(', ')||'N/A'} />
+                                    <InfoItem label="Spring Options"
+                                        value={[u.springOneSemester?'One semester':null, u.springCalendarYear?'Calendar year':null].filter(Boolean).join(', ')||'N/A'} />
+                                    <InfoItem label="Accepts"
+                                        value={[u.acceptsUG?'Undergraduate':null, u.acceptsGrad?'Graduate':null].filter(Boolean).join(', ')||'N/A'} />
+                                    <InfoItem label="Program Type" value={u.programType || 'Regular'} />
+                                </div>
+                            </section>
+
+                            {/* Academic Requirements — Basic Information 다음으로 이동 (자격 확인 우선) */}
+                            <section className="info-section">
+                                <h3>Academic Requirements</h3>
+                                <div className="info-grid">
+                                    <InfoItem label="TOEFL iBT Total" value={u.toefl ?? 'Not specified'} />
+                                    {u.toeflReading && <InfoItem label="TOEFL Reading" value={u.toeflReading} />}
+                                    {u.toeflListening && <InfoItem label="TOEFL Listening" value={u.toeflListening} />}
+                                    {u.toeflSpeaking && <InfoItem label="TOEFL Speaking" value={u.toeflSpeaking} />}
+                                    {u.toeflWriting && <InfoItem label="TOEFL Writing" value={u.toeflWriting} />}
+                                    {u.englishNotes && <InfoItem label="English Notes" value={u.englishNotes} />}
+                                    <InfoItem label="GPA Required (4.3)" value={u.gpaRequired ?? 'Not specified'} />
+                                    {u.language2 && <InfoItem label={`${u.language2} Level Required`} value={u.lang2Level || 'Not specified'} />}
+                                    {u.languageOtherNotes && <InfoItem label="Language Notes" value={u.languageOtherNotes} />}
+                                </div>
+                            </section>
+
+                            {u.admissionNotes && (
+                                <section className="info-section">
+                                    <h3>Admission Requirements</h3>
+                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.admissionNotes)}</p>
+                                </section>
+                            )}
+
+                            {u.availableAreas && (
+                                <section className="info-section">
+                                    <h3>Available Study Areas</h3>
+                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.availableAreas)}</p>
+                                </section>
+                            )}
+
+                            {u.restrictedAreas && (
+                                <section className="info-section">
+                                    <h3>Restricted Study Areas</h3>
+                                    <p style={{fontSize:14, lineHeight:1.6, color:'var(--danger)'}}>{linkify(u.restrictedAreas)}</p>
+                                </section>
+                            )}
+
+                            <section className="info-section">
+                                <h3>Important Dates</h3>
+                                <div className="info-grid">
+                                    <InfoItem label="Spring Nomination Deadline"   value={u.springNominationDeadline || 'N/A'} />
+                                    <InfoItem label="Spring Application Deadline"  value={u.springApplicationDeadline || 'N/A'} />
+                                    <InfoItem label="Fall Nomination Deadline"     value={u.fallNominationDeadline || 'N/A'} />
+                                    <InfoItem label="Fall Application Deadline"    value={u.fallApplicationDeadline || 'N/A'} />
+                                </div>
+                            </section>
+
+                            {(u.labels.length > 0 || u.note) && (
+                                <section className="info-section">
+                                    <h3>Note</h3>
+                                    {u.labels.length > 0 && (
+                                        <div style={{marginBottom: u.note ? 10 : 0}}>
+                                            {u.labels.map(l => <LabelTag key={l} label={l} size="large" />)}
+                                        </div>
+                                    )}
+                                    {u.note && (u.noteLink ? (
+                                        <a href={u.noteLink} target="_blank" rel="noopener noreferrer"
+                                            style={{fontSize:14, lineHeight:1.6, color:'var(--yonsei-light-blue)', textDecoration:'underline'}}>
+                                            {u.note}
+                                        </a>
+                                    ) : (
+                                        <p style={{fontSize:14, lineHeight:1.6}}>{u.note}</p>
+                                    ))}
+                                </section>
+                            )}
+
+                            {u.labels.includes('Update') && u.updateDate && (
+                                <section className="info-section update-box">
+                                    <h3 style={{color:'var(--yonsei-blue)'}}>📋 Recent Update</h3>
+                                    <div style={{fontSize:14, marginTop:10}}>
+                                        <div style={{marginBottom:8}}><strong>Date:</strong> {u.updateDate}</div>
+                                        {u.updateDescription && (
+                                            <div><strong>Changes:</strong> {u.updateDescription}</div>
+                                        )}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* About 섹션 (학교 소개) */}
+                            {u.content && u.content.about_text && (
+                                <section className="info-section">
+                                    <h3>About {u.name.split(' - ')[0]}</h3>
+                                    <div className="detail-rich">{renderRichText(u.content.about_text)}</div>
+                                </section>
+                            )}
+
+                            {/* Why Yonsei (OIA 추천 포인트) */}
+                            {u.content && u.content.why_yonsei && (
+                                <section className="info-section">
+                                    <h3>Why this school for Yonsei students</h3>
+                                    <div className="detail-rich">{renderRichText(u.content.why_yonsei)}</div>
+                                </section>
+                            )}
+
+                            {/* Campus & Location */}
+                            {u.content && u.content.campus_location && (
+                                <section className="info-section">
+                                    <h3>Campus & Location</h3>
+                                    <div className="detail-rich">{renderRichText(u.content.campus_location)}</div>
+                                </section>
+                            )}
+
+                            {/* Accommodation (content 시트 — 정제된 주거 안내) */}
+                            {u.content && u.content.accommodation && (
+                                <section className="info-section">
+                                    <h3>Accommodation</h3>
+                                    <div className="detail-rich">{renderRichText(u.content.accommodation)}</div>
+                                </section>
+                            )}
+
+                            {/* Student Tips */}
+                            {u.content && u.content.student_tips && (
+                                <section className="info-section">
+                                    <h3>Student Tips</h3>
+                                    <div className="detail-rich">{renderRichText(u.content.student_tips)}</div>
+                                </section>
+                            )}
+
+                            {/* Videos (최대 3개) — 썸네일 카드, 클릭 시 새 탭 */}
+                            {u.content && u.content.video_links && parsePipeLines(u.content.video_links).length > 0 && (
+                                <section className="info-section">
+                                    <h3>Videos</h3>
+                                    <div className="detail-video-list">
+                                        {parsePipeLines(u.content.video_links).slice(0, 3).map((v, i) => {
+                                            const ytId = getYouTubeId(v.url);
+                                            const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
+                                            return (
+                                                <a key={i} href={v.url}
+                                                   target="_blank" rel="noopener noreferrer"
+                                                   className="detail-video-card">
+                                                    {thumb ? (
+                                                        <img src={thumb} className="detail-video-thumb"
+                                                             alt={v.label || 'video'} loading="lazy" />
+                                                    ) : (
+                                                        <div className="detail-video-thumb-placeholder">▶</div>
+                                                    )}
+                                                    <div className="detail-video-meta">
+                                                        <div className="detail-video-title">{v.label || 'Watch'}</div>
+                                                        <div className="detail-video-host">{getVideoHost(v.url)}</div>
+                                                    </div>
+                                                </a>
+                                            );
+                                        })}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Gallery (최대 6장) */}
+                            {u.content && u.content.gallery_urls && parseUrlLines(u.content.gallery_urls).length > 0 && (
+                                <section className="info-section">
+                                    <h3>Gallery</h3>
+                                    <div className="detail-gallery">
+                                        {parseUrlLines(u.content.gallery_urls).slice(0, 6).map((src, i) => (
+                                            <a key={i} href={src} target="_blank" rel="noopener noreferrer">
+                                                <img src={src} alt={`${u.name} ${i + 1}`} />
+                                            </a>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Useful Links (최대 5개) */}
+                            {u.content && u.content.useful_links && parsePipeLines(u.content.useful_links).length > 0 && (
+                                <section className="info-section">
+                                    <h3>Useful Links</h3>
+                                    <div className="detail-link-list">
+                                        {parsePipeLines(u.content.useful_links).slice(0, 5).map((l, i) => (
+                                            <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
+                                               className="detail-link-chip">
+                                                {l.label || l.url}
+                                            </a>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {u.additionalLink && (
+                                <section className="info-section">
+                                    <h3>Additional Info / Promotional Link</h3>
+                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.additionalLink)}</p>
+                                </section>
+                            )}
+
+                            {u.academicCalendar && (
+                                <section className="info-section">
+                                    <h3>Academic Calendar</h3>
+                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.academicCalendar)}</p>
+                                </section>
+                            )}
+
+                            {u.housingInfo && (
+                                <section className="info-section">
+                                    <h3>Housing Information</h3>
+                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.housingInfo)}</p>
+                                </section>
+                            )}
+
+                            {(u.housingGuaranteed || u.recentFactsheet) && (
+                                <section className="info-section">
+                                    <h3>Additional Information</h3>
+                                    <div className="info-grid">
+                                        {u.housingGuaranteed && (
+                                            <InfoItem label="On-campus Housing Guaranteed?" value={u.housingGuaranteed} />
+                                        )}
+                                        {u.recentFactsheet && (
+                                            <div className="info-item">
+                                                <div className="info-label">Factsheet</div>
+                                                <div className="info-value">
+                                                    <a href={u.recentFactsheet} target="_blank" rel="noopener noreferrer"
+                                                        style={{color:'var(--yonsei-light-blue)', textDecoration:'underline'}}>
+                                                        Recent Factsheet
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <div className="modal-nav-group">
+                                <button type="button" className="btn btn-secondary"
+                                    onClick={onPrev} disabled={!hasPrev}
+                                    aria-label="이전 학교 (← key)">
+                                    ← Prev
+                                </button>
+                                <span className="modal-nav-counter">
+                                    {modalIdx >= 0 ? `${modalIdx + 1} / ${modalTotal}` : ''}
+                                </span>
+                                <button type="button" className="btn btn-secondary"
+                                    onClick={onNext} disabled={!hasNext}
+                                    aria-label="다음 학교 (→ key)">
+                                    Next →
+                                </button>
+                            </div>
+                            {u.website && (
+                                <a href={u.website} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                                    Visit Website
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function InfoItem({ label, value }) {
+            return (
+                <div className="info-item">
+                    <div className="info-label">{label}</div>
+                    <div className="info-value">{value}</div>
+                </div>
+            );
+        }
+
+        function CompareModal({ universities, onClose, onRemove }) {
+            if (!universities || universities.length === 0) return null;
+
+            const yn = (v) => v ? '○' : '—';
+            const rows = [
+                { label: '국가',          render: u => `${COUNTRY_FLAGS[u.country] || ''} ${u.country}`.trim() },
+                { label: '대륙',          render: u => u.continent || '—' },
+                { label: '쿼터',          render: u => `${u.quota}${u.quotaUnit ? ' ' + u.quotaUnit : ''}` },
+                { label: '학부생 가능',    render: u => yn(u.acceptsUG) },
+                { label: '대학원생 가능',  render: u => yn(u.acceptsGrad) },
+                { label: 'GPA 요구',      render: u => u.gpaRequired ?? '—' },
+                { label: 'TOEFL 요구',    render: u => u.toefl ?? '—' },
+                { label: '수업 언어',      render: u => [u.language1, u.language2].filter(Boolean).join(', ') || '—' },
+                { label: '비영어 어학',    render: u => u.lang2Level || '—' },
+                { label: 'Fall 1학기',    render: u => yn(u.fallOneSemester) },
+                { label: 'Fall부터 1년',  render: u => yn(u.fallCalendarYear) },
+                { label: 'Spring 1학기',  render: u => yn(u.springOneSemester) },
+                { label: 'Spring부터 1년', render: u => yn(u.springCalendarYear) },
+                { label: '학사 시스템',    render: u => u.academicSystem || '—' },
+                { label: '제한 학과',      render: u => u.restrictedAreas || '—' },
+                { label: 'Fall 노미네이션', render: u => u.fallNominationDeadline || '—' },
+                { label: 'Fall 지원 마감', render: u => u.fallApplicationDeadline || '—' },
+                { label: 'Spring 노미네이션', render: u => u.springNominationDeadline || '—' },
+                { label: 'Spring 지원 마감', render: u => u.springApplicationDeadline || '—' },
+                { label: '기숙사 보장',    render: u => u.housingGuaranteed || '—' },
+                { label: '라벨',          render: u => u.labels && u.labels.length ? u.labels.join(', ') : '—' },
+            ];
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal compare-modal" onClick={(e)=>e.stopPropagation()}>
+                        <div className="modal-header" style={{position:'relative'}}>
+                            <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
+                            <div className="modal-title">학교 비교 ({universities.length}개)</div>
+                            <div className="modal-subtitle">즐겨찾기에 담긴 학교를 한눈에 비교</div>
+                        </div>
+                        <div className="modal-body compare-body">
+                            <table className="compare-table">
+                                <thead>
+                                    <tr>
+                                        <th className="compare-attr-col">속성</th>
+                                        {universities.map(u => (
+                                            <th key={u.id} className="compare-uni-col">
+                                                <div className="compare-uni-header">
+                                                    <a href={u.website || '#'} target="_blank" rel="noopener noreferrer"
+                                                       className="compare-uni-name">
+                                                        {u.name}
+                                                    </a>
+                                                    <button onClick={() => onRemove(u.id)}
+                                                            className="compare-remove-btn"
+                                                            aria-label={`${u.name} 비교에서 제거`}>×</button>
+                                                </div>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {rows.map((row, i) => (
+                                        <tr key={i}>
+                                            <th className="compare-attr-col">{row.label}</th>
+                                            {universities.map(u => (
+                                                <td key={u.id} className="compare-cell">{row.render(u)}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="modal-footer">
+                            <span style={{fontSize:13, color:'var(--ink-muted)'}}>
+                                {universities.length}개 학교 비교 중 · 학교를 추가하려면 ☆ 별표로 즐겨찾기에 담으세요
+                            </span>
+                            <button className="btn btn-secondary" onClick={onClose}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function UpdateHistoryModal({ universities, onClose, onPickUniversity }) {
+            const rows = universities
+                .filter(u => u.labels.includes('Update') && u.updateDate)
+                .sort((a,b) => new Date(b.updateDate) - new Date(a.updateDate))
+                .slice(0, 100);
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e)=>e.stopPropagation()} style={{maxWidth:800}}>
+                        <div className="modal-header" style={{position:'relative'}}>
+                            <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
+                            <h2 style={{fontSize:20, fontWeight:700}}>📋 Update History</h2>
+                        </div>
+                        <div className="modal-body" style={{maxHeight:'60vh', overflowY:'auto'}}>
+                            {rows.length === 0 ? (
+                                <p style={{textAlign:'center', color:'var(--gray-500)', padding:40}}>
+                                    No update history available.
+                                </p>
+                            ) : (
+                                <table style={{width:'100%', borderCollapse:'collapse', fontSize:14}}>
+                                    <thead>
+                                        <tr style={{borderBottom:'2px solid var(--gray-300)', textAlign:'left'}}>
+                                            <th style={{padding:'12px 8px', width:120}}>Date</th>
+                                            <th style={{padding:'12px 8px'}}>University</th>
+                                            <th style={{padding:'12px 8px'}}>Country</th>
+                                            <th style={{padding:'12px 8px'}}>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {rows.map((u, i) => (
+                                            <tr key={i}
+                                                style={{borderBottom:'1px solid var(--gray-200)', cursor:'pointer'}}
+                                                onClick={() => onPickUniversity(u)}
+                                                onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='var(--gray-100)'}
+                                                onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='transparent'}>
+                                                <td style={{padding:'12px 8px', color:'var(--gray-500)'}}>{u.updateDate}</td>
+                                                <td style={{padding:'12px 8px', color:'var(--yonsei-blue)', fontWeight:600}}>{u.name}</td>
+                                                <td style={{padding:'12px 8px'}}>{u.country || '-'}</td>
+                                                <td style={{padding:'12px 8px'}}>{u.updateDescription || '-'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={onClose}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

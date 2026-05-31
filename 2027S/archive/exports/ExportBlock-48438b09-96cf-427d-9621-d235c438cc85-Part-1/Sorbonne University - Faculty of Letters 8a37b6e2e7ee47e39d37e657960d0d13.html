@@ -1,0 +1,746 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Sorbonne University - Faculty of Letters</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+/* Override strong tags inside headings to maintain consistent weight */
+h1 strong,
+h2 strong,
+h3 strong {
+	font-weight: 600;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 10px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+
+	table.collection-content {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	table.collection-content th,
+	table.collection-content td {
+		overflow-wrap: anywhere;
+	}
+
+	table.collection-content td > .user,
+	table.collection-content td > time {
+		white-space: pre-wrap;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content-wrapper {
+	overflow-x: auto;
+}
+
+@media only print {
+	.collection-content-wrapper {
+		overflow-x: visible;
+	}
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.collection-content td {
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.column-list {
+	display: flex;
+	gap: 46px;
+}
+
+.column {
+	min-width: 0;
+	overflow: hidden;
+}
+
+.column > *:first-child {
+	margin-top: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+table {
+	border-collapse: collapse;
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol.numbered-list.numbered-list-digits-2 {
+	padding-inline-start: 2em;
+}
+
+ol.numbered-list.numbered-list-digits-3plus {
+	padding-inline-start: 2.4em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.callout img.notion-static-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.callout p {
+	margin: 0;
+}
+
+.callout h1,
+.callout h2,
+.callout h3 {
+	margin: 0 0 0.6rem;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+blockquote.quote-large {
+	font-size: 1.25em;
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", "Noto Sans Arabic", "Noto Sans Hebrew", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.highlight-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.highlight-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.highlight-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.highlight-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.highlight-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.highlight-default_background {
+	color: rgba(44, 44, 43, 1);
+}
+.highlight-gray_background {
+	background: rgba(42, 28, 0, 0.07);
+}
+.highlight-brown_background {
+	background: rgba(139, 46, 0, 0.086);
+}
+.highlight-orange_background {
+	background: rgba(224, 101, 1, 0.129);
+}
+.highlight-yellow_background {
+	background: rgba(211, 168, 0, 0.137);
+}
+.highlight-teal_background {
+	background: rgba(0, 100, 45, 0.09);
+}
+.highlight-blue_background {
+	background: rgba(0, 124, 215, 0.094);
+}
+.highlight-purple_background {
+	background: rgba(102, 0, 178, 0.078);
+}
+.highlight-pink_background {
+	background: rgba(197, 0, 93, 0.086);
+}
+.highlight-red_background {
+	background: rgba(223, 22, 0, 0.094);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(125, 122, 117, 1);
+	fill: rgba(125, 122, 117, 1);
+}
+.block-color-brown {
+	color: rgba(159, 118, 90, 1);
+	fill: rgba(159, 118, 90, 1);
+}
+.block-color-orange {
+	color: rgba(210, 123, 45, 1);
+	fill: rgba(210, 123, 45, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 148, 52, 1);
+	fill: rgba(203, 148, 52, 1);
+}
+.block-color-teal {
+	color: rgba(80, 148, 110, 1);
+	fill: rgba(80, 148, 110, 1);
+}
+.block-color-blue {
+	color: rgba(56, 125, 201, 1);
+	fill: rgba(56, 125, 201, 1);
+}
+.block-color-purple {
+	color: rgba(154, 107, 180, 1);
+	fill: rgba(154, 107, 180, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(207, 81, 72, 1);
+	fill: rgba(207, 81, 72, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(240, 239, 237, 1);
+}
+.block-color-brown_background {
+	background: rgba(245, 237, 233, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 235, 222, 1);
+}
+.block-color-yellow_background {
+	background: rgba(249, 243, 220, 1);
+}
+.block-color-teal_background {
+	background: rgba(232, 241, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(229, 242, 252, 1);
+}
+.block-color-purple_background {
+	background: rgba(243, 235, 249, 1);
+}
+.block-color-pink_background {
+	background: rgba(250, 233, 241, 1);
+}
+.block-color-red_background {
+	background: rgba(252, 233, 231, 1);
+}
+.select-value-color-default { background-color: rgba(42, 28, 0, 0.07); }
+.select-value-color-gray { background-color: rgba(28, 19, 1, 0.11); }
+.select-value-color-brown { background-color: rgba(127, 51, 0, 0.156); }
+.select-value-color-orange { background-color: rgba(196, 88, 0, 0.203); }
+.select-value-color-yellow { background-color: rgba(209, 156, 0, 0.282); }
+.select-value-color-green { background-color: rgba(0, 96, 38, 0.156); }
+.select-value-color-blue { background-color: rgba(0, 118, 217, 0.203); }
+.select-value-color-purple { background-color: rgba(92, 0, 163, 0.141); }
+.select-value-color-pink { background-color: rgba(183, 0, 78, 0.152); }
+.select-value-color-red { background-color: rgba(206, 24, 0, 0.164); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="8a37b6e2-e7ee-47e3-9d37-e657960d0d13" class="page sans"><header><div class="page-header-icon undefined"><span class="icon">🇫🇷</span></div><h1 class="page-title" dir="auto">Sorbonne University - Faculty of Letters</h1><p class="page-description" dir="auto"></p><table class="properties"><tbody><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Country</th><td>France</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Program language</th><td>French</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Accepts Undergraduate</th><td>Yes</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Accepts Graduate</th><td>Yes</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Fall program option</th><td>Both one semester &amp; one year stay are possible</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Spring program option (Do you accept calendar year students?)</th><td>One semester only  <br/>Calendar year program (Studying for 1 year starting in Spring) is not possible due to housing / visa / administrative reasons</td></tr><tr class="property-row property-row-url"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/link_gray.svg" style="width:14px;height:14px;display:block"/></span>Website</th><td><a href="https://www.sorbonne-universite.fr/en/study-sorbonne-university/exchange-students" class="url-value">https://www.sorbonne-universite.fr/en/study-sorbonne-university/exchange-students</a></td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>TOEFL iBT Total</th><td>-</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>TOEFL iBT Subscores</th><td>-</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Additional language requirement (French / German / Spanish / Russian / Japanese / Chinese)</th><td>French B2 required. Home university language certificates are accepted. <br/>Please refer to the course catalogue for more details on the language of instruction recommendations.</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>GPA in 4.3 scale</th><td>-</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Admission requirements</th><td>-</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Available study area</th><td>It is possible to take courses across different departments within the Faculty of Letters.<br/>https://lettres.sorbonne-universite.fr/formation/offre-de-formation<br/>Some English taught courses in English studies: See attached file at https://www.notion.so/yonsei-abroad/Sorbonne-University-Faculty-of-Letters-8a37b6e2e7ee47e39d37e657960d0d13</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Restricted study area</th><td>Only Faculty of Letters is open to exchange students. </td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Additional info / Promotional link</th><td>-</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Fall Nomination Deadline (MM/DD)</th><td>4/15</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Fall Application Deadline (MM/DD)</th><td>5/15</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Academic Calendar</th><td>https://www.sorbonne-universite.fr/sites/default/files/media/2023-07/Calendrier-FL-2023-2024_0.pdf</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Housing Info / Link</th><td>https://www.sorbonne-universite.fr/en/education/student-life/housing</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Receiving Transcript</th><td>E-transcript will be sent to home university by email after the semester is over. However, the official transcript does not include credit information (the number of credits for each course). Therefore, students are expected to keep their Learning agreement signed by both Yonsei and Sorbonne, and submit it to Yonsei OIA. Yonsei OIA will then verify the number of credits earned and update the transcript.</td></tr><tr class="property-row property-row-text"><th><span class="icon property-icon"><img src="https://www.notion.so/icons/description_gray.svg" style="width:14px;height:14px;display:block"/></span>Latest Factsheet received</th><td>AY 24/25</td></tr></tbody></table></header><div class="page-body"><div style="display:contents" dir="ltr"><figure class="block-color-blue_background callout" style="white-space:pre-wrap;display:flex" id="e728e604-221f-4c7b-a505-81578d861e41"><div style="font-size:1.5em"><span class="icon">⚠️</span></div><div style="width:100%"><strong>Important notice for nominated students</strong><div style="display:contents" dir="auto"><ul id="884d71b3-eaa2-4b24-b4bf-3334e9ef1bd0" class="toggle"><li><details open=""><summary><strong>Make sure to use the Learning agreement when registering for courses. </strong></summary><div style="display:contents" dir="auto"><p id="875b371a-9fe7-4f83-8c72-500acb099cc0" class="">Due to systematic issue, Sorbonne University cannot issue a transcript showing the number of credits earned for each courses. Therefore, students must use the attached learning agreement form when registering/registered for courses, which shows and confirms the number of credits for each courses registered. For inquiries, please contact abroad@yonsei.ac.kr</p></div><div style="display:contents" dir="ltr"><figure id="e5badbb2-5303-4b0b-9f07-a5d9b4bd6023"><div class="source"><a href="Learning_agreement_-_Contrat_pdagogique.docx">Learning agreement - Contrat pédagogique.docx</a></div></figure></div></details></li></ul></div><div style="display:contents" dir="auto"><ul id="ace91549-edce-4961-a091-7fcf907305df" class="toggle"><li><details open=""><summary><strong>Application documents for nominated students</strong></summary><div style="display:contents" dir="auto"><p id="89ccdb14-43d0-4084-b2cf-e90aea8668f2" class=""><strong>I remind you that the minimum French language certificate level B2 is obligatory.</strong></p></div><div style="display:contents" dir="auto"><p id="41838e48-1e80-4932-80c6-fd1947df4dfa" class="">We accept, as a French certificate, the results of an official test (such as the DELF B2/DALF/Alliance Française...) or the certificate signed by a French teacher from the student&#x27;s home university. student, which certifies that the student is able to follow a course and complete work/exams in French. This certificate should be supplemented by an OLS test.</p></div><div style="display:contents" dir="auto"><p id="4417b9fe-730c-4306-bb42-c09f2a77b199" class="">Please also remind your students who apply for an exchange at our faculty that there are no courses for exchange students only.</p></div><div style="display:contents" dir="auto"><p id="398cca0c-6be0-4172-b4fe-9b00113fb312" class="">Our incoming international students are in class with French students and are treated like any other student.</p></div><div style="display:contents" dir="auto"><p id="5345b287-fddc-4d23-bb7c-1569a94fe20e" class="">Most of our courses are taught in French. The only courses taught in another language are available in the language departments.</p></div><div style="display:contents" dir="auto"><p id="3e625985-7a85-4a07-ba30-2d4287b84665" class="">And even then, there must be lessons both in French and in the language taught.</p></div><div style="display:contents" dir="auto"><p id="076e7031-cf63-4e97-84a4-2348d66f3e74" class="">To find out more, your students can contact the academic coordinator of the study departments that interest them (see attached file).</p></div><div style="display:contents" dir="auto"><p id="bea5d3d0-9d63-4874-9848-d6887ba99fe3" class="">Since September 2019, only academic coordinators can sign learning agreements. Your students can send their L.A. to the academic coordinator of the main department they chose during the online application.</p></div><div style="display:contents" dir="auto"><p id="977c3c34-94c0-4564-96a7-d22f6a17b4ea" class="">No application will be accepted without all the required documents:</p></div><div style="display:contents" dir="auto"><p id="8facab79-2344-4566-8308-0be08d35febb" class="">1 - The completed application form</p></div><div style="display:contents" dir="auto"><p id="ceafbdfa-2100-4a6e-a920-6e9d2d820505" class="">2 - Copy of the ID card or passport</p></div><div style="display:contents" dir="auto"><p id="65a3ef37-e88f-425f-9f5e-cd34b11e0649" class="">3 - Student card from the home university or proof of enrollment</p></div><div style="display:contents" dir="auto"><p id="5f3c18a6-ca7a-4a01-b481-87c7153b7f3c" class="">4 - Proof of health insurance</p></div><div style="display:contents" dir="auto"><p id="ad4fd3fa-af79-4cf8-9c91-12b03f74cf90" class="">5 - Minimum B2 level French language certificate</p></div><div style="display:contents" dir="auto"><p id="6b216210-2fa6-49fe-89ba-e06f31d28584" class="">6 - Color ID photo (JPEG format for the Sorbonne University student card)</p></div><div style="display:contents" dir="auto"><p id="0b21215e-edce-4e1e-a121-8c20f222615b" class="">7 - Academic transcripts</p></div><div style="display:contents" dir="auto"><p id="782977e6-c8da-4890-8fc4-1854e2117a35" class="">8 - Resume</p></div><div style="display:contents" dir="auto"><p id="ce34d08c-ef9d-434f-b9c3-3260deea943a" class="">9 - Statement of purpose (motivation letter)</p></div></details></li></ul></div></div></figure></div><div style="display:contents" dir="auto"><hr id="c4ab9559-106d-4345-a72a-dcc0981d7df9"/></div><div style="display:contents" dir="auto"><h3 id="8c357d6b-40cf-494d-ad2e-a885e6eadef0" class="block-color-blue_background">📁 Factsheet and documents</h3></div><div style="display:contents" dir="ltr"><figure id="aa416549-fcac-4653-b025-f9c06d1d00a0"><div class="source"><a href="(English_studies)_2023-2024_Brochure_LICENCE_LLCER_Anglais_du_18.09.2023.pdf">(English studies) 2023-2024 Brochure LICENCE LLCER Anglais du 18.09.2023.pdf</a></div></figure></div><div style="display:contents" dir="ltr"><figure id="7ba44f60-74fe-4ce7-a356-aaf3b5ec6f8f"><div class="source"><a href="France_Sorbonne_University_-_Faculty_of_Letters_Fact_Sheet_2024-2025.pdf">[France] Sorbonne University - Faculty of Letters_Fact Sheet 2024-2025.pdf</a></div></figure></div><div style="display:contents" dir="ltr"><figure id="7cb14ef9-f4fd-477f-9a2e-51c226a5fe9d"><div class="source"><a href="France_Sorbonne_University_-_Faculty_of_Letters_Coordinateurs_Pdagogiques_Entrants_23-24.pdf">[France] Sorbonne University - Faculty of Letters_Coordinateurs Pédagogiques Entrants 23-24.pdf</a></div></figure></div><div style="display:contents" dir="auto"><p id="f47a1796-716d-4801-9c04-a113622ed76d" class="">
+</p></div><div style="display:contents" dir="auto"><h3 id="454f2ca2-69a3-44c0-9af3-be19f342da66" class="block-color-blue_background">📒 Student Report Highlight</h3></div><div style="display:contents" dir="ltr"><figure class="block-color-default_background callout" style="white-space:pre-wrap;display:flex" id="176606df-81d2-8057-b1b9-c169a6ec5402"><div style="font-size:1.5em"><span class="icon">✨</span></div><div style="width:100%"><div style="display:contents" dir="ltr"><div id="e2f0b01a-db98-4284-a33d-53cab7f559c0" class="collection-content"><h4 class="collection-title">Tips and Testimonials</h4><div class="collection-content-wrapper"><table class="collection-content"><colgroup><col style="width:41.17647058823529%"/><col style="width:29.411764705882355%"/><col style="width:29.411764705882348%"/></colgroup><thead><tr><th><span class="icon property-icon"><img src="https://www.notion.so/icons/font_gray.svg" style="width:14px;height:14px;display:block"/></span>Title</th><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Study year</th><th><span class="icon property-icon"><img src="https://www.notion.so/icons/list_gray.svg" style="width:14px;height:14px;display:block"/></span>Content Type</th></tr></thead><tbody><tr id="175606df-81d2-8088-8c85-ea31815f666e"><td class="cell-title"><a href="https://www.notion.so/Les-r-ves-deviennent-r-alit-175606df81d280888c85ea31815f666e?pvs=21"><span class="icon">🇫🇷</span>꿈은 이루어질 거예요 🇫🇷✨ Les rêves deviennent réalité !</a></td><td class="cell-mxcO"><span class="selected-value select-value-color-brown">2024</span><span class="selected-value select-value-color-default">Fall</span></td><td class="cell-W|su"><span class="selected-value select-value-color-yellow">Video clip</span></td></tr></tbody></table></div><br/><br/></div></div></div></figure></div><div style="display:contents" dir="auto"><ul id="1136feff-eb2d-4aa2-9218-9f0192586c11" class="toggle"><li><details open=""><summary>☀️<strong>교환대학의 크기, 지리적 위치, 기후 등</strong></summary><div style="display:contents" dir="auto"><p id="ce7be730-623e-49d8-8d51-29edd72d5f7d" class=""><strong>#캠퍼스_3군데 #추운_초봄 #지리적_이점</strong></p></div><div style="display:contents" dir="auto"><blockquote id="4a3fb2b1-c802-43da-8671-b5a3ce7d57e4" class=""><em>“Campus de la Sorbonne: 주변에 뤽샹부르 공원, 팡테옹 등이 있는 중심지이며 치안 안전함, Campus de Malesherbes: 괜찮음, Campus de Clignancourt: 우범지대, 밤에는 가는 것을 피하세요, 낮에만 가도 분위기 좀 묘함” </em><br/><strong>출처: “소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="284733a5-8e0e-467e-80cc-12349bd18433" class=""><em>“4-5월 까지는 무척 추웠다. 6월부터는 한국의 5월 중순처럼 초여름의 분위기이다.” </em><br/><strong>출처: “2023-1 Sorbonne University (2023-1)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="230f060a-f8a2-44f2-9396-16a0a8f46961" class=""><em>“학교는 센느강을 등지고 있으며, 강가와 매우 가까워 통학을 하는 이들은 자전거를 타고 등교하기 매우 편하다.” <br/></em><strong>출처: “파리로의 교환을 오랫동안 꿈꿨던 고학번 공대생의 파견보고서 (2021)”</strong></blockquote></div></details></li></ul></div><div style="display:contents" dir="auto"><ul id="1da1fe5d-3970-4044-8cce-f68fd93d4acf" class="toggle"><li><details open=""><summary>🏞️ <strong>대학 주변 환경</strong></summary><div style="display:contents" dir="auto"><p id="051dc76c-37fe-4e92-ba1f-9fa34a7b9ffb" class=""><strong>#끌리녕꾸르_치안주의 #공원과_센강 #역세권</strong></p></div><div style="display:contents" dir="auto"><blockquote id="4549d1de-1428-449f-a1d0-fc73a88cfba9" class=""><em>“ 메인 캠퍼스는 주변에 뤽샹부르 공원, 팡테옹, Sainte-Geneviève 도서관 등등 있어서 가실 일이 많은 곳이고, 끌리녕꾸흐의 경우 자주 가시지 않는 게 좋습니다.” </em><br/><strong>출처: “소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="20c80901-9204-4393-bcf6-c296f336389f" class=""><em>“딱히 놀거리는 많이 없지만 공원이 있어서 수업 중간에 가기는 좋다. 조금만 걸으면 센강이 있어서 그 쪽으로 갈 수도 있긴 한데 관광지의 센강과는 분위기가 조금 다르다.” </em><br/><strong>출처: “2023-1 Sorbonne University (2023-1)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="a5a06d3a-3f3a-4533-a5ff-af43c0cd75e3" class=""><em>“바로 앞에 지하철이 위치하고 있어 매우 편리하게 파리 시내 어디든 돌아다닐 수 있다.” <br/></em><strong>출처: “파리로의 교환을 오랫동안 꿈꿨던 고학번 공대생의 파견보고서 (2021)”</strong></blockquote></div></details></li></ul></div><div style="display:contents" dir="auto"><ul id="2014394a-c44a-4500-8f95-950146178994" class="toggle"><li><details open=""><summary>🍽️ <strong>거주 형태, 식사</strong></summary><div style="display:contents" dir="auto"><p id="770932b4-a376-41f0-b2e6-c01cae4d19b1" class=""><strong>#학교_추천_기숙사 #한국관_기숙사 #한식은_아시안마트</strong></p></div><div style="display:contents" dir="auto"><blockquote id="fa4308ca-0f5b-469c-9ae5-24cdf902ea22" class=""><em>“저는 파리국제대학촌 (Cité Universitaire) 한국관에 살았습니다. 불통으로 유명한 곳이지만 이만한 가격과 교통수단 (RER B) 을 겸비한 파리 내 숙소를 찾는 것이 매우 어렵기 때문에 파리로 교환 오신다면 반드시! 신청하시는 것을 추천드립니다. (추첨을 통해 선발합니다.)” </em><br/><strong>출처: “소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="a96aab9f-b562-4f65-b050-c53be4c6e1d3" class=""><em>“사실 케이마트보다 아시안 마트(13구 쪽)에 요즘 한식이 많이 들어오는 추세라 여길 이용하면 조금 싼 값을 주고 살 수 있을 것이다.” </em><br/><strong>출처: “2023-1 Sorbonne University (2023-1)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="f2801114-2e5e-4b83-bf92-a8586be81a93" class=""><em>“학교에서 주선해준 기숙사를 이용했다. Crous 라는 일종의 정부 지원금을 받는 형태의 기숙사인데, 1인실을 제공하며, 시설도 나쁘지 않음에 파리 내에 위치하고 있어서 굉장히 만족스러웠다.” <br/></em><strong>출처: “파리로의 교환을 오랫동안 꿈꿨던 고학번 공대생의 파견보고서 (2021)”</strong></blockquote></div></details></li></ul></div><div style="display:contents" dir="auto"><ul id="657053c9-0970-4a52-a96e-7456e10d47ee" class="toggle"><li><details open=""><summary>📚 <strong>수업, 도서관</strong></summary><div style="display:contents" dir="auto"><p id="45fef053-d58a-4c53-b03d-f8e311500062" class=""><strong>#복잡한_수강신청 #13구_BnF도서관 #100%_불어수업</strong></p></div><div style="display:contents" dir="auto"><blockquote id="1a6c27c9-9d03-481c-9518-f883b5cacd3c" class=""><em>“수강신청이 굉장히 복잡했던 것으로 기억하는데, 제 경우 맨 처음 교환 신청 시 기입했던 과에서 메일이 와서 해당 coordinator 분과 계속 메일로 첨부파일을 제출하는 식으로 수강신청을 진행했고 철회도 비슷한 방식으로 했습니다. 딱히 우리나라와 같은 정형화된 형태의 수강신청 포털이 존재하지 않습니다. 과별로 다른 만큼 미리 반드시 체크해 주시면 좋을 것 같습니다.” </em><br/><strong>출처: “소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="511df958-06fe-45f7-9c45-10df657c7755" class=""><em>“13구 기숙사 근처에 BnF라는 도서관이 있는데 거길 항상 이용했다. crous 기숙사 생이라면 1년 무료로 이용할 수 있다고 한다. 전시도 열리고 있어서 가끔 보기도 좋다. 내가 갔을 때는 직지심체요절이 일반인에게 몇 십년만에 공개되어서 좋은 기회에 보기도 했다.” </em><br/><strong>출처: “2023-1 Sorbonne University (2023-1)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="8d0238d1-734d-42b7-9e6f-0c0366bdbafb" class=""><em>“수업은 100% 불어로 진행된다. 혹여라도 공과대학 수업이라고 본교처럼 수업 자료가 영어로 되어있을 것이라고 생각하면 큰 역경에 놓이게 될 것이다. 본인이 파견된 2021년도 가을학기에는 코로나와는 상관 없이 대면방식으로 수업을 진행하였며, 이때의 대면 수업 방식은 코로나 이전의 본교 공대 수업처럼, 이론수업과 실습수업으로 나누어져 있다.” <br/></em><strong>출처: “파리로의 교환을 오랫동안 꿈꿨던 고학번 공대생의 파견보고서 (2021)”</strong></blockquote></div></details></li></ul></div><div style="display:contents" dir="auto"><ul id="b602c1b1-483e-4271-8474-2992dabe76ae" class="toggle"><li><details open=""><summary>➕ <strong>기타</strong></summary><div style="display:contents" dir="auto"><p id="5609a2d1-7943-4f7f-95a8-4a7525e5b30c" class=""><strong>#토론과_논쟁의_나라 #빠르고_친절 #한국에_대한_호기심</strong></p></div><div style="display:contents" dir="auto"><blockquote id="d1fdd3f8-51f4-478b-994c-762ac3d64506" class=""><em>“괜히 바깔로레아와 사르트르와 라캉의 나라가 아니지요... 이 나라 사람들은 굉장히 토론하기를 좋아하고, 우리나라와 달리 타인의 의견에 비동의하는 것이 습관화되어 있습니다. 프랑스 친구들이 &quot;근데 그건~&quot; 하면서 말끝마다 반대한다고 본인을 싫어한다고 오해 마시길... ㅎㅎ 문화가 원래 그런 사람들입니다.” </em><br/><strong>출처: “소르본 대학교, 그리고 파리에서의 한 학기 (2023-2)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="235b6e47-04a3-41a2-b6c1-598670d6eec3" class=""><em>“본교의 국제처는 알다시피 답장이 매우 빠르고 정확하고 친절하게 알려주신다. 교환교도 설명을 자세하게 해주고 입학허가도 다른 친구들에 비해 굉장히 빨리 나오는 등 생각보다 빠르고 좋았다.” </em><br/><strong>출처: “2023-1 Sorbonne University (2023-1)”</strong></blockquote></div><div style="display:contents" dir="auto"><blockquote id="0379e8c7-9231-4678-bb5c-9fe03db0fcca" class=""><em>“한국에 대한 호기심, 일본에 대한 환상, 중국에 대한 공포감 동북아시아 3국에 대한 인식이 각자 다 달랐는데 이게 굉장히 재미있었다. 한국의 경우 젊은 이들에게는 호기심의 대상임과 동시에 전반적으로 한국인에 대한 좋은 인식들을 가지고 있어 친구가 되기에 굉장히 편했다. 최근 오징어게임 열풍으로 거의 모든 유럽의 인구가 한류를 즐겨 보고 있고, 유럽의 젊은 인구를 대상으로 한류가 곳곳에 퍼져 있어 문화를 기반으로 소통하기에 어렵지 않았다.” <br/></em><strong>출처: “파리로의 교환을 오랫동안 꿈꿨던 고학번 공대생의 파견보고서 (2021)”</strong></blockquote></div></details></li></ul></div><div style="display:contents" dir="auto"><p id="2d978fe5-6ea2-4c8f-8be5-60a352784a0e" class="">
+</p></div><div style="display:contents" dir="auto"><h3 id="837bdf0e-5b35-4583-8313-92f0b918bc76" class="block-color-blue_background">🌐 Websites</h3></div><div style="display:contents" dir="auto"><p id="f25907ff-7beb-4547-b121-a9b56322a6f5" class=""><strong>Study Abroad Website</strong></p></div><div style="display:contents" dir="ltr"><figure id="53df13b7-50f4-4d8c-a312-adad35ed7c41"><a href="https://www.sorbonne-universite.fr/en/education/study-sorbonne-university/exchange-students" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Exchange Students</div><div class="bookmark-description">International students can attend classes anywhere from a two-week visit to the completion of an international degree. Each faculty has an international relations department to provide support to all international students, including application procedures, anticipating living costs, housing, and a host of other aspects of living and studying in Paris.</div></div><div class="bookmark-href"><img src="https://www.sorbonne-universite.fr/themes/custom/boots/favicon.ico" class="icon bookmark-icon"/>https://www.sorbonne-universite.fr/en/education/study-sorbonne-university/exchange-students</div></div></a></figure></div><div style="display:contents" dir="ltr"><figure id="ee3f2f24-abe2-47a1-8dde-cc0e9a2d806d"><a href="https://lettres.sorbonne-universite.fr/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Sorbonne Université</div><div class="bookmark-description">Formations et recherches en arts, langues, lettres, sciences humaines et sociales.</div></div><div class="bookmark-href"><img src="https://lettres.sorbonne-universite.fr/themes/custom/boots/favicon.ico" class="icon bookmark-icon"/>https://lettres.sorbonne-universite.fr/</div></div></a></figure></div><div style="display:contents" dir="auto"><p id="60cf9d29-309c-460e-8146-9b18b6017897" class="">
+</p></div><div style="display:contents" dir="auto"><h3 id="c56cfc05-125c-4a4c-b26b-e5f585c0ee99" class="block-color-blue_background">ℹ️ About Sorbonne University</h3></div><div style="display:contents" dir="ltr"><figure id="101f67f3-bd91-46c7-b814-4ce23ef6ca2c"><div class="source"><a href="https://youtu.be/pQVSibpoZzw?feature=shared">https://youtu.be/pQVSibpoZzw?feature=shared</a></div></figure></div><div style="display:contents" dir="auto"><p id="4e5354b4-df93-4992-a40d-b2ef7338fcea" class=""><mark class="highlight-orange"><strong>Sorbonne University is,</strong></mark> </p></div><div style="display:contents" dir="auto"><p id="c1acc9c7-3b33-4ccf-b0de-6cb24fc44e49" class="">a multidisciplinary, research-intensive, world-class university. Through the strength of its 55,000 students, 7,300 academic researchers and partner researchers, and 3,900 administrative and technical staff, Sorbonne University promotes diversity, creativity, innovation and openness to the world.</p></div><div style="display:contents" dir="ltr"><figure id="a6aed014-5f96-4596-9dab-6f1514297e57" class="image"><a href="Untitled.png"><img style="width:689.9791870117188px" src="Untitled.png"/></a></figure></div><div style="display:contents" dir="auto"><blockquote id="fa752a38-f0ab-45d5-b82e-32afa163af10" class="">Sorbonne University was created on January 1st, 2018 from the merger of ParisSorbonne and Pierre and Marie Curie (UPMC) universities. As a public institution, it fulfils the public service calling of French higher education, research and innovation.</blockquote></div><div style="display:contents" dir="auto"><p id="baaa31be-1421-4a50-8c4c-110937a8aa80" class=""><br/>The Faculty of Arts &amp; Humanities at Sorbonne University is today the largest and most complete faculty in France, in the field of arts, languages, literature, social sciences and humanities. Committed to the transmission of a humanist culture, its pedagogical excellence is based on the recognized quality of its research to offer the most complete and innovative teaching.</p></div><div style="display:contents" dir="auto"><p id="6d517d6f-9973-4941-8db7-9f8fa181fc05" class=""><strong>International outreach</strong></p></div><div style="display:contents" dir="auto"><p id="61f59568-c94c-4812-b01a-6ef397237236" class="">As an internationally renowned institution, the Faculty of Arts and Humanities has developed numerous cultural, scientific and educational partnerships with foreign universities and takes part in various exchange programmes on every continent. The Faculty thus welcomes many foreign students each year, and provides many different French and foreign language certifications.</p></div><div style="display:contents" dir="auto"><h3 id="1e692ed1-a985-4ba7-9d1d-958240ae8ac0" class="block-color-blue_background">📍 Campus</h3></div><div style="display:contents" dir="auto"><div id="279df93b-4b65-4679-9cef-cbb5a01d0a21" class="column-list"><div style="display:contents" dir="auto"><div id="f2546952-9ecc-4dcf-8631-c3afa48a3001" style="width:50%" class="column"><div style="display:contents" dir="auto"><p id="2e452a9c-b658-4188-a93e-75a722416a4f" class=""><strong>Google Maps</strong></p></div><div style="display:contents" dir="ltr"><figure id="cde1685c-c9af-4350-b79d-42da85c81f87"><div class="source"><a href="https://maps.app.goo.gl/JpdhCp3hQByGUT9t6">https://maps.app.goo.gl/JpdhCp3hQByGUT9t6</a></div></figure></div></div></div><div style="display:contents" dir="auto"><div id="0e0c1ce2-d1dc-4357-8d43-01c0b6621572" style="width:50%" class="column"><div style="display:contents" dir="auto"><p id="ec883acf-fc3e-477c-9d4e-4df9fc993edf" class=""><strong>Campus Map </strong></p></div><div style="display:contents" dir="ltr"><figure id="74e7fca7-3cbf-496f-8ebe-d454104fe37e"><div class="source"><a href="https://lettres.sorbonne-universite.fr/sites/default/files/media/2024-06/Plan Sorbonne-RdC-2024.pdf">https://lettres.sorbonne-universite.fr/sites/default/files/media/2024-06/Plan Sorbonne-RdC-2024.pdf</a></div></figure></div></div></div></div></div><div style="display:contents" dir="auto"><p id="9ef72b10-05dd-4458-9f1b-3b9f529902ac" class=""><strong>Virtual Campus Tour</strong></p></div><div style="display:contents" dir="ltr"><figure id="7469f31b-2f23-4300-a705-46401438fbd1"><a href="https://storage.net-fs.com/hosting/7219336/3/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">La Sorbonne</div><div class="bookmark-description">Visite virtuelle du campus de la Sorbonne</div></div><div class="bookmark-href">https://storage.net-fs.com/hosting/7219336/3/</div></div><img src="https://storage.net-fs.com/hosting/7219336/3/socialThumbnail.jpg?v=1648206355604" class="bookmark-image"/></a></figure></div><div style="display:contents" dir="auto"><h3 id="2dcb29bf-293d-47ca-abb6-0c4b99f14596" class="block-color-blue_background">📔 <strong>Module(Course) Catalogue</strong></h3></div><div style="display:contents" dir="auto"><p id="c7d89ae9-34c8-4f60-9aaa-26caa6306ba3" class="">It is possible to take courses across different departments within the Faculty of Letters.</p></div><div style="display:contents" dir="auto"><ul id="b8d0e68b-6aab-4667-aa53-4dc603066c66" class="bulleted-list"><li style="list-style-type:disc">Arts</li></ul></div><div style="display:contents" dir="auto"><ul id="ecbdd03a-7576-49c3-aa59-5b21fef19847" class="bulleted-list"><li style="list-style-type:disc">Education, Education and Training</li></ul></div><div style="display:contents" dir="auto"><ul id="099897d4-a7f9-4402-8475-37a7cff000fd" class="bulleted-list"><li style="list-style-type:disc">Information and Communication</li></ul></div><div style="display:contents" dir="auto"><ul id="6be8ef31-23d5-457a-a69b-8d4b5e7e9bcd" class="bulleted-list"><li style="list-style-type:disc">Languages </li></ul></div><div style="display:contents" dir="auto"><ul id="677cfb08-2dd7-4f12-a6f8-b3f940e95f41" class="bulleted-list"><li style="list-style-type:disc">Letters</li></ul></div><div style="display:contents" dir="auto"><ul id="065d5af9-3290-4cf8-9a6e-4a8e34528d0d" class="bulleted-list"><li style="list-style-type:disc">Humanities and Social Sciences</li></ul></div><div style="display:contents" dir="auto"><p id="e8127d19-9a8e-4b29-9db6-53a0d968c58a" class="">But, <mark class="highlight-orange">only Faculty of Letters is open</mark> to exchange students. </p></div><div style="display:contents" dir="ltr"><figure id="68705c4e-92a5-4bc8-971f-7e461fcff59d"><a href="https://lettres.sorbonne-universite.fr/formation/offre-de-formation" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Offre de formation</div><div class="bookmark-description">La Faculté des Lettres propose des formations de haut niveau dans tous les domaines des arts, langues, lettres, sciences humaines et sociales.</div></div><div class="bookmark-href"><img src="https://lettres.sorbonne-universite.fr/themes/custom/boots/favicon.ico" class="icon bookmark-icon"/>https://lettres.sorbonne-universite.fr/formation/offre-de-formation</div></div><img src="https://lettres.sorbonne-universite.fr/sites/default/files/media/2022-11/Offre%20formation%20%C3%A9tudiantes%20Malesherbes.jpg" class="bookmark-image"/></a></figure></div><div style="display:contents" dir="auto"><h3 id="97bb36f1-62fd-4d9c-a232-87bea24e0ba5" class="block-color-blue_background">🏘️ Accommodation</h3></div><div style="display:contents" dir="auto"><p id="2e92e852-7d38-4ab7-9ac7-345510c2c5f3" class="">Sorbonne University supports students to find accommodation in Paris.</p></div><div style="display:contents" dir="auto"><ul id="4d997918-349e-4ad7-b270-877fea6bfc0a" class="toggle"><li><details open=""><summary>Sorbonne University accommodation platform</summary><div style="display:contents" dir="auto"><p id="be609560-634b-45d7-a8aa-f28d3dc68f4d" class="">Sorbonne University provides accommodation platform on their own. </p></div><div style="display:contents" dir="ltr"><figure id="30bf676e-42a1-4ee3-896e-712ec4bcbdf0"><a href="https://sorbonne-universite.studapart.com/fr/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Location de logements de 1 à 24 mois</div><div class="bookmark-description">Trouvez votre logement parmi +120 000 logements vérifiés et rejoignez notre communauté de +300 000 locataires. Réservation sécurisée. Equipe multilingue disponible 6/7J.</div></div><div class="bookmark-href"><img src="https://media.studapart.com/logos_thumb/5abccb5921628.PNG" class="icon bookmark-icon"/>https://sorbonne-universite.studapart.com/fr/</div></div><img src="https://media.studapart.com/backgrounds_large/1484324738.JPEG" class="bookmark-image"/></a></figure></div></details></li></ul></div><div style="display:contents" dir="auto"><ul id="c91d46ec-2bf2-4e98-b7f9-85c1298bbe36" class="toggle"><li><details open=""><summary>CROUS accommodation</summary><div style="display:contents" dir="auto"><p id="7aa654fd-c2d4-45c1-b808-9a80a7f30150" class="">Accommodation is also provided based on social criteria. To obtain a CROUS accommodation, students can create a DSE before signing up to Sorbonne University.</p></div></details></li></ul></div><div style="display:contents" dir="auto"><ul id="83569628-9d05-46bc-9cb4-8e93971db3af" class="toggle"><li><details open=""><summary>Personal housing assistance (APL) </summary><div style="display:contents" dir="auto"><p id="e82876e3-420e-4383-b3d1-bb2be3998941" class="">Sorbonne University provides personalised housing assistance to students. For students to benifit from the APL, they must apply to the CAF.</p></div></details></li></ul></div><div style="display:contents" dir="auto"><h3 id="687d0f1d-3cdf-49f3-9588-769aad071995" class="block-color-blue_background"><strong>📱 S</strong>ocial media</h3></div><div style="display:contents" dir="auto"><ul id="8958d238-6091-4325-903a-8baaa20a7eb2" class="bulleted-list"><li style="list-style-type:disc">Facebook<div style="display:contents" dir="ltr"><figure id="c8cdf579-e4c4-4a7d-a0e1-e29e883c8c69"><a href="https://www.facebook.com/Lettres.Sorbonne.Universite/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Sorbonne Université - Faculté des Lettres | Paris</div><div class="bookmark-description">Sorbonne Université - Faculté des Lettres, Paris, France. 246,831 likes · 86 talking about this · 42,651 were here. Page officielle de la Faculté des Lettres de Sorbonne Université.  Suivez-nous sur...</div></div><div class="bookmark-href"><img src="https://static.xx.fbcdn.net/rsrc.php/yv/r/B8BxsscfVBr.ico" class="icon bookmark-icon"/>https://www.facebook.com/Lettres.Sorbonne.Universite/</div></div><img src="https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/273274045_5133553726668292_6113064214429653958_n.jpg?stp=dst-jpg_s720x720&amp;_nc_cat=107&amp;ccb=1-7&amp;_nc_sid=6de708&amp;_nc_ohc=Rs2tc6o9XokQ7kNvgEcHUOY&amp;_nc_ht=scontent-iad3-1.xx&amp;oh=00_AYDn31IiJ6mDLRzAvSf3s3se7Vj2htBJPTjxyrDyK6bwsw&amp;oe=66CCB6BE" class="bookmark-image"/></a></figure></div></li></ul></div><div style="display:contents" dir="auto"><ul id="d448511b-e060-4cdc-b32b-eb06ce082217" class="bulleted-list"><li style="list-style-type:disc">Instagram<div style="display:contents" dir="ltr"><figure id="f00280d2-e1ce-4b90-86e9-39f71835ff91"><a href="https://www.instagram.com/lettres_sorbonne/" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Instagram (@lettres_sorbonne)</div><div class="bookmark-description">Instagram photos and videos</div></div><div class="bookmark-href"><img src="https://static.cdninstagram.com/rsrc.php/v3/yI/r/VsNE-OHk_8a.png" class="icon bookmark-icon"/>https://www.instagram.com/lettres_sorbonne/</div></div><img src="https://scontent-iad3-2.cdninstagram.com/v/t51.2885-19/26068695_1276719689100400_4914522362877050880_n.jpg?stp=dst-jpg_s100x100&amp;_nc_cat=111&amp;ccb=1-7&amp;_nc_sid=fcb8ef&amp;_nc_ohc=PPDrcZKHzb8Q7kNvgErH0un&amp;_nc_ht=scontent-iad3-2.cdninstagram.com&amp;oh=00_AYCXCrTfvxS2YwEMKcWg3YAkCgkZvC7qgzWYmDdzTZr-eg&amp;oe=66CCB47B" class="bookmark-image"/></a></figure></div></li></ul></div><div style="display:contents" dir="auto"><ul id="5c1e412d-fc24-48d1-bf9c-0cb00a6845f9" class="bulleted-list"><li style="list-style-type:disc">Twitter<div style="display:contents" dir="ltr"><figure id="eaeef5ed-bedb-4c75-a689-14006884ade0"><a href="https://x.com/Sorbonne_Univ_" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Sorbonne Université (@Sorbonne_Univ_) on X</div><div class="bookmark-description">📚🔬🩺 Université de recherche intensive et pluridisciplinaire 🎯 Relevons les grands défis sociétaux de demain ! 📰 Suivez toute notre actualité #recherche</div></div><div class="bookmark-href"><img src="https://abs.twimg.com/favicons/twitter.3.ico" class="icon bookmark-icon"/>https://x.com/Sorbonne_Univ_</div></div><img src="https://pbs.twimg.com/profile_images/1792825118210539520/clL9-wG9_200x200.jpg" class="bookmark-image"/></a></figure></div></li></ul></div><div style="display:contents" dir="auto"><ul id="9ca9a694-0de1-4dfe-8840-ed0335564256" class="bulleted-list"><li style="list-style-type:disc">Youtube<div style="display:contents" dir="ltr"><figure id="f4e75095-11dd-4acf-a07f-7668a4b26902"><a href="https://www.youtube.com/FacultédesLettresdeSorbonneUniversité" class="bookmark source"><div class="bookmark-info"><div class="bookmark-text"><div class="bookmark-title">Faculté des Lettres de Sorbonne Université</div><div class="bookmark-description">Site You Tube officiel de la Faculté des Lettres de #SorbonneUniversité.</div></div><div class="bookmark-href"><img src="https://www.youtube.com/s/desktop/5a5c78c3/img/favicon_144x144.png" class="icon bookmark-icon"/>https://www.youtube.com/FacultédesLettresdeSorbonneUniversité</div></div><img src="https://yt3.googleusercontent.com/ytc/AIdro_kMsRocahWUkIEenEE0--ptYMZ3nsU7fN2O5YLuSSw-Xo8=s900-c-k-c0x00ffffff-no-rj" class="bookmark-image"/></a></figure></div></li></ul></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
