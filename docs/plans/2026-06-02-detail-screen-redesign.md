@@ -92,7 +92,7 @@ test('deadlineYear: Spring intake recruits the previous year, Fall the same year
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `cd D:/projects/oia/20-1-univfinder-site && node --test 2027S/tests/`
+Run: `cd D:/projects/oia/20-1-univfinder-site && node --test "2027S/tests/*.test.js"`
 Expected: FAIL with `Cannot find module '../lib/term.js'`.
 
 - [ ] **Step 3: Write the minimal implementation**
@@ -129,7 +129,7 @@ Expected: FAIL with `Cannot find module '../lib/term.js'`.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `node --test 2027S/tests/`
+Run: `node --test "2027S/tests/*.test.js"`
 Expected: PASS (2 tests).
 
 - [ ] **Step 5: Commit**
@@ -165,7 +165,7 @@ test('activeDeadlineFields: maps season to the right university property names',
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `node --test 2027S/tests/`
+Run: `node --test "2027S/tests/*.test.js"`
 Expected: FAIL with `TypeError: TermLib.orientationLabel is not a function`.
 
 - [ ] **Step 3: Add the functions** (insert before the `const TermLib = {...}` line, then add them to the exported object)
@@ -195,7 +195,7 @@ Update the export object to:
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `node --test 2027S/tests/`
+Run: `node --test "2027S/tests/*.test.js"`
 Expected: PASS (4 tests).
 
 - [ ] **Step 5: Commit**
@@ -235,7 +235,7 @@ test('isRecruiting: quota > 0 means recruiting this term', () => {
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `node --test 2027S/tests/`
+Run: `node --test "2027S/tests/*.test.js"`
 Expected: FAIL with `TypeError: TermLib.formatDeadline is not a function`.
 
 - [ ] **Step 3: Add the functions** (insert before the `const TermLib = {...}` line, then extend the export)
@@ -271,7 +271,7 @@ Update the export object to:
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `node --test 2027S/tests/`
+Run: `node --test "2027S/tests/*.test.js"`
 Expected: PASS (6 tests).
 
 - [ ] **Step 5: Commit**
@@ -1385,8 +1385,8 @@ git commit -m "chore: bump footer copyright to 2026"
 
 - [ ] **Step 1: Run the logic unit tests.**
 
-Run: `cd D:/projects/oia/20-1-univfinder-site && node --test 2027S/tests/`
-Expected: PASS (6 tests).
+Run: `cd D:/projects/oia/20-1-univfinder-site && node --test "2027S/tests/*.test.js"`
+Expected: PASS (6 tests). (Node v24 on Windows rejects the bare-directory form `node --test "2027S/tests/*.test.js"`; use the glob.)
 
 - [ ] **Step 2: End-to-end visual QA.** Start the preview and walk the full checklist:
   - List loads; recruiting schools first; quota-0 schools dimmed at the bottom with the grey pill; "Hide Not Recruiting" toggle removes/restores them.
