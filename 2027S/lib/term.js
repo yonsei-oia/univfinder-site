@@ -34,7 +34,28 @@
             : { nom: 'fallNominationDeadline', app: 'fallApplicationDeadline' };
     }
 
-    const TermLib = { parseSemester, deadlineYear, orientationLabel, activeDeadlineFields };
+    const _MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // '10/31' + 2026 -> 'Oct 31, 2026'. Returns '' for empty / non-MM/DD / out-of-range.
+    function formatDeadline(mmdd, year) {
+        if (!mmdd) return '';
+        const m = String(mmdd).trim().match(/^(\d{1,2})\/(\d{1,2})$/);
+        if (!m) return '';
+        const mo = parseInt(m[1], 10), da = parseInt(m[2], 10);
+        if (mo < 1 || mo > 12 || da < 1 || da > 31) return '';
+        return `${_MONTHS[mo - 1]} ${da}, ${year}`;
+    }
+
+    // Recruiting this term? quota is normally a parsed number (0 = not offered/N/A),
+    // but tolerate strings so callers cannot break on raw data.
+    function isRecruiting(u) {
+        const q = typeof u.quota === 'number' ? u.quota : parseFloat(u.quota);
+        return !isNaN(q) && q > 0;
+    }
+
+    const TermLib = { parseSemester, deadlineYear, orientationLabel,
+                      activeDeadlineFields, formatDeadline, isRecruiting };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = TermLib;
     global.TermLib = TermLib;

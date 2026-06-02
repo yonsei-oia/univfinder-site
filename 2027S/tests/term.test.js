@@ -24,3 +24,19 @@ test('activeDeadlineFields: maps season to the right university property names',
     assert.deepStrictEqual(TermLib.activeDeadlineFields('27F'),
         { nom: 'fallNominationDeadline', app: 'fallApplicationDeadline' });
 });
+
+test('formatDeadline: MM/DD + year -> human date; junk -> empty string', () => {
+    assert.strictEqual(TermLib.formatDeadline('10/31', 2026), 'Oct 31, 2026');
+    assert.strictEqual(TermLib.formatDeadline('4/15', 2026), 'Apr 15, 2026');
+    assert.strictEqual(TermLib.formatDeadline('', 2026), '');
+    assert.strictEqual(TermLib.formatDeadline('Not Available', 2026), '');
+    assert.strictEqual(TermLib.formatDeadline('13/40', 2026), '');
+    assert.strictEqual(TermLib.formatDeadline(null, 2026), '');
+});
+
+test('isRecruiting: quota > 0 means recruiting this term', () => {
+    assert.strictEqual(TermLib.isRecruiting({ quota: 3 }), true);
+    assert.strictEqual(TermLib.isRecruiting({ quota: 0 }), false);
+    assert.strictEqual(TermLib.isRecruiting({ quota: '2' }), true);
+    assert.strictEqual(TermLib.isRecruiting({ quota: '' }), false);
+});
