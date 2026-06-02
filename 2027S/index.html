@@ -3370,7 +3370,155 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 </div>
             );
         }
-        function ApplyPanel({ u, recruiting }) { return <div>Apply</div>; }
+        function ApplyPanel({ u, recruiting }) {
+            const fields = TermLib.activeDeadlineFields(SEMESTER.code);
+            const year = TermLib.deadlineYear(SEMESTER.code);
+            const nomDate = TermLib.formatDeadline(u[fields.nom], year) || 'TBA';
+            const appDate = TermLib.formatDeadline(u[fields.app], year) || 'TBA';
+            const orientation = TermLib.orientationLabel(SEMESTER.code);
+            const [openAcc, setOpenAcc] = useState('steps'); // 'steps' | 'nom' | 'decisions' | null
+            const toggle = (k) => setOpenAcc(prev => prev === k ? null : k);
+
+            if (!recruiting) return <ApplyNotRecruiting u={u} />;
+
+            const STEPS = [
+                { n:1, who:'oia',  tag:'OIA',        text:'Review the OIA exchange program general information' },
+                { n:2, who:'oia',  tag:'OIA',        text:'OIA submits your nomination to the host university' },
+                { n:3, who:'host', tag:'Host',       text:'Host university confirms the nomination' },
+                { n:4, who:'oia',  tag:'OIA · Host', text:'Host university and OIA send application instructions by email' },
+                { n:5, who:'you',  tag:'You',        text:'You submit your application and required documents to the host' },
+                { n:6, who:'you',  tag:'You',        text:'Attend the OIA online pre-departure orientation',
+                  sub:`${orientation} · online (${TermLib.parseSemester(SEMESTER.code).season === 'spring' ? 'Spring intake: the November before departure' : 'Fall intake: the May before departure'})` },
+                { n:7, who:'host', tag:'Host',       text:'Receive the Letter of Acceptance from the host' },
+                { n:8, who:'you',  tag:'You',        text:'Apply for your visa' },
+                { n:9, who:'you',  tag:'You',        text:'Prepare for departure' },
+            ];
+
+            return (
+                <>
+                    <div className="yz-sect">
+                        <div className="yz-sect-head">
+                            <p className="yz-sect-label">Key deadlines · {SEMESTER.full} ({SEMESTER.code})</p>
+                            <h3 className="yz-sect-title">Nomination comes first, then application</h3>
+                        </div>
+                        <div className="yz-seq">
+                            <div className="yz-seq-card is-1">
+                                <p className="yz-seq-step">Step 1</p>
+                                <p className="yz-seq-who">OIA nominates you</p>
+                                <p className="yz-seq-label">Nomination deadline</p>
+                                <p className="yz-seq-date">{nomDate}</p>
+                                <p className="yz-seq-desc">OIA submits your nomination to the host university. You cannot do this step yourself.</p>
+                            </div>
+                            <div className="yz-seq-arrow"><IconArrowRight /></div>
+                            <div className="yz-seq-card is-2">
+                                <p className="yz-seq-step">Step 2</p>
+                                <p className="yz-seq-who">You apply to the host</p>
+                                <p className="yz-seq-label">Application deadline</p>
+                                <p className="yz-seq-date">{appDate}</p>
+                                <p className="yz-seq-desc">Only after nomination is confirmed and you receive application instructions.</p>
+                            </div>
+                        </div>
+                        <div className="yz-keynote">
+                            <IconInfo />
+                            <span>Meeting the application deadline alone does not secure your place. You must first be nominated by OIA during the nomination period — students cannot complete the nomination step themselves.</span>
+                        </div>
+                    </div>
+
+                    <div className="yz-sect">
+                        <div className="yz-warn">
+                            <IconAlert />
+                            <div>
+                                <p className="yz-warn-title">Placement does not guarantee final admission</p>
+                                <p className="yz-warn-text">Even if you are nominated by Yonsei, the host university reserves the right to reject students who do not meet its requirements. Cancellation due to unfulfilled requirements is solely the student's responsibility.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="yz-sect">
+                        <div className="yz-sect-head">
+                            <p className="yz-sect-label">Process &amp; details</p>
+                            <h3 className="yz-sect-title">Understand the full path</h3>
+                        </div>
+
+                        <Accordion title="Steps to final admission" open={openAcc==='steps'} onToggle={() => toggle('steps')}>
+                            <div className="yz-flow-legend"><span>Who acts: <b>You</b> = your action · OIA / Host = handled for you</span></div>
+                            <div className="yz-flow">
+                                {STEPS.map(s => (
+                                    <div key={s.n} className={`yz-fstep ${s.who==='you' ? 'is-you' : ''}`}>
+                                        <div className="yz-fstep-dot">{s.n}</div>
+                                        <div className="yz-fstep-body">
+                                            <p className="yz-fstep-text">{s.text}
+                                                <span className={`yz-fstep-tag tag-${s.who}`}>{s.tag}</span></p>
+                                            {s.sub && <p className="yz-fstep-sub">{s.sub}</p>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </Accordion>
+
+                        <Accordion title="What is nomination?" open={openAcc==='nom'} onToggle={() => toggle('nom')}>
+                            <div className="yz-prose">
+                                <p>Nomination is the process where OIA officially recommends students to the host university during the designated nomination period. Students cannot complete this step themselves.</p>
+                                <p>Once the host university confirms the nomination, both OIA and the host will send you application instructions individually. Please submit your documents according to those instructions.</p>
+                            </div>
+                            <p className="yz-inline-note">If you do not receive an email from OIA by the nomination deadline, please check your spam folder and contact us.</p>
+                        </Accordion>
+
+                        <Accordion title="How admission decisions work" open={openAcc==='decisions'} onToggle={() => toggle('decisions')}>
+                            <div className="yz-prose">
+                                <p>Final admission decisions are made by the host university. The timing may vary by university, and even among students at the same university.</p>
+                                <p>Even if you submit your application early, you may receive your admission decision later than students at other universities. Please check your email regularly after applying to stay informed before departure.</p>
+                            </div>
+                        </Accordion>
+                    </div>
+
+                    <div className="yz-sect">
+                        <div className="yz-sect-head">
+                            <p className="yz-sect-label">While you wait</p>
+                            <h3 className="yz-sect-title">Before you receive application instructions</h3>
+                        </div>
+                        <p className="yz-prose" style={{color:'var(--ink-muted)', margin:'0 0 14px'}}>Familiarize yourself with your host country and university — available departments, course offerings, and housing procedures.</p>
+                        <div className="yz-links">
+                            {u.recentFactsheet && (
+                                <a className="yz-link" href={u.recentFactsheet} target="_blank" rel="noopener noreferrer">
+                                    <span className="yz-link-icon"><IconFile /></span>
+                                    <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
+                                        <p className="yz-link-url">Detailed university information (PDF)</p></div>
+                                    <span className="yz-link-cta">Open ↗</span>
+                                </a>
+                            )}
+                            {u.website && (
+                                <a className="yz-link" href={u.website} target="_blank" rel="noopener noreferrer">
+                                    <span className="yz-link-icon"><IconGlobe /></span>
+                                    <div className="yz-link-body"><p className="yz-link-title">Host university website</p>
+                                        <p className="yz-link-url">{u.website}</p></div>
+                                    <span className="yz-link-cta">Open ↗</span>
+                                </a>
+                            )}
+                            <a className="yz-link" href="https://portal.yonsei.ac.kr" target="_blank" rel="noopener noreferrer">
+                                <span className="yz-link-icon"><IconMessage /></span>
+                                <div className="yz-link-body"><p className="yz-link-title">Yonsei Portal — Experience Reports</p>
+                                    <p className="yz-link-url">Academic Information System → International Student Exchange</p></div>
+                                <span className="yz-link-cta">Open ↗</span>
+                            </a>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        function Accordion({ title, open, onToggle, children }) {
+            return (
+                <div className={`yz-acc ${open ? '' : 'collapsed'}`}>
+                    <button type="button" className="yz-acc-head" onClick={onToggle}
+                        aria-expanded={open}>
+                        <p className="yz-acc-title">{title}</p>
+                        <span className="yz-acc-chev"><IconChevron /></span>
+                    </button>
+                    <div className="yz-acc-body">{children}</div>
+                </div>
+            );
+        }
 
         function InfoItem({ label, value }) {
             return (
