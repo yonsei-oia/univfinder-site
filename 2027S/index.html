@@ -3109,7 +3109,118 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         }
 
         // Panels are filled in by later tasks; stubs keep the page compiling.
-        function EligibilityPanel({ u, linkify }) { return <div>Eligibility</div>; }
+        function EligibilityPanel({ u, linkify }) {
+            const otherLang = u.language2
+                ? (u.lang2Level ? `${u.language2} · ${u.lang2Level}` : u.language2)
+                : 'Not required';
+            return (
+                <>
+                    {(u.labels.length > 0 || u.note) && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Notice</p>
+                                <h3 className="yz-sect-title">From OIA</h3>
+                            </div>
+                            {u.labels.length > 0 && (
+                                <div style={{marginBottom: u.note ? 10 : 0}}>
+                                    {u.labels.map(l => <LabelTag key={l} label={l} size="large" />)}
+                                </div>
+                            )}
+                            {u.note && (u.noteLink ? (
+                                <a href={u.noteLink} target="_blank" rel="noopener noreferrer"
+                                   className="yz-prose" style={{color:'var(--brand)', textDecoration:'underline'}}>{u.note}</a>
+                            ) : <div className="yz-prose"><p>{u.note}</p></div>)}
+                        </div>
+                    )}
+
+                    <div className="yz-sect">
+                        <div className="yz-sect-head">
+                            <p className="yz-sect-label">Academic</p>
+                            <h3 className="yz-sect-title">Grade &amp; language requirements</h3>
+                        </div>
+                        <div className="yz-req-grid">
+                            <div className="yz-req">
+                                <p className="yz-req-label">GPA Required (4.3)</p>
+                                <p className="yz-req-value">{u.gpaRequired ?? 'Not specified'}</p>
+                            </div>
+                            <div className="yz-req">
+                                <p className="yz-req-label">TOEFL iBT</p>
+                                <p className="yz-req-value">{u.toefl ?? 'Not specified'}</p>
+                                {(u.toeflReading || u.toeflListening || u.toeflSpeaking || u.toeflWriting) && (
+                                    <p className="yz-req-note">{
+                                        [u.toeflReading && `R ${u.toeflReading}`, u.toeflListening && `L ${u.toeflListening}`,
+                                         u.toeflSpeaking && `S ${u.toeflSpeaking}`, u.toeflWriting && `W ${u.toeflWriting}`]
+                                        .filter(Boolean).join(' · ')
+                                    }</p>
+                                )}
+                            </div>
+                            <div className="yz-req">
+                                <p className="yz-req-label">English notes</p>
+                                <p className="yz-req-value muted">{u.englishNotes || 'See factsheet'}</p>
+                            </div>
+                            <div className="yz-req">
+                                <p className="yz-req-label">Other language</p>
+                                <p className="yz-req-value muted">{otherLang}</p>
+                                {u.languageOtherNotes && <p className="yz-req-note">{u.languageOtherNotes}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="yz-sect">
+                        <div className="yz-sect-head">
+                            <p className="yz-sect-label">Levels</p>
+                            <h3 className="yz-sect-title">Open programs</h3>
+                        </div>
+                        <div className="yz-req-grid">
+                            <div className="yz-req">
+                                <p className="yz-req-label">Undergraduate</p>
+                                <p className="yz-req-value">{u.acceptsUG ? 'Open' : 'Not open'}</p>
+                            </div>
+                            <div className="yz-req">
+                                <p className="yz-req-label">Graduate</p>
+                                <p className="yz-req-value">{u.acceptsGrad ? 'Open' : 'Not open'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {(u.availableAreas || u.restrictedAreas || u.admissionNotes) && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Study areas</p>
+                                <h3 className="yz-sect-title">Where you can study</h3>
+                            </div>
+                            {u.availableAreas && (
+                                <div className="yz-area">
+                                    <div className="yz-area-head">
+                                        <span className="yz-area-badge">Available</span>
+                                        <p className="yz-area-title">Open areas</p>
+                                    </div>
+                                    <p className="yz-area-text">{linkify(u.availableAreas)}</p>
+                                </div>
+                            )}
+                            {u.restrictedAreas && (
+                                <div className="yz-area">
+                                    <div className="yz-area-head">
+                                        <span className="yz-area-badge">Restricted</span>
+                                        <p className="yz-area-title">Faculty-level restrictions</p>
+                                    </div>
+                                    <p className="yz-area-text">{linkify(u.restrictedAreas)}</p>
+                                </div>
+                            )}
+                            {u.admissionNotes && (
+                                <div className="yz-area">
+                                    <div className="yz-area-head">
+                                        <span className="yz-area-badge">Notes</span>
+                                        <p className="yz-area-title">Admission notes</p>
+                                    </div>
+                                    <p className="yz-area-text">{linkify(u.admissionNotes)}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </>
+            );
+        }
         function AboutPanel({ u }) { return <div>About</div>; }
         function MediaPanel({ u }) { return <div>Media</div>; }
         function ApplyPanel({ u, recruiting }) { return <div>Apply</div>; }
