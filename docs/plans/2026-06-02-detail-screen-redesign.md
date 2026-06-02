@@ -43,14 +43,14 @@ printf "\n# Local QA data snapshot (copied from 20-2-univfinder-data; not source
 git add .gitignore && git commit -m "chore: ignore local QA data snapshot dir"
 ```
 
-- [ ] **Define the preview command** used by every visual-QA step below. From `2027S/`:
+- [ ] **Define the preview command** used by every visual-QA step below. Serve from the **repo root** (NOT from `2027S/`) so the page's local-dev `../data/...` fetch resolves to `20-1-univfinder-site/data/`:
 
 ```bash
-cd D:/projects/oia/20-1-univfinder-site/2027S
+cd D:/projects/oia/20-1-univfinder-site
 python -m http.server 8027
 ```
 
-Then open `http://localhost:8027/index.html`, click any university's **View Details**, and verify the item described in that task. Stop the server with Ctrl-C when done. (Any static server works; `python -m http.server` is assumed present.)
+Then open `http://localhost:8027/2027S/index.html`, click any university's **View Details**, and verify the item described in that task. Stop the server with Ctrl-C when done. (Any static server works; `python -m http.server` is assumed present. Serving from `2027S/` instead would 404 the `../data/` fetch and the page would show no data.)
 
 ---
 
