@@ -3520,6 +3520,48 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             );
         }
 
+        function ApplyNotRecruiting({ u }) {
+            return (
+                <>
+                    <div className="yz-sect">
+                        <div className="yz-warn">
+                            <IconInfo />
+                            <div>
+                                <p className="yz-warn-title">{u.name.split(' - ')[0]} is not currently accepting exchange applications for {SEMESTER.full}</p>
+                                <p className="yz-warn-text">This university has no exchange slots in the current term. Its program information remains available in the other tabs. Recruitment availability can change each term — check this dashboard again, or see the factsheet for the university's typical intake pattern.</p>
+                            </div>
+                        </div>
+                    </div>
+                    {(u.recentFactsheet || u.website) && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Learn more</p>
+                                <h3 className="yz-sect-title">About this university</h3>
+                            </div>
+                            <div className="yz-links">
+                                {u.recentFactsheet && (
+                                    <a className="yz-link" href={u.recentFactsheet} target="_blank" rel="noopener noreferrer">
+                                        <span className="yz-link-icon"><IconFile /></span>
+                                        <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
+                                            <p className="yz-link-url">Detailed university information (PDF)</p></div>
+                                        <span className="yz-link-cta">Open ↗</span>
+                                    </a>
+                                )}
+                                {u.website && (
+                                    <a className="yz-link" href={u.website} target="_blank" rel="noopener noreferrer">
+                                        <span className="yz-link-icon"><IconGlobe /></span>
+                                        <div className="yz-link-body"><p className="yz-link-title">Host university website</p>
+                                            <p className="yz-link-url">{u.website}</p></div>
+                                        <span className="yz-link-cta">Open ↗</span>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
         function InfoItem({ label, value }) {
             return (
                 <div className="info-item">
