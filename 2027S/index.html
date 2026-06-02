@@ -3331,7 +3331,45 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                          style={{color:'var(--brand)', textDecoration:'underline'}}>{part}</a>
                     : part);
         }
-        function MediaPanel({ u }) { return <div>Media</div>; }
+        function MediaPanel({ u }) {
+            const c = u.content || {};
+            const videos = c.video_links ? parsePipeLines(c.video_links).slice(0, 3) : [];
+            if (videos.length === 0) {
+                return (
+                    <div className="yz-prose" style={{color:'var(--ink-muted)'}}>
+                        <p>No videos have been added for this university yet.</p>
+                    </div>
+                );
+            }
+            return (
+                <div className="yz-sect">
+                    <div className="yz-sect-head">
+                        <p className="yz-sect-label">Videos</p>
+                        <h3 className="yz-sect-title">Watch the campus and program</h3>
+                    </div>
+                    <div className="yz-videos">
+                        {videos.map((v, i) => {
+                            const ytId = getYouTubeId(v.url);
+                            const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
+                            return (
+                                <a key={i} className="yz-video" href={v.url || '#'}
+                                   target="_blank" rel="noopener noreferrer">
+                                    <div className="yz-video-thumb"
+                                         style={thumb ? { backgroundImage:
+                                            `linear-gradient(180deg,rgba(0,0,0,0.1),rgba(0,0,0,0.45)), url('${thumb}')` } : undefined}>
+                                        <div className="yz-video-play"><IconPlay /></div>
+                                    </div>
+                                    <div className="yz-video-body">
+                                        <p className="yz-video-title">{v.label || 'Watch'}</p>
+                                        <span className="yz-video-host">{getVideoHost(v.url)}</span>
+                                    </div>
+                                </a>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
         function ApplyPanel({ u, recruiting }) { return <div>Apply</div>; }
 
         function InfoItem({ label, value }) {
