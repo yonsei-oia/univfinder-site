@@ -3221,7 +3221,116 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 </>
             );
         }
-        function AboutPanel({ u }) { return <div>About</div>; }
+        function AboutPanel({ u }) {
+            const c = u.content || {};
+            const links = c.useful_links ? parsePipeLines(c.useful_links).slice(0, 6) : [];
+            const hasOverview = c.about_text || c.campus_location || c.why_yonsei;
+            const hasLiving = c.accommodation || u.housingInfo || u.academicCalendar || u.housingGuaranteed;
+            const schoolShort = u.name.split(' - ')[0];
+            return (
+                <>
+                    {hasOverview && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Overview</p>
+                                <h3 className="yz-sect-title">About the university</h3>
+                            </div>
+                            {c.about_text && (
+                                <div className="yz-sub">
+                                    <p className="yz-sub-title">About {schoolShort}</p>
+                                    <div className="yz-prose">{renderRichText(c.about_text)}</div>
+                                </div>
+                            )}
+                            {c.campus_location && (
+                                <div className="yz-sub">
+                                    <p className="yz-sub-title">Campus &amp; Location</p>
+                                    <div className="yz-prose">{renderRichText(c.campus_location)}</div>
+                                </div>
+                            )}
+                            {c.why_yonsei && (
+                                <div className="yz-sub">
+                                    <p className="yz-sub-title">Why this school for Yonsei students</p>
+                                    <div className="yz-prose">{renderRichText(c.why_yonsei)}</div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {hasLiving && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Living &amp; logistics</p>
+                                <h3 className="yz-sect-title">Housing and the academic year</h3>
+                            </div>
+                            {c.accommodation && (
+                                <div className="yz-sub">
+                                    <p className="yz-sub-title">Accommodation</p>
+                                    <div className="yz-prose">{renderRichText(c.accommodation)}</div>
+                                </div>
+                            )}
+                            {u.housingInfo && (
+                                <div className="yz-sub">
+                                    <p className="yz-sub-title">Housing information</p>
+                                    <div className="yz-prose"><p>{linkifyText(u.housingInfo)}</p></div>
+                                </div>
+                            )}
+                            {u.housingGuaranteed && (
+                                <div className="yz-sub">
+                                    <p className="yz-sub-title">On-campus housing guaranteed?</p>
+                                    <div className="yz-prose"><p>{u.housingGuaranteed}</p></div>
+                                </div>
+                            )}
+                            {u.academicCalendar && (
+                                <div className="yz-sub">
+                                    <p className="yz-sub-title">Academic calendar</p>
+                                    <div className="yz-prose"><p>{linkifyText(u.academicCalendar)}</p></div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {links.length > 0 && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Resources</p>
+                                <h3 className="yz-sect-title">Useful Links</h3>
+                            </div>
+                            <div className="yz-links">
+                                {links.map((l, i) => (
+                                    <a key={i} className="yz-link" href={l.url || '#'}
+                                       target="_blank" rel="noopener noreferrer">
+                                        <span className="yz-link-icon">{usefulLinkIcon(l.label)}</span>
+                                        <div className="yz-link-body">
+                                            <p className="yz-link-title">{l.label || l.url}</p>
+                                            {l.url && <p className="yz-link-url">{l.url}</p>}
+                                        </div>
+                                        <span className="yz-link-cta">Open ↗</span>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {!hasOverview && !hasLiving && links.length === 0 && (
+                        <div className="yz-prose" style={{color:'var(--ink-muted)'}}>
+                            <p>Detailed information for this university has not been added yet. See the Apply tab for the factsheet and the host website.</p>
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        // Plain-string linkify (returns React nodes) for fields rendered outside renderRichText.
+        function linkifyText(text) {
+            if (!text) return text;
+            const splitRe = /(https?:\/\/[^\s]+)/g;
+            const urlRe = /^https?:\/\/[^\s]+$/;
+            return String(text).split(splitRe).map((part, i) =>
+                urlRe.test(part)
+                    ? <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+                         style={{color:'var(--brand)', textDecoration:'underline'}}>{part}</a>
+                    : part);
+        }
         function MediaPanel({ u }) { return <div>Media</div>; }
         function ApplyPanel({ u, recruiting }) { return <div>Apply</div>; }
 
