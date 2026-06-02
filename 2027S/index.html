@@ -3031,282 +3031,71 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
         function DetailModal({ u, onClose, cameFromUpdateHistory, onBack, linkify,
                               onPrev, onNext, hasPrev, hasNext, modalIdx, modalTotal }) {
+            const [tab, setTab] = useState('eligibility');
+            const cover = u.content && u.content.cover_image_url;
+            const credit = u.content && u.content.cover_image_credit;
+            const recruiting = TermLib.isRecruiting(u);
+            const slotsText = recruiting
+                ? `${u.quota}${u.quotaUnit ? ' ' + u.quotaUnit : ''}`
+                : `Not offered for ${SEMESTER.full}`;
+
+            const TABS = [
+                ['eligibility', 'Eligibility'],
+                ['about', 'About'],
+                ['media', 'Media'],
+                ['apply', 'Apply'],
+            ];
+
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={(e)=>e.stopPropagation()}>
-                        <div
-                            className={`modal-header ${u.content && u.content.cover_image_url ? 'has-cover' : ''}`}
-                            style={u.content && u.content.cover_image_url ? {
-                                backgroundImage: `linear-gradient(135deg, rgba(0,56,118,0.55) 0%, rgba(0,37,84,0.75) 100%), url('${u.content.cover_image_url}')`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
+                        <div className={`yz-cover ${cover ? 'has-img' : ''}`}
+                            style={cover ? {
+                                backgroundImage: `linear-gradient(180deg, rgba(15,20,25,0.20) 0%, rgba(15,20,25,0.70) 100%), url('${cover}')`,
                             } : undefined}>
                             {cameFromUpdateHistory && (
                                 <button className="modal-close-btn" onClick={onBack}
-                                    aria-label="Back to Update History" style={{right:50}}>
-                                    ←
-                                </button>
+                                    aria-label="Back to Update History" style={{right:50}}>←</button>
                             )}
                             <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
-                            <div className="modal-title">{u.name}</div>
-                            <div className="modal-subtitle">{u.country} · {u.continent}</div>
-                            {u.content && u.content.cover_image_credit && (
-                                <div className="modal-header-credit">{u.content.cover_image_credit}</div>
-                            )}
+                            <div className="yz-cover-inner">
+                                <p className="yz-cover-eyebrow">{u.continent} · {u.country}</p>
+                                <h1 className="yz-cover-title">{u.name}</h1>
+                            </div>
+                            {credit && <div className="yz-cover-credit">{credit}</div>}
                         </div>
 
-                        <div className="modal-body">
-                            <section className="info-section">
-                                <h3>Basic Information</h3>
-                                <div className="info-grid">
-                                    <InfoItem label="Exchange Quota" value={`${u.quota} ${u.quotaUnit||''}`} />
-                                    <InfoItem label="Language of Instruction" value={[u.language1,u.language2].filter(Boolean).join(', ')||'—'} />
-                                    <InfoItem label="Academic System" value={u.academicSystem || 'N/A'} />
-                                    <InfoItem label="Fall Options"
-                                        value={[u.fallOneSemester?'One semester':null, u.fallCalendarYear?'Calendar year':null].filter(Boolean).join(', ')||'N/A'} />
-                                    <InfoItem label="Spring Options"
-                                        value={[u.springOneSemester?'One semester':null, u.springCalendarYear?'Calendar year':null].filter(Boolean).join(', ')||'N/A'} />
-                                    <InfoItem label="Accepts"
-                                        value={[u.acceptsUG?'Undergraduate':null, u.acceptsGrad?'Graduate':null].filter(Boolean).join(', ')||'N/A'} />
-                                    <InfoItem label="Program Type" value={u.programType || 'Regular'} />
-                                </div>
-                            </section>
+                        <dl className="yz-meta">
+                            <div><dt>Program</dt><dd>{u.programType || 'Regular'}</dd></div>
+                            <div><dt>Slots</dt><dd>{slotsText}</dd></div>
+                            <div><dt>Language</dt><dd>{[u.language1,u.language2].filter(Boolean).join(', ') || '—'}</dd></div>
+                            <div><dt>System</dt><dd>{u.academicSystem || 'N/A'}</dd></div>
+                        </dl>
 
-                            {/* Academic Requirements — Basic Information 다음으로 이동 (자격 확인 우선) */}
-                            <section className="info-section">
-                                <h3>Academic Requirements</h3>
-                                <div className="info-grid">
-                                    <InfoItem label="TOEFL iBT Total" value={u.toefl ?? 'Not specified'} />
-                                    {u.toeflReading && <InfoItem label="TOEFL Reading" value={u.toeflReading} />}
-                                    {u.toeflListening && <InfoItem label="TOEFL Listening" value={u.toeflListening} />}
-                                    {u.toeflSpeaking && <InfoItem label="TOEFL Speaking" value={u.toeflSpeaking} />}
-                                    {u.toeflWriting && <InfoItem label="TOEFL Writing" value={u.toeflWriting} />}
-                                    {u.englishNotes && <InfoItem label="English Notes" value={u.englishNotes} />}
-                                    <InfoItem label="GPA Required (4.3)" value={u.gpaRequired ?? 'Not specified'} />
-                                    {u.language2 && <InfoItem label={`${u.language2} Level Required`} value={u.lang2Level || 'Not specified'} />}
-                                    {u.languageOtherNotes && <InfoItem label="Language Notes" value={u.languageOtherNotes} />}
-                                </div>
-                            </section>
+                        <div className="yz-nav">
+                            {TABS.map(([key, label]) => (
+                                <button key={key} type="button"
+                                    className={`yz-nav-tab ${tab===key ? 'is-active' : ''}`}
+                                    onClick={() => setTab(key)}>{label}</button>
+                            ))}
+                        </div>
 
-                            {u.admissionNotes && (
-                                <section className="info-section">
-                                    <h3>Admission Requirements</h3>
-                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.admissionNotes)}</p>
-                                </section>
-                            )}
-
-                            {u.availableAreas && (
-                                <section className="info-section">
-                                    <h3>Available Study Areas</h3>
-                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.availableAreas)}</p>
-                                </section>
-                            )}
-
-                            {u.restrictedAreas && (
-                                <section className="info-section">
-                                    <h3>Restricted Study Areas</h3>
-                                    <p style={{fontSize:14, lineHeight:1.6, color:'var(--danger)'}}>{linkify(u.restrictedAreas)}</p>
-                                </section>
-                            )}
-
-                            <section className="info-section">
-                                <h3>Important Dates</h3>
-                                <div className="info-grid">
-                                    <InfoItem label="Spring Nomination Deadline"   value={u.springNominationDeadline || 'N/A'} />
-                                    <InfoItem label="Spring Application Deadline"  value={u.springApplicationDeadline || 'N/A'} />
-                                    <InfoItem label="Fall Nomination Deadline"     value={u.fallNominationDeadline || 'N/A'} />
-                                    <InfoItem label="Fall Application Deadline"    value={u.fallApplicationDeadline || 'N/A'} />
-                                </div>
-                            </section>
-
-                            {(u.labels.length > 0 || u.note) && (
-                                <section className="info-section">
-                                    <h3>Note</h3>
-                                    {u.labels.length > 0 && (
-                                        <div style={{marginBottom: u.note ? 10 : 0}}>
-                                            {u.labels.map(l => <LabelTag key={l} label={l} size="large" />)}
-                                        </div>
-                                    )}
-                                    {u.note && (u.noteLink ? (
-                                        <a href={u.noteLink} target="_blank" rel="noopener noreferrer"
-                                            style={{fontSize:14, lineHeight:1.6, color:'var(--yonsei-light-blue)', textDecoration:'underline'}}>
-                                            {u.note}
-                                        </a>
-                                    ) : (
-                                        <p style={{fontSize:14, lineHeight:1.6}}>{u.note}</p>
-                                    ))}
-                                </section>
-                            )}
-
-                            {u.labels.includes('Update') && u.updateDate && (
-                                <section className="info-section update-box">
-                                    <h3 style={{color:'var(--yonsei-blue)'}}>📋 Recent Update</h3>
-                                    <div style={{fontSize:14, marginTop:10}}>
-                                        <div style={{marginBottom:8}}><strong>Date:</strong> {u.updateDate}</div>
-                                        {u.updateDescription && (
-                                            <div><strong>Changes:</strong> {u.updateDescription}</div>
-                                        )}
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* About 섹션 (학교 소개) */}
-                            {u.content && u.content.about_text && (
-                                <section className="info-section">
-                                    <h3>About {u.name.split(' - ')[0]}</h3>
-                                    <div className="detail-rich">{renderRichText(u.content.about_text)}</div>
-                                </section>
-                            )}
-
-                            {/* Why Yonsei (OIA 추천 포인트) */}
-                            {u.content && u.content.why_yonsei && (
-                                <section className="info-section">
-                                    <h3>Why this school for Yonsei students</h3>
-                                    <div className="detail-rich">{renderRichText(u.content.why_yonsei)}</div>
-                                </section>
-                            )}
-
-                            {/* Campus & Location */}
-                            {u.content && u.content.campus_location && (
-                                <section className="info-section">
-                                    <h3>Campus & Location</h3>
-                                    <div className="detail-rich">{renderRichText(u.content.campus_location)}</div>
-                                </section>
-                            )}
-
-                            {/* Accommodation (content 시트 — 정제된 주거 안내) */}
-                            {u.content && u.content.accommodation && (
-                                <section className="info-section">
-                                    <h3>Accommodation</h3>
-                                    <div className="detail-rich">{renderRichText(u.content.accommodation)}</div>
-                                </section>
-                            )}
-
-                            {/* Student Tips */}
-                            {u.content && u.content.student_tips && (
-                                <section className="info-section">
-                                    <h3>Student Tips</h3>
-                                    <div className="detail-rich">{renderRichText(u.content.student_tips)}</div>
-                                </section>
-                            )}
-
-                            {/* Videos (최대 3개) — 썸네일 카드, 클릭 시 새 탭 */}
-                            {u.content && u.content.video_links && parsePipeLines(u.content.video_links).length > 0 && (
-                                <section className="info-section">
-                                    <h3>Videos</h3>
-                                    <div className="detail-video-list">
-                                        {parsePipeLines(u.content.video_links).slice(0, 3).map((v, i) => {
-                                            const ytId = getYouTubeId(v.url);
-                                            const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
-                                            return (
-                                                <a key={i} href={v.url}
-                                                   target="_blank" rel="noopener noreferrer"
-                                                   className="detail-video-card">
-                                                    {thumb ? (
-                                                        <img src={thumb} className="detail-video-thumb"
-                                                             alt={v.label || 'video'} loading="lazy" />
-                                                    ) : (
-                                                        <div className="detail-video-thumb-placeholder">▶</div>
-                                                    )}
-                                                    <div className="detail-video-meta">
-                                                        <div className="detail-video-title">{v.label || 'Watch'}</div>
-                                                        <div className="detail-video-host">{getVideoHost(v.url)}</div>
-                                                    </div>
-                                                </a>
-                                            );
-                                        })}
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* Gallery (최대 6장) */}
-                            {u.content && u.content.gallery_urls && parseUrlLines(u.content.gallery_urls).length > 0 && (
-                                <section className="info-section">
-                                    <h3>Gallery</h3>
-                                    <div className="detail-gallery">
-                                        {parseUrlLines(u.content.gallery_urls).slice(0, 6).map((src, i) => (
-                                            <a key={i} href={src} target="_blank" rel="noopener noreferrer">
-                                                <img src={src} alt={`${u.name} ${i + 1}`} />
-                                            </a>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* Useful Links (최대 5개) */}
-                            {u.content && u.content.useful_links && parsePipeLines(u.content.useful_links).length > 0 && (
-                                <section className="info-section">
-                                    <h3>Useful Links</h3>
-                                    <div className="detail-link-list">
-                                        {parsePipeLines(u.content.useful_links).slice(0, 5).map((l, i) => (
-                                            <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
-                                               className="detail-link-chip">
-                                                {l.label || l.url}
-                                            </a>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {u.additionalLink && (
-                                <section className="info-section">
-                                    <h3>Additional Info / Promotional Link</h3>
-                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.additionalLink)}</p>
-                                </section>
-                            )}
-
-                            {u.academicCalendar && (
-                                <section className="info-section">
-                                    <h3>Academic Calendar</h3>
-                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.academicCalendar)}</p>
-                                </section>
-                            )}
-
-                            {u.housingInfo && (
-                                <section className="info-section">
-                                    <h3>Housing Information</h3>
-                                    <p style={{fontSize:14, lineHeight:1.6}}>{linkify(u.housingInfo)}</p>
-                                </section>
-                            )}
-
-                            {(u.housingGuaranteed || u.recentFactsheet) && (
-                                <section className="info-section">
-                                    <h3>Additional Information</h3>
-                                    <div className="info-grid">
-                                        {u.housingGuaranteed && (
-                                            <InfoItem label="On-campus Housing Guaranteed?" value={u.housingGuaranteed} />
-                                        )}
-                                        {u.recentFactsheet && (
-                                            <div className="info-item">
-                                                <div className="info-label">Factsheet</div>
-                                                <div className="info-value">
-                                                    <a href={u.recentFactsheet} target="_blank" rel="noopener noreferrer"
-                                                        style={{color:'var(--yonsei-light-blue)', textDecoration:'underline'}}>
-                                                        Recent Factsheet
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </section>
-                            )}
+                        <div className="yz-body modal-body">
+                            {tab === 'eligibility' && <EligibilityPanel u={u} linkify={linkify} />}
+                            {tab === 'about' && <AboutPanel u={u} />}
+                            {tab === 'media' && <MediaPanel u={u} />}
+                            {tab === 'apply' && <ApplyPanel u={u} recruiting={recruiting} />}
                         </div>
 
                         <div className="modal-footer">
                             <div className="modal-nav-group">
                                 <button type="button" className="btn btn-secondary"
-                                    onClick={onPrev} disabled={!hasPrev}
-                                    aria-label="이전 학교 (← key)">
-                                    ← Prev
-                                </button>
+                                    onClick={onPrev} disabled={!hasPrev} aria-label="이전 학교 (← key)">← Prev</button>
                                 <span className="modal-nav-counter">
                                     {modalIdx >= 0 ? `${modalIdx + 1} / ${modalTotal}` : ''}
                                 </span>
                                 <button type="button" className="btn btn-secondary"
-                                    onClick={onNext} disabled={!hasNext}
-                                    aria-label="다음 학교 (→ key)">
-                                    Next →
-                                </button>
+                                    onClick={onNext} disabled={!hasNext} aria-label="다음 학교 (→ key)">Next →</button>
                             </div>
                             {u.website && (
                                 <a href={u.website} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
@@ -3318,6 +3107,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 </div>
             );
         }
+
+        // Panels are filled in by later tasks; stubs keep the page compiling.
+        function EligibilityPanel({ u, linkify }) { return <div>Eligibility</div>; }
+        function AboutPanel({ u }) { return <div>About</div>; }
+        function MediaPanel({ u }) { return <div>Media</div>; }
+        function ApplyPanel({ u, recruiting }) { return <div>Apply</div>; }
 
         function InfoItem({ label, value }) {
             return (
