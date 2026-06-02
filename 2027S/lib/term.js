@@ -19,7 +19,22 @@
         return season === 'spring' ? year - 1 : year;
     }
 
-    const TermLib = { parseSemester, deadlineYear };
+    // Step 6 pre-departure orientation date. Spring -> the November before
+    // departure; Fall -> the May of the departure year. Online, rule-derived.
+    function orientationLabel(code) {
+        const { year, season } = parseSemester(code);
+        return season === 'spring' ? `November ${year - 1}` : `May ${year}`;
+    }
+
+    // Which university object fields hold the ACTIVE term's deadlines.
+    function activeDeadlineFields(code) {
+        const { season } = parseSemester(code);
+        return season === 'spring'
+            ? { nom: 'springNominationDeadline', app: 'springApplicationDeadline' }
+            : { nom: 'fallNominationDeadline', app: 'fallApplicationDeadline' };
+    }
+
+    const TermLib = { parseSemester, deadlineYear, orientationLabel, activeDeadlineFields };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = TermLib;
     global.TermLib = TermLib;
