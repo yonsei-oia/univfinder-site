@@ -3243,37 +3243,41 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         function AboutPanel({ u }) {
             const c = u.content || {};
             const links = c.useful_links ? parsePipeLines(c.useful_links).slice(0, 6) : [];
-            const hasOverview = c.about_text || c.campus_location || c.why_yonsei;
             const hasLiving = c.accommodation || u.housingInfo || u.academicCalendar || u.housingGuaranteed;
             const schoolShort = u.name.split(' - ')[0];
             return (
                 <>
-                    {hasOverview && (
-                        <div className="yz-sect">
-                            <div className="yz-sect-head">
-                                <p className="yz-sect-label">Overview</p>
-                                <h3 className="yz-sect-title">About the university</h3>
-                            </div>
-                            {c.about_text && (
-                                <div className="yz-sub">
-                                    <p className="yz-sub-title">About {schoolShort}</p>
-                                    <div className="yz-prose">{renderRichText(c.about_text)}</div>
-                                </div>
-                            )}
-                            {c.campus_location && (
-                                <div className="yz-sub">
-                                    <p className="yz-sub-title">Campus &amp; Location</p>
-                                    <div className="yz-prose">{renderRichText(c.campus_location)}</div>
-                                </div>
-                            )}
-                            {c.why_yonsei && (
-                                <div className="yz-sub">
-                                    <p className="yz-sub-title">Why this school for Yonsei students</p>
-                                    <div className="yz-prose">{renderRichText(c.why_yonsei)}</div>
-                                </div>
-                            )}
+                    <div className="yz-sect">
+                        <div className="yz-sect-head">
+                            <p className="yz-sect-label">Overview</p>
+                            <h3 className="yz-sect-title">About the university</h3>
                         </div>
-                    )}
+                        {c.about_text && (
+                            <div className="yz-sub">
+                                <p className="yz-sub-title">About {schoolShort}</p>
+                                <div className="yz-prose">{renderRichText(c.about_text)}</div>
+                            </div>
+                        )}
+                        <div className="yz-sub">
+                            <p className="yz-sub-title">Campus &amp; Location</p>
+                            {c.campus_location && (
+                                <div className="yz-prose">{renderRichText(c.campus_location)}</div>
+                            )}
+                            <div className="yz-map">
+                                <iframe
+                                    src={CampusMap.src(u.name, u.country, u.campusMapUrl)}
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    title={`Map of ${schoolShort}`}></iframe>
+                            </div>
+                        </div>
+                        {c.why_yonsei && (
+                            <div className="yz-sub">
+                                <p className="yz-sub-title">Why this school for Yonsei students</p>
+                                <div className="yz-prose">{renderRichText(c.why_yonsei)}</div>
+                            </div>
+                        )}
+                    </div>
 
                     {hasLiving && (
                         <div className="yz-sect">
@@ -3330,11 +3334,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </div>
                     )}
 
-                    {!hasOverview && !hasLiving && links.length === 0 && (
-                        <div className="yz-prose" style={{color:'var(--ink-muted)'}}>
-                            <p>Detailed information for this university has not been added yet. See the Apply tab for the factsheet and the host website.</p>
-                        </div>
-                    )}
                 </>
             );
         }
