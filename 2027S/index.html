@@ -44,6 +44,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Pure term/deadline logic (unit-tested in 2027S/tests/term.test.js) -->
     <script src="lib/term.js"></script>
+    <script src="lib/campus_map.js"></script>
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Host Universities | Yonsei OIA">
@@ -1078,6 +1079,9 @@
     margin:0 0 6px; letter-spacing:-0.01em; }
 .yz-prose { font-size:14.5px; color:var(--ink); line-height:1.7; }
 .yz-prose p { margin:0; } .yz-prose p + p { margin-top:10px; }
+
+.yz-map { margin-top:10px; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.yz-map iframe { display:block; width:100%; height:300px; border:0; }
 
 /* Useful links (icon + title + url + cta) */
 .yz-links { display:grid; gap:8px; }
