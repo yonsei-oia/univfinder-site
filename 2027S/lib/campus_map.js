@@ -1,19 +1,19 @@
-// Pure, dependency-free campus-map embed URL builder. Shared by the browser
-// (global CampusMap) and Node tests (module.exports). Keyless Google Maps embed.
+// Pure, dependency-free OpenStreetMap embed URL builder. Shared by the browser
+// (global CampusMap) and Node tests (module.exports). Keyless OSM embed from
+// coordinates (lat, lng) — reliable because no client-side geocoding is needed.
 (function (global) {
     'use strict';
 
-    function src(name, country, override) {
-        if (override) {
-            // Already an embeddable URL -> use directly; else wrap as a q= embed.
-            if (/output=embed|\/maps\/embed/.test(override)) return override;
-            return 'https://maps.google.com/maps?q=' + encodeURIComponent(override) + '&output=embed';
-        }
-        var q = country ? (name + ', ' + country) : name;
-        return 'https://maps.google.com/maps?q=' + encodeURIComponent(q) + '&output=embed&z=14';
+    function osmSrc(lat, lng) {
+        if (lat == null || lng == null) return '';
+        var d = 0.008; // ~campus-area view
+        var bbox = (lng - d).toFixed(5) + ',' + (lat - d).toFixed(5) + ','
+                 + (lng + d).toFixed(5) + ',' + (lat + d).toFixed(5);
+        return 'https://www.openstreetmap.org/export/embed.html?bbox=' + bbox
+             + '&layer=mapnik&marker=' + lat + ',' + lng;
     }
 
-    var CampusMap = { src: src };
+    var CampusMap = { osmSrc: osmSrc };
     if (typeof module !== 'undefined' && module.exports) module.exports = CampusMap;
     global.CampusMap = CampusMap;
 })(typeof window !== 'undefined' ? window : globalThis);

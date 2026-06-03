@@ -3,35 +3,25 @@ const assert = require('node:assert');
 const CampusMap = require('../lib/campus_map.js');
 
 
-test('auto-generates a keyless embed from name + country', () => {
-    const s = CampusMap.src('Vrije Universiteit Amsterdam', 'Netherlands', '');
-    assert.ok(s.startsWith('https://maps.google.com/maps?q='));
-    assert.ok(s.includes('output=embed'));
-    assert.ok(s.includes(encodeURIComponent('Vrije Universiteit Amsterdam, Netherlands')));
+test('osmSrc builds an OSM embed with marker', () => {
+    const s = CampusMap.osmSrc(52.3341, 4.8652);
+    assert.ok(s.startsWith('https://www.openstreetmap.org/export/embed.html?bbox='));
+    assert.ok(s.includes('layer=mapnik'));
+    assert.ok(s.includes('marker=52.3341,4.8652'));
 });
 
 
-test('override that is already an embed URL is used as-is', () => {
-    const u = 'https://www.google.com/maps/embed?pb=xyz';
-    assert.strictEqual(CampusMap.src('X', 'Y', u), u);
+test('osmSrc bbox is lng,lat order and spans the point', () => {
+    const s = CampusMap.osmSrc(52.3341, 4.8652);
+    const bbox = s.match(/bbox=([^&]+)/)[1].split(',').map(Number);
+    assert.strictEqual(bbox.length, 4);
+    assert.ok(bbox[0] < 4.8652 && 4.8652 < bbox[2]);
+    assert.ok(bbox[1] < 52.3341 && 52.3341 < bbox[3]);
 });
 
 
-test('override q-embed URL is used as-is', () => {
-    const u = 'https://maps.google.com/maps?q=place&output=embed';
-    assert.strictEqual(CampusMap.src('X', 'Y', u), u);
-});
-
-
-test('override plain value is wrapped as a query embed', () => {
-    const s = CampusMap.src('X', 'Y', 'Vrije Universiteit, De Boelelaan 1105');
-    assert.ok(s.includes(encodeURIComponent('Vrije Universiteit, De Boelelaan 1105')));
-    assert.ok(s.includes('output=embed'));
-});
-
-
-test('no country falls back to name only (no comma)', () => {
-    const s = CampusMap.src('Some University', '', '');
-    assert.ok(s.includes(encodeURIComponent('Some University')));
-    assert.ok(!s.includes('%2C'));
+test('osmSrc returns empty string when coordinates are missing', () => {
+    assert.strictEqual(CampusMap.osmSrc(null, null), '');
+    assert.strictEqual(CampusMap.osmSrc(undefined, 4.8), '');
+    assert.strictEqual(CampusMap.osmSrc(52.3, null), '');
 });
