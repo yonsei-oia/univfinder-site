@@ -1031,12 +1031,15 @@
 .yz-cover-credit { position:absolute; right:14px; bottom:10px; font-size:10.5px;
     color:rgba(255,255,255,0.6); font-style:italic; }
 
-.yz-meta { display:flex; flex-wrap:wrap; gap:4px 28px; padding:14px 28px;
-    background:var(--bg-soft); border-bottom:1px solid var(--line);
-    font-size:12.5px; color:var(--ink-muted); margin:0; }
-.yz-meta div { display:flex; align-items:baseline; }
-.yz-meta dt { font-weight:600; color:var(--ink); margin-right:5px; }
+.yz-meta { display:flex; flex-wrap:wrap; align-items:flex-end; gap:10px 32px; padding:16px 28px;
+    background:var(--bg-soft); border-bottom:1px solid var(--line); margin:0; }
+.yz-meta > div { display:flex; flex-direction:column; }
+.yz-meta dt { font-size:10.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink-faint); margin:0 0 2px; }
 .yz-meta dd { margin:0; }
+.yz-meta-stat dd { font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-0.01em;
+    font-variant-numeric:tabular-nums; }
+.yz-meta-sub dd { font-size:13px; font-weight:500; color:var(--ink-muted); }
 
 .yz-nav { display:flex; padding:6px 12px; gap:4px; border-bottom:1px solid var(--line);
     background:#fff; }
@@ -3139,10 +3142,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </div>
 
                         <dl className="yz-meta">
-                            <div><dt>Program</dt><dd>{u.programType || 'Regular'}</dd></div>
-                            <div><dt>Slots</dt><dd>{slotsText}</dd></div>
-                            <div><dt>Language</dt><dd>{[u.language1,u.language2].filter(Boolean).join(', ') || '—'}</dd></div>
-                            <div><dt>System</dt><dd>{u.academicSystem || 'N/A'}</dd></div>
+                            <div className="yz-meta-stat"><dt>Slots</dt><dd>{slotsText}</dd></div>
+                            <div className="yz-meta-stat"><dt>Language</dt><dd>{[u.language1,u.language2].filter(Boolean).join(' · ') || '—'}</dd></div>
+                            <div className="yz-meta-sub"><dt>System</dt><dd>{u.academicSystem || 'N/A'}</dd></div>
                         </dl>
 
                         <div className="yz-nav">
