@@ -1090,6 +1090,16 @@
 .yz-track-note { font-size:12px; color:var(--ink-muted); margin:4px 0 0; line-height:1.5; }
 .yz-track-foot { font-size:12px; color:var(--ink-muted); margin:10px 0 0; }
 
+/* OIA minimum TOEFL floor — applies even when a school lists no requirement */
+.yz-toefl-floor { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+.yz-toefl-floor-head { font-size:12px; font-weight:600; color:var(--ink-muted); margin:0 0 6px; line-height:1.45; }
+.yz-toefl-floor-list { margin:0; }
+.yz-toefl-floor-list > div { display:flex; align-items:baseline; justify-content:space-between;
+    gap:14px; padding:3px 0; }
+.yz-toefl-floor-list dt { font-size:12px; color:var(--ink-muted); margin:0; line-height:1.4; }
+.yz-toefl-floor-list dd { font-size:13px; font-weight:700; color:var(--ink); margin:0;
+    font-variant-numeric:tabular-nums; white-space:nowrap; }
+
 /* Study-area cards */
 .yz-area { background:var(--bg-soft); border:1px solid var(--line); border-radius:8px;
     padding:16px 18px; }
@@ -3275,6 +3285,17 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     <dd className="muted">See factsheet</dd>
                                 </>)}
                             </dl>
+                        )}
+
+                        {hasEnglish && (
+                            <div className="yz-toefl-floor">
+                                <p className="yz-toefl-floor-head">OIA minimum TOEFL iBT — applies even if not listed above</p>
+                                <dl className="yz-toefl-floor-list">
+                                    <div><dt>Humanities, Social Sciences</dt><dd>79</dd></div>
+                                    <div><dt>Natural Sciences, Engineering, Music, Physical Education, Medicine, Dentistry, Nursing</dt><dd>68</dd></div>
+                                    <div><dt>Graduate students</dt><dd>100</dd></div>
+                                </dl>
+                            </div>
                         )}
                     </div>
 
