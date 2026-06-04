@@ -45,6 +45,7 @@
     <!-- Pure term/deadline logic (unit-tested in 2027S/tests/term.test.js) -->
     <script src="lib/term.js"></script>
     <script src="lib/campus_map.js"></script>
+    <script src="lib/hashroute.js"></script>
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Host Universities | Yonsei OIA">
@@ -1736,6 +1737,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const content = (contentMap && contentMap[name]) || null;
             return {
                 id: index,
+                slug: row.slug || '',
                 name,
                 website: row.website || '',
                 continent: (row.continent || '').trim() || 'Other',
@@ -2159,6 +2161,35 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             }, []);
 
             useEffect(() => { loadData(); }, [loadData]);
+
+            // ---- Deep-link: keep selectedUniversity <-> URL hash (#/slug) in sync ----
+            const applyHash = useCallback(() => {
+                if (!universities.length) return;
+                const slug = HashRoute.slugFromHash(window.location.hash);
+                const found = slug ? universities.find(u => u.slug === slug) : null;
+                setSelectedUniversity(prev => {
+                    const prevId = prev ? prev.id : null;
+                    const foundId = found ? found.id : null;
+                    return prevId === foundId ? prev : (found || null);
+                });
+            }, [universities]);
+
+            // URL -> state: apply on data load and on every hashchange (back/forward, manual edit)
+            useEffect(() => { applyHash(); }, [applyHash]);
+            useEffect(() => {
+                window.addEventListener('hashchange', applyHash);
+                return () => window.removeEventListener('hashchange', applyHash);
+            }, [applyHash]);
+
+            // state -> URL: mirror the open school into the hash; clear it when closed
+            useEffect(() => {
+                if (selectedUniversity) {
+                    const target = HashRoute.hashForSlug(selectedUniversity.slug);
+                    if (window.location.hash !== target) window.location.hash = target;
+                } else if (window.location.hash && window.location.hash !== '#/') {
+                    history.replaceState(null, '', window.location.pathname + window.location.search);
+                }
+            }, [selectedUniversity]);
 
             // ---- validation warnings (computed values, NOT setState in useMemo) -----
             const gpaWarning = useMemo(() => {
