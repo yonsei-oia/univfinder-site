@@ -1090,6 +1090,18 @@
 .yz-track-note { font-size:12px; color:var(--ink-muted); margin:4px 0 0; line-height:1.5; }
 .yz-track-foot { font-size:12px; color:var(--ink-muted); margin:10px 0 0; }
 
+/* OIA minimum TOEFL floor — sits inside the English requirement, small + muted */
+.yz-floor { margin-top:10px; padding-top:9px; border-top:1px dashed var(--line-strong); }
+.yz-floor-head { font-size:10.5px; font-weight:700; color:var(--ink-faint); text-transform:uppercase;
+    letter-spacing:0.04em; margin:0 0 5px; line-height:1.4; }
+.yz-floor-list { margin:0; }
+.yz-floor-list > div { display:flex; align-items:baseline; justify-content:space-between;
+    gap:8px; padding:1.5px 0; }
+.yz-floor-list dt { font-size:11px; font-weight:500; color:var(--ink-muted); margin:0; line-height:1.3;
+    text-transform:none; letter-spacing:0; }
+.yz-floor-list dd { font-size:12px; font-weight:700; color:var(--brand); margin:0;
+    font-variant-numeric:tabular-nums; }
+
 /* Study-area cards */
 .yz-area { background:var(--bg-soft); border:1px solid var(--line); border-radius:8px;
     padding:16px 18px; }
@@ -3182,6 +3194,22 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             );
         }
 
+        // OIA's affiliation-based TOEFL minimums. These apply on top of the host
+        // school's own requirement (or in place of it when the school lists none),
+        // so they are shown inside the English requirement, not as a separate block.
+        function ToeflFloor() {
+            return (
+                <div className="yz-floor">
+                    <p className="yz-floor-head">OIA minimum — required even if not listed</p>
+                    <dl className="yz-floor-list">
+                        <div><dt>Humanities · Social Sciences</dt><dd>79</dd></div>
+                        <div><dt>Sciences · Engineering · Arts · Sports · Medical</dt><dd>68</dd></div>
+                        <div><dt>Graduate students</dt><dd>100</dd></div>
+                    </dl>
+                </div>
+            );
+        }
+
         // Panels are filled in by later tasks; stubs keep the page compiling.
         function EligibilityPanel({ u, linkify }) {
             const hasEnglish = u.language1 === 'English';
@@ -3243,6 +3271,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         <p className="yz-track-req">TOEFL iBT {u.toefl ?? 'Not specified'}</p>
                                         {subscores && <p className="yz-track-note">{subscores}</p>}
                                         {u.englishNotes && <p className="yz-track-note">{u.englishNotes}</p>}
+                                        <ToeflFloor />
                                     </div>
                                     <div className="yz-track">
                                         <p className="yz-track-name">{u.language2} track</p>
@@ -3258,6 +3287,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     <dt>TOEFL iBT</dt>
                                     <dd>{u.toefl ?? 'Not specified'}
                                         {subscores && <span className="yz-kv-note">{subscores}</span>}
+                                        <ToeflFloor />
                                     </dd>
                                     {u.englishNotes && (<>
                                         <dt>English notes</dt>
