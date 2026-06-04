@@ -47,15 +47,23 @@
         return `${_MONTHS[mo - 1]} ${da}, ${year}`;
     }
 
-    // Recruiting this term? quota is normally a parsed number (0 = not offered/N/A),
-    // but tolerate strings so callers cannot break on raw data.
-    function isRecruiting(u) {
+    // Does the school offer an intake in the active term? Reads that season's
+    // two option flags (booleans on u). Both false (incl. 'N' or blank) -> no.
+    function offersTerm(u, code) {
+        return parseSemester(code).season === 'spring'
+            ? !!(u.springOneSemester || u.springCalendarYear)
+            : !!(u.fallOneSemester || u.fallCalendarYear);
+    }
+
+    // Recruiting this term = offers the term AND has slots. quota is normally a
+    // parsed number (0 = no slots); tolerate strings so callers cannot break.
+    function isRecruiting(u, code) {
         const q = typeof u.quota === 'number' ? u.quota : parseFloat(u.quota);
-        return !isNaN(q) && q > 0;
+        return offersTerm(u, code) && !isNaN(q) && q > 0;
     }
 
     const TermLib = { parseSemester, deadlineYear, orientationLabel,
-                      activeDeadlineFields, formatDeadline, isRecruiting };
+                      activeDeadlineFields, formatDeadline, offersTerm, isRecruiting };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = TermLib;
     global.TermLib = TermLib;
