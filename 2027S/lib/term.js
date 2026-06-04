@@ -62,8 +62,27 @@
         return offersTerm(u, code) && !isNaN(q) && q > 0;
     }
 
+    // The semester/length filter options to show for the active term. Only the
+    // active season is offered (a Spring dashboard never shows Fall options), so
+    // switching SEMESTER_CODE flips the whole filter automatically.
+    //   key  - filters[] state key (4-flag model keeps all four; UI shows two)
+    //   flag - the university field this option matches
+    //   label/chip - English UI copy (checkbox label / active-filter chip)
+    function semesterOptions(code) {
+        return parseSemester(code).season === 'spring'
+            ? [
+                { key: 'wantSpringOneSem',  flag: 'springOneSemester',  label: 'Spring — one semester',                   chip: 'Spring · 1 sem' },
+                { key: 'wantSpringCalYear', flag: 'springCalendarYear', label: 'Spring — full year (Spring → next Fall)', chip: 'Spring · 1 yr' },
+              ]
+            : [
+                { key: 'wantFallOneSem',  flag: 'fallOneSemester',  label: 'Fall — one semester',              chip: 'Fall · 1 sem' },
+                { key: 'wantFallCalYear', flag: 'fallCalendarYear', label: 'Fall — full year (Fall → Spring)', chip: 'Fall · 1 yr' },
+              ];
+    }
+
     const TermLib = { parseSemester, deadlineYear, orientationLabel,
-                      activeDeadlineFields, formatDeadline, offersTerm, isRecruiting };
+                      activeDeadlineFields, formatDeadline, offersTerm, isRecruiting,
+                      semesterOptions };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = TermLib;
     global.TermLib = TermLib;
