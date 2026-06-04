@@ -1040,6 +1040,11 @@
 .yz-meta-stat dd { font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-0.01em;
     font-variant-numeric:tabular-nums; }
 .yz-meta-sub dd { font-size:13px; font-weight:500; color:var(--ink-muted); }
+.yz-meta-terms dd { display:flex; flex-direction:column; gap:2px; }
+.yz-term-row { display:flex; align-items:baseline; gap:8px; }
+.yz-term-season { font-size:11px; font-weight:700; color:var(--ink-muted); min-width:40px; }
+.yz-term-dur { font-size:13px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
+.yz-term-dur.is-none { font-weight:500; color:var(--ink-faint); }
 
 .yz-nav { display:flex; padding:6px 12px; gap:4px; border-bottom:1px solid var(--line);
     background:#fff; }
@@ -3125,6 +3130,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const slotsText = recruiting
                 ? `${u.quota}${u.quotaUnit ? ' ' + u.quotaUnit : ''}`
                 : `Not offered for ${SEMESTER.full}`;
+            // Exchange terms: per season, which durations are offered (1 sem / 1 yr).
+            const termRows = [
+                { season: 'Fall',   parts: [u.fallOneSemester && '1 sem', u.fallCalendarYear && '1 yr'].filter(Boolean) },
+                { season: 'Spring', parts: [u.springOneSemester && '1 sem', u.springCalendarYear && '1 yr'].filter(Boolean) },
+            ];
 
             const TABS = [
                 ['eligibility', 'Eligibility'],
@@ -3155,6 +3165,19 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <dl className="yz-meta">
                             <div className="yz-meta-stat"><dt>Slots</dt><dd>{slotsText}</dd></div>
                             <div className="yz-meta-stat"><dt>Language</dt><dd>{[u.language1,u.language2].filter(Boolean).join(' · ') || '—'}</dd></div>
+                            <div className="yz-meta-terms">
+                                <dt>Exchange terms</dt>
+                                <dd>
+                                    {termRows.map(r => (
+                                        <span key={r.season} className="yz-term-row">
+                                            <span className="yz-term-season">{r.season}</span>
+                                            {r.parts.length
+                                                ? <span className="yz-term-dur">{r.parts.join(' · ')}</span>
+                                                : <span className="yz-term-dur is-none">Not offered</span>}
+                                        </span>
+                                    ))}
+                                </dd>
+                            </div>
                             <div className="yz-meta-sub"><dt>System</dt><dd>{u.academicSystem || 'N/A'}</dd></div>
                         </dl>
 
