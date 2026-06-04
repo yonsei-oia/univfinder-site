@@ -2002,10 +2002,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             }
 
             if (filters.gpa && u.gpaRequired !== null) {
-                const myGpa43 = filters.gpaScaleIs45
-                    ? convertGpa45to43(filters.gpa)
-                    : parseFloat(filters.gpa);
-                if (myGpa43 !== null && myGpa43 < u.gpaRequired) return false;
+                const myGpa = parseFloat(filters.gpa);
+                if (!isNaN(myGpa) && myGpa < u.gpaRequired) return false;
             }
             if (filters.toefl && u.toefl !== null) {
                 if (parseInt(filters.toefl, 10) < u.toefl) return false;
@@ -2046,8 +2044,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             if (filters.university) add('university', `학교: ${filters.university}`, { university: '' });
             if (filters.universitySearch) add('universitySearch', `검색: "${filters.universitySearch}"`, { universitySearch: '' });
             if (filters.gpa) {
-                const scale = filters.gpaScaleIs45 ? '4.5' : '4.3';
-                add('gpa', `GPA ≥ ${filters.gpa} (${scale})`, { gpa: '' });
+                add('gpa', `GPA ≥ ${filters.gpa} (4.3)`, { gpa: '' });
             }
             if (filters.toefl) add('toefl', `TOEFL ≥ ${filters.toefl}`, { toefl: '' });
             if (filters.nonEnglishLanguage) add('nonEnglishLanguage', `비영어: ${filters.nonEnglishLanguage}`, { nonEnglishLanguage: '', nonEnglishLevel: '' });
@@ -2075,7 +2072,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             university: '',
             universitySearch: '',
             gpa: '',
-            gpaScaleIs45: false,      // true면 입력한 gpa를 4.5만점으로 간주, 비교 시 4.3 환산
             toefl: '',
             nonEnglishLanguage: '',
             nonEnglishLevel: '',
@@ -2085,14 +2081,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             updateOnly: false,
         };
 
-        // 4.5 만점 GPA를 4.3 만점으로 환산 (단순 비례 — 참고용)
-        // 학생들이 OIA에 제출할 때는 정확한 등급별 환산표를 별도 확인해야 함.
-        function convertGpa45to43(gpa45) {
-            const v = parseFloat(gpa45);
-            if (isNaN(v)) return null;
-            const converted = (v / 4.5) * 4.3;
-            return Math.round(converted * 100) / 100; // 소수점 2자리
-        }
 
         function loadFromStorage(storage, key, fallback) {
             try {
@@ -2106,7 +2094,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         //   - favorites (사용자 별표한 학교)
         //   - qualifications (GPA / TOEFL / 비영어 어학 — 재입력 줄이기 위해)
         // 나머지 필터(대륙·국가·체크박스 등)는 sessionStorage만 사용 (세션 한정).
-        const QUALIFICATION_KEYS = ['gpa', 'gpaScaleIs45', 'toefl', 'nonEnglishLanguage', 'nonEnglishLevel'];
+        const QUALIFICATION_KEYS = ['gpa', 'toefl', 'nonEnglishLanguage', 'nonEnglishLevel'];
 
         // =========================================================================
         // App
@@ -2168,7 +2156,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 const quals = {};
                 QUALIFICATION_KEYS.forEach(k => { quals[k] = filters[k]; });
                 localStorage.setItem('27S_qualifications', JSON.stringify(quals));
-            }, [filters.gpa, filters.gpaScaleIs45, filters.toefl, filters.nonEnglishLanguage, filters.nonEnglishLevel]);
+            }, [filters.gpa, filters.toefl, filters.nonEnglishLanguage, filters.nonEnglishLevel]);
 
             // ---- language region change: clear incompatible language filters --------
             useEffect(() => {
@@ -2240,10 +2228,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const gpaWarning = useMemo(() => {
                 if (!filters.gpa) return '';
                 const v = parseFloat(filters.gpa);
-                const max = filters.gpaScaleIs45 ? 4.5 : 4.3;
-                if (isNaN(v) || v < 0 || v > max) return `GPA는 0.0 ~ ${max} 사이여야 합니다.`;
+                if (isNaN(v) || v < 0 || v > 4.3) return 'GPA는 0.0 ~ 4.3 사이여야 합니다.';
                 return '';
-            }, [filters.gpa, filters.gpaScaleIs45]);
+            }, [filters.gpa]);
             const toeflWarning = useMemo(() => {
                 if (!filters.toefl) return '';
                 const v = parseInt(filters.toefl, 10);
@@ -2739,25 +2726,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 <label className="filter-label">My Qualifications</label>
                                 <div className="input-group">
                                     <div className="input-field">
-                                        <div className="input-field-head">
-                                            <label>GPA ({filters.gpaScaleIs45 ? '4.5 scale 입력' : '4.3 scale 입력'})</label>
-                                            <label className="scale-toggle" title="내 학교가 4.5 만점 기준이면 체크. 비교 시 자동 4.3 환산">
-                                                <input type="checkbox"
-                                                    checked={filters.gpaScaleIs45}
-                                                    onChange={(e)=>setFilters(p=>({...p, gpaScaleIs45: e.target.checked}))} />
-                                                내 GPA는 4.5 만점
-                                            </label>
-                                        </div>
-                                        <input type="number" step="0.01" min="0"
-                                            max={filters.gpaScaleIs45 ? '4.5' : '4.3'}
-                                            placeholder={filters.gpaScaleIs45 ? 'e.g., 4.0 (4.5점 기준)' : 'e.g., 3.5'}
+                                        <label>GPA (4.3 scale)</label>
+                                        <input type="number" step="0.01" min="0" max="4.3"
+                                            placeholder="e.g., 3.5"
                                             value={filters.gpa}
                                             onChange={(e)=>setFilters(p=>({...p, gpa:e.target.value}))} />
-                                        {filters.gpa && filters.gpaScaleIs45 && !gpaWarning && (
-                                            <div className="gpa-hint">
-                                                ≈ <strong>{convertGpa45to43(filters.gpa)}</strong> (4.3 환산, 참고용)
-                                            </div>
-                                        )}
                                         {gpaWarning && <div className="warning-text">{gpaWarning}</div>}
                                     </div>
 
