@@ -3211,15 +3211,17 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </div>
                     )}
 
-                    <div className="yz-sect">
-                        <div className="yz-sect-head">
-                            <p className="yz-sect-label">Open to</p>
+                    {(u.acceptsUG || u.acceptsGrad) && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Open to</p>
+                            </div>
+                            <div className="yz-levels">
+                                {u.acceptsUG && <span className="yz-level is-open">Undergraduate</span>}
+                                {u.acceptsGrad && <span className="yz-level is-open">Graduate</span>}
+                            </div>
                         </div>
-                        <div className="yz-levels">
-                            <span className={`yz-level ${u.acceptsUG ? 'is-open' : ''}`}>Undergraduate</span>
-                            <span className={`yz-level ${u.acceptsGrad ? 'is-open' : ''}`}>Graduate</span>
-                        </div>
-                    </div>
+                    )}
 
                     <div className="yz-sect">
                         <div className="yz-sect-head">
