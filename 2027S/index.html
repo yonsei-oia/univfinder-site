@@ -1063,6 +1063,13 @@
 .yz-req-value.muted { font-size:14px; font-weight:500; color:var(--ink-muted); }
 .yz-req-note { font-size:12px; color:var(--ink-muted); margin:4px 0 0; }
 
+/* Compact "Open to" level chips (Undergraduate / Graduate) */
+.yz-levels { display:flex; gap:8px; flex-wrap:wrap; }
+.yz-level { font-size:12px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;
+    padding:6px 12px; border-radius:999px; border:1px solid var(--line-strong);
+    color:var(--ink-faint); background:var(--bg-soft); }
+.yz-level.is-open { background:var(--brand-soft); border-color:var(--brand-soft); color:var(--brand); }
+
 /* Study-area cards */
 .yz-area { background:var(--bg-soft); border:1px solid var(--line); border-radius:8px;
     padding:16px 18px; }
@@ -3219,18 +3226,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                     <div className="yz-sect">
                         <div className="yz-sect-head">
-                            <p className="yz-sect-label">Levels</p>
-                            <h3 className="yz-sect-title">Open programs</h3>
+                            <p className="yz-sect-label">Open to</p>
                         </div>
-                        <div className="yz-req-grid">
-                            <div className="yz-req">
-                                <p className="yz-req-label">Undergraduate</p>
-                                <p className="yz-req-value">{u.acceptsUG ? 'Open' : 'Not open'}</p>
-                            </div>
-                            <div className="yz-req">
-                                <p className="yz-req-label">Graduate</p>
-                                <p className="yz-req-value">{u.acceptsGrad ? 'Open' : 'Not open'}</p>
-                            </div>
+                        <div className="yz-levels">
+                            <span className={`yz-level ${u.acceptsUG ? 'is-open' : ''}`}>Undergraduate</span>
+                            <span className={`yz-level ${u.acceptsGrad ? 'is-open' : ''}`}>Graduate</span>
                         </div>
                     </div>
 
