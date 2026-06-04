@@ -34,9 +34,19 @@ test('formatDeadline: MM/DD + year -> human date; junk -> empty string', () => {
     assert.strictEqual(TermLib.formatDeadline(null, 2026), '');
 });
 
-test('isRecruiting: quota > 0 means recruiting this term', () => {
-    assert.strictEqual(TermLib.isRecruiting({ quota: 3 }), true);
-    assert.strictEqual(TermLib.isRecruiting({ quota: 0 }), false);
-    assert.strictEqual(TermLib.isRecruiting({ quota: '2' }), true);
-    assert.strictEqual(TermLib.isRecruiting({ quota: '' }), false);
+test('offersTerm reads the active-season intake flags', () => {
+    assert.strictEqual(TermLib.offersTerm({ springOneSemester: true }, '27S'), true);
+    assert.strictEqual(TermLib.offersTerm({ springCalendarYear: true }, '27S'), true);
+    assert.strictEqual(TermLib.offersTerm({ fallOneSemester: true }, '27S'), false);
+    assert.strictEqual(TermLib.offersTerm({ fallOneSemester: true }, '27F'), true);
+    assert.strictEqual(TermLib.offersTerm({}, '27S'), false);
+});
+
+test('isRecruiting: offers the active term AND has slots', () => {
+    assert.strictEqual(TermLib.isRecruiting({ quota: 3, springOneSemester: true }, '27S'), true);
+    assert.strictEqual(TermLib.isRecruiting({ quota: 0, springOneSemester: true }, '27S'), false); // no slots
+    assert.strictEqual(TermLib.isRecruiting({ quota: 3 }, '27S'), false);                          // no spring intake
+    assert.strictEqual(TermLib.isRecruiting({ quota: 3, fallOneSemester: true }, '27S'), false);   // fall-only, spring dashboard
+    assert.strictEqual(TermLib.isRecruiting({ quota: 3, fallOneSemester: true }, '27F'), true);    // fall dashboard
+    assert.strictEqual(TermLib.isRecruiting({ quota: '2', springCalendarYear: true }, '27S'), true);
 });
