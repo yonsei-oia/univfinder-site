@@ -2031,10 +2031,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
             if (filters.studentType) add('studentType', `학생: ${filters.studentType}`, { studentType: '' });
             if (filters.languageRegion) add('languageRegion', `언어권: ${filters.languageRegion}`, { languageRegion: '' });
-            if (filters.wantFallOneSem)    add('wantFallOneSem',    '학기: Fall 1학기',     { wantFallOneSem: false });
-            if (filters.wantFallCalYear)   add('wantFallCalYear',   '학기: Fall부터 1년',   { wantFallCalYear: false });
-            if (filters.wantSpringOneSem)  add('wantSpringOneSem',  '학기: Spring 1학기',   { wantSpringOneSem: false });
-            if (filters.wantSpringCalYear) add('wantSpringCalYear', '학기: Spring부터 1년', { wantSpringCalYear: false });
+            TermLib.semesterOptions(SEMESTER.code).forEach(opt => {
+                if (filters[opt.key]) add(opt.key, `Term: ${opt.chip}`, { [opt.key]: false });
+            });
             if (filters.continent) add('continent', `대륙: ${filters.continent}`, { continent: '', country: '', university: '' });
             if (filters.country) {
                 const flag = COUNTRY_FLAGS[filters.country] || '';
@@ -2667,34 +2666,18 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 </div>
                             </div>
 
-                            {/* Semester Option (T2-G — 4-way checkboxes) */}
+                            {/* Semester Option — only the active term's options (derived from SEMESTER_CODE) */}
                             <div className="filter-section">
-                                <label className="filter-label">파견 가능 학기·기간 (복수 선택 가능)</label>
+                                <label className="filter-label">Exchange Term &amp; Length (select any)</label>
                                 <div className="checkbox-list">
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.wantFallOneSem}
-                                            onChange={(e)=>setFilters(p=>({...p, wantFallOneSem:e.target.checked}))} />
-                                        <span>Fall 1학기만 (가을학기 한 학기)</span>
-                                        {counts && <span className="filter-count">({counts.semesterOption.wantFallOneSem})</span>}
-                                    </label>
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.wantFallCalYear}
-                                            onChange={(e)=>setFilters(p=>({...p, wantFallCalYear:e.target.checked}))} />
-                                        <span>Fall부터 1년 (Fall → Spring)</span>
-                                        {counts && <span className="filter-count">({counts.semesterOption.wantFallCalYear})</span>}
-                                    </label>
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.wantSpringOneSem}
-                                            onChange={(e)=>setFilters(p=>({...p, wantSpringOneSem:e.target.checked}))} />
-                                        <span>Spring 1학기만 (봄학기 한 학기)</span>
-                                        {counts && <span className="filter-count">({counts.semesterOption.wantSpringOneSem})</span>}
-                                    </label>
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.wantSpringCalYear}
-                                            onChange={(e)=>setFilters(p=>({...p, wantSpringCalYear:e.target.checked}))} />
-                                        <span>Spring부터 1년 (Spring → 다음 Fall)</span>
-                                        {counts && <span className="filter-count">({counts.semesterOption.wantSpringCalYear})</span>}
-                                    </label>
+                                    {TermLib.semesterOptions(SEMESTER.code).map(opt => (
+                                        <label key={opt.key} className="checkbox-row">
+                                            <input type="checkbox" checked={filters[opt.key]}
+                                                onChange={(e)=>setFilters(p=>({...p, [opt.key]:e.target.checked}))} />
+                                            <span>{opt.label}</span>
+                                            {counts && <span className="filter-count">({counts.semesterOption[opt.key]})</span>}
+                                        </label>
+                                    ))}
                                 </div>
                             </div>
 
