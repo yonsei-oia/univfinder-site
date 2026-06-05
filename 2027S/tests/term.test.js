@@ -50,3 +50,17 @@ test('isRecruiting: offers the active term AND has slots', () => {
     assert.strictEqual(TermLib.isRecruiting({ quota: 3, fallOneSemester: true }, '27F'), true);    // fall dashboard
     assert.strictEqual(TermLib.isRecruiting({ quota: '2', springCalendarYear: true }, '27S'), true);
 });
+
+test('semesterOptions: only the active season, with filter keys and flags', () => {
+    const s = TermLib.semesterOptions('27S');
+    assert.strictEqual(s.length, 2);
+    assert.deepStrictEqual(s.map(o => o.key), ['wantSpringOneSem', 'wantSpringCalYear']);
+    assert.deepStrictEqual(s.map(o => o.flag), ['springOneSemester', 'springCalendarYear']);
+    assert.ok(s.every(o => o.label.includes('Spring') && o.chip.includes('Spring')));
+
+    const f = TermLib.semesterOptions('27F');
+    assert.strictEqual(f.length, 2);
+    assert.deepStrictEqual(f.map(o => o.key), ['wantFallOneSem', 'wantFallCalYear']);
+    assert.deepStrictEqual(f.map(o => o.flag), ['fallOneSemester', 'fallCalendarYear']);
+    assert.ok(f.every(o => o.label.includes('Fall') && o.chip.includes('Fall')));
+});
