@@ -1294,9 +1294,7 @@
                 fall_one_semester: 'Y', fall_calendar_year: 'Y',
                 spring_one_semester: 'Y', spring_calendar_year: 'N',
                 academic_system: 'Quarter',
-                toefl_total: '92', toefl_reading: '22', toefl_listening: '22',
-                toefl_speaking: '22', toefl_writing: '22',
-                english_notes: 'subscores must each be at least 20',
+                toefl_total: '92', toefl_subscores: 'R22 L22 S22 W22 — each subscore at least 20',
                 lang2_level: '', language_other_notes: '',
                 available_areas: 'All majors except Medicine, Dentistry',
                 restricted_areas: 'Medicine, Dentistry',
@@ -1318,9 +1316,7 @@
                 fall_one_semester: 'Y', fall_calendar_year: 'N',
                 spring_one_semester: 'Y', spring_calendar_year: 'N',
                 academic_system: 'Semester',
-                toefl_total: '80', toefl_reading: '20', toefl_listening: '20',
-                toefl_speaking: '20', toefl_writing: '20',
-                english_notes: 'or equivalent',
+                toefl_total: '80', toefl_subscores: 'R20 L20 S20 W20 — or equivalent',
                 lang2_level: 'N2', language_other_notes: 'JLPT N2 required for non-English track',
                 available_areas: 'All faculties open to exchange',
                 restricted_areas: 'Medicine, Law graduate',
@@ -1342,9 +1338,7 @@
                 fall_one_semester: 'Y', fall_calendar_year: 'Y',
                 spring_one_semester: 'Y', spring_calendar_year: 'N',
                 academic_system: 'Semester',
-                toefl_total: '', toefl_reading: '', toefl_listening: '',
-                toefl_speaking: '', toefl_writing: '',
-                english_notes: '',
+                toefl_total: '', toefl_subscores: '',
                 lang2_level: 'B2', language_other_notes: 'B2 required, C1 recommended',
                 available_areas: 'Limited to Social Sciences and Humanities',
                 restricted_areas: 'Sciences Po Law School',
@@ -1366,9 +1360,7 @@
                 fall_one_semester: 'Y', fall_calendar_year: 'Y',
                 spring_one_semester: 'Y', spring_calendar_year: 'Y',
                 academic_system: 'Semester',
-                toefl_total: '88', toefl_reading: '', toefl_listening: '',
-                toefl_speaking: '', toefl_writing: '',
-                english_notes: '',
+                toefl_total: '88', toefl_subscores: '',
                 lang2_level: 'B1', language_other_notes: 'B1 minimum for German-taught courses',
                 available_areas: 'Humanities, Social Sciences, Natural Sciences',
                 restricted_areas: 'Medicine',
@@ -1390,9 +1382,7 @@
                 fall_one_semester: 'Y', fall_calendar_year: 'Y',
                 spring_one_semester: 'Y', spring_calendar_year: 'N',
                 academic_system: 'Semester',
-                toefl_total: '85', toefl_reading: '', toefl_listening: '',
-                toefl_speaking: '', toefl_writing: '',
-                english_notes: '',
+                toefl_total: '85', toefl_subscores: '',
                 lang2_level: 'HSK4', language_other_notes: 'HSK4 for Chinese-taught courses',
                 available_areas: 'Most faculties',
                 restricted_areas: 'Medicine, Stomatology',
@@ -1414,9 +1404,7 @@
                 fall_one_semester: 'Y', fall_calendar_year: 'Y',
                 spring_one_semester: 'Y', spring_calendar_year: 'N',
                 academic_system: 'Semester',
-                toefl_total: '', toefl_reading: '', toefl_listening: '',
-                toefl_speaking: '', toefl_writing: '',
-                english_notes: '',
+                toefl_total: '', toefl_subscores: '',
                 lang2_level: 'B2',
                 language_other_notes: 'French B2 required. Home university language certificates are accepted.',
                 available_areas: 'Courses across departments within the Faculty of Letters.',
@@ -1440,9 +1428,7 @@
                 fall_one_semester: 'Y', fall_calendar_year: 'Y',
                 spring_one_semester: 'Y', spring_calendar_year: 'N',
                 academic_system: 'Semester',
-                toefl_total: '90', toefl_reading: '22', toefl_listening: '22',
-                toefl_speaking: '21', toefl_writing: '21',
-                english_notes: '',
+                toefl_total: '90', toefl_subscores: 'R22 L22 S21 W21',
                 lang2_level: '', language_other_notes: '',
                 available_areas: 'All faculties',
                 restricted_areas: 'Medicine, Dentistry, Pharmacy',
@@ -1778,11 +1764,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 springCalendarYear: isYes(row.spring_calendar_year),
                 academicSystem: (row.academic_system || '').trim(),
                 toefl: parseIntOrNull(row.toefl_total),
-                toeflReading: parseIntOrNull(row.toefl_reading),
-                toeflListening: parseIntOrNull(row.toefl_listening),
-                toeflSpeaking: parseIntOrNull(row.toefl_speaking),
-                toeflWriting: parseIntOrNull(row.toefl_writing),
-                englishNotes: row.english_notes || '',
+                toeflSubscores: row.toefl_subscores || '',
                 lang2Level: (row.lang2_level || '').trim(),
                 languageOtherNotes: row.language_other_notes || '',
                 availableAreas: row.available_areas || '',
@@ -3174,10 +3156,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const hasEnglish = u.language1 === 'English';
             const hasOther = !!u.language2;
             const twoTracks = hasEnglish && hasOther;
-            const subscores = [
-                u.toeflReading && `R ${u.toeflReading}`, u.toeflListening && `L ${u.toeflListening}`,
-                u.toeflSpeaking && `S ${u.toeflSpeaking}`, u.toeflWriting && `W ${u.toeflWriting}`,
-            ].filter(Boolean).join(' · ');
+            const subscores = u.toeflSubscores;
             const otherReq = u.lang2Level ? `${u.language2} · ${u.lang2Level}` : u.language2;
             return (
                 <>
@@ -3228,8 +3207,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     <div className="yz-track">
                                         <p className="yz-track-name">English track</p>
                                         <p className="yz-track-req">TOEFL iBT {u.toefl ?? 'Not specified'}</p>
-                                        {subscores && <p className="yz-track-note">{subscores}</p>}
-                                        {u.englishNotes && <p className="yz-track-note">{u.englishNotes}</p>}
+                                        {subscores && <p className="yz-track-note" style={{whiteSpace:'pre-line'}}>{linkify(subscores)}</p>}
                                         <ToeflFloor />
                                     </div>
                                     <div className="yz-track">
@@ -3245,13 +3223,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 {hasEnglish && (<>
                                     <dt>TOEFL iBT</dt>
                                     <dd>{u.toefl ?? 'Not specified'}
-                                        {subscores && <span className="yz-kv-note">{subscores}</span>}
+                                        {subscores && <span className="yz-kv-note" style={{whiteSpace:'pre-line'}}>{linkify(subscores)}</span>}
                                         <ToeflFloor />
                                     </dd>
-                                    {u.englishNotes && (<>
-                                        <dt>English notes</dt>
-                                        <dd className="muted">{u.englishNotes}</dd>
-                                    </>)}
                                 </>)}
                                 {!hasEnglish && hasOther && (<>
                                     <dt>{u.language2}</dt>
