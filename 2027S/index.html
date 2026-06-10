@@ -229,6 +229,12 @@
             line-height: 1.15; text-wrap: balance;
             color: #fff; margin: 0 0 14px;
         }
+        .hero__subtitle {
+            font-size: clamp(15px, 1.6vw, 19px);
+            font-weight: 600; letter-spacing: -0.01em;
+            line-height: 1.3; color: rgba(255, 255, 255, 0.92);
+            max-width: 60ch; margin: 0 0 14px;
+        }
         .hero__lede {
             font-size: clamp(14px, 1.2vw, 16px);
             color: rgba(255, 255, 255, 0.78);
@@ -2565,7 +2571,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     <section className="hero" aria-labelledby="page-title">
                         <div className="hero__inner">
                             <div className="hero__top">
-                                <p className="hero__eyebrow">{SEMESTER.korean} · {SEMESTER.full}</p>
+                                <p className="hero__eyebrow">Exchange University Finder · {SEMESTER.full}</p>
                                 <div className="hero__counter" aria-label="결과 카운터">
                                     <span className="hero__counter-item">
                                         <span className="hero__counter-label">결과</span>
@@ -2581,6 +2587,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             <h1 id="page-title" className="hero__title">
                                 해외파견 프로그램 배정 가능 대학
                             </h1>
+                            <p className="hero__subtitle">
+                                List of Host Universities for Yonsei Outbound Exchange Program
+                            </p>
                             <p className="hero__lede">
                                 연세대학교 국제처가 운영하는 교환학생 프로그램에서 지원 가능한 해외 파트너 대학 명단입니다.
                                 대륙·언어·학점·어학 요건으로 좁혀 검색하고, 관심 학교는 즐겨찾기에 담아 비교해 보세요.
