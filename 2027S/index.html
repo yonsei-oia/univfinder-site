@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring 2027 Exchange University Finder | Yonsei OIA</title>
+    <title>Exchange University Finder | Yonsei OIA</title>
 
     <!-- ===================================================================
          배포 직전 활성화용 보안 차단 블록 (현재 비활성화)
@@ -49,15 +49,15 @@
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Host Universities | Yonsei OIA">
-    <meta property="og:title" content="Spring 2027 Host Universities | Yonsei OIA">
-    <meta property="og:description" content="Yonsei OIA Host Universities for Spring 2027">
+    <meta property="og:title" content="Exchange University Finder | Yonsei OIA">
+    <meta property="og:description" content="Host universities for the Yonsei Outbound Exchange Program — Office of International Affairs, Yonsei University.">
     <meta property="og:url" content="https://yonsei-oia-univfinder.netlify.app/">
     <meta property="og:image" content="https://yonsei-oia-univfinder.netlify.app/assets/oiaunivfinderthumbnail.png">
     <meta property="og:image:width" content="800">
     <meta property="og:image:height" content="400">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Spring 2027 Host Universities | Yonsei OIA">
-    <meta name="twitter:description" content="Yonsei OIA Host Universities for Spring 2027">
+    <meta name="twitter:title" content="Exchange University Finder | Yonsei OIA">
+    <meta name="twitter:description" content="Host universities for the Yonsei Outbound Exchange Program — Office of International Affairs, Yonsei University.">
     <meta name="twitter:image" content="https://yonsei-oia-univfinder.netlify.app/assets/oiaunivfinderthumbnail.png">
 
     <meta name="theme-color" content="#003876">
@@ -1362,6 +1362,7 @@
             full: semesterCodeToFullName(SEMESTER_CODE),
             korean: semesterCodeToKoreanName(SEMESTER_CODE),
         };
+        document.title = `${SEMESTER.full} Exchange University Finder | Yonsei OIA`;
 
         // =========================================================================
         // 데이터 소스 — 우선순위: JSON → CSV → mock
