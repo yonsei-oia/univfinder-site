@@ -1340,6 +1340,8 @@
         // =========================================================================
         const SEMESTER_OVERRIDE = '';   // '' = 자동; 예: '27F' 로 고정(테스트/비상)
         const SEMESTER_CODE = SEMESTER_OVERRIDE || TermLib.codeForDate(new Date());
+        // Per-term browser-storage namespace — advances automatically with the term.
+        const TERM_SK = SEMESTER_CODE + '_';
 
         function semesterCodeToYearPart(code) {
             const year = 2000 + parseInt(code.substring(0, 2));
@@ -2129,13 +2131,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 // Active filters live in sessionStorage. If absent (new session),
                 // restore saved qualifications from localStorage so the student
                 // does not retype GPA/TOEFL/언어 every visit.
-                const fromSession = loadFromStorage(sessionStorage, '27S_filters', null);
+                const fromSession = loadFromStorage(sessionStorage, `${TERM_SK}filters`, null);
                 if (fromSession) return fromSession;
-                const savedQuals = loadFromStorage(localStorage, '27S_qualifications', {});
+                const savedQuals = loadFromStorage(localStorage, `${TERM_SK}qualifications`, {});
                 return { ...DEFAULT_FILTERS, ...savedQuals };
             });
-            const [sortBy, setSortBy]     = useState(() => loadFromStorage(sessionStorage, '27S_sortBy', 'quota-desc'));
-            const [favorites, setFavorites] = useState(() => loadFromStorage(localStorage, '27S_favorites', []));
+            const [sortBy, setSortBy]     = useState(() => loadFromStorage(sessionStorage, `${TERM_SK}sortBy`, 'quota-desc'));
+            const [favorites, setFavorites] = useState(() => loadFromStorage(localStorage, `${TERM_SK}favorites`, []));
             const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
             const [hideNotRecruiting, setHideNotRecruiting] = useState(false);
 
@@ -2146,11 +2148,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
             // T2-I: First-visit banner — dismissed flag persists in localStorage
             const [showFirstVisitBanner, setShowFirstVisitBanner] = useState(() =>
-                !loadFromStorage(localStorage, '27S_dismissedFirstVisitBanner', false)
+                !loadFromStorage(localStorage, `${TERM_SK}dismissedFirstVisitBanner`, false)
             );
             const dismissFirstVisitBanner = () => {
                 setShowFirstVisitBanner(false);
-                localStorage.setItem('27S_dismissedFirstVisitBanner', 'true');
+                localStorage.setItem(`${TERM_SK}dismissedFirstVisitBanner`, 'true');
             };
 
             // T2-F: Compare modal state
@@ -2176,16 +2178,16 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             }, [sidebarCollapsed]);
 
             // ---- persist filters/sortBy/favorites/qualifications --------------------
-            useEffect(() => { sessionStorage.setItem('27S_filters', JSON.stringify(filters)); }, [filters]);
-            useEffect(() => { sessionStorage.setItem('27S_sortBy', JSON.stringify(sortBy)); }, [sortBy]);
-            useEffect(() => { localStorage.setItem('27S_favorites', JSON.stringify(favorites)); }, [favorites]);
+            useEffect(() => { sessionStorage.setItem(`${TERM_SK}filters`, JSON.stringify(filters)); }, [filters]);
+            useEffect(() => { sessionStorage.setItem(`${TERM_SK}sortBy`, JSON.stringify(sortBy)); }, [sortBy]);
+            useEffect(() => { localStorage.setItem(`${TERM_SK}favorites`, JSON.stringify(favorites)); }, [favorites]);
 
             // Mirror just the personal qualifications into localStorage so they
             // survive across browser sessions, separate from transient filters.
             useEffect(() => {
                 const quals = {};
                 QUALIFICATION_KEYS.forEach(k => { quals[k] = filters[k]; });
-                localStorage.setItem('27S_qualifications', JSON.stringify(quals));
+                localStorage.setItem(`${TERM_SK}qualifications`, JSON.stringify(quals));
             }, [filters.gpa, filters.toefl, filters.nonEnglishLanguage, filters.nonEnglishLevel]);
 
             // ---- language region change: clear incompatible language filters --------
@@ -2532,7 +2534,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
             const clearAllFilters = () => {
                 setFilters(DEFAULT_FILTERS);
-                sessionStorage.removeItem('27S_filters');
+                sessionStorage.removeItem(`${TERM_SK}filters`);
             };
 
             const removeChip = (reset) => setFilters(prev => ({ ...prev, ...reset }));
