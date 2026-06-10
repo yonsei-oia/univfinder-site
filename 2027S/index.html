@@ -1043,6 +1043,14 @@
 .yz-cover { aspect-ratio:16/7; position:relative; overflow:hidden;
     background:linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); }
 .yz-cover.has-img { background-size:cover; background-position:center; }
+.yz-cover.is-logo { background:#fff; }
+.yz-cover-logo { position:absolute; top:8%; left:50%; transform:translateX(-50%);
+    height:54%; max-width:72%; object-fit:contain; }
+.yz-cover.is-logo .yz-cover-eyebrow { color:#6b7280; }
+.yz-cover.is-logo .yz-cover-title { color:#003876; }
+.yz-cover.is-logo .yz-cover-credit { color:rgba(0,0,0,0.45); }
+.yz-cover.is-logo .modal-close-btn { background:rgba(0,0,0,0.07); color:#1f2937; }
+.yz-cover.is-logo .modal-close-btn:hover { background:rgba(0,0,0,0.14); }
 .yz-cover-inner { position:absolute; inset:auto 0 0 0; padding:24px 28px; color:#fff; }
 .yz-cover-eyebrow { font-size:11px; font-weight:700; letter-spacing:0.12em;
     text-transform:uppercase; color:var(--brand-on-dark); margin:0 0 8px; }
@@ -1573,6 +1581,7 @@
             'Sorbonne University - Faculty of Letters': {
                 cover_image_url: 'assets/universities/sorbonne-faculty-of-letters/cover.jpg',
                 cover_image_credit: '',
+                cover_image_kind: 'photo',
                 gallery_urls: '',
                 // 노션 본문 내 YouTube URL과 채널 URL 그대로
                 video_links:
@@ -1653,6 +1662,11 @@ Sorbonne Université (@Sorbonne_Univ_) on X | https://x.com/Sorbonne_Univ_
 Google Maps | https://maps.app.goo.gl/JpdhCp3hQByGUT9t6
 Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/files/media/2024-06/Plan Sorbonne-RdC-2024.pdf`,
                 last_updated: '2026-05-20',
+            },
+            'University of Washington': {
+                cover_image_url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="100"><rect width="240" height="100" fill="white"/><text x="120" y="68" font-size="56" font-weight="bold" text-anchor="middle" fill="%234b2e83">UW</text></svg>',
+                cover_image_credit: 'Wikimedia Commons',
+                cover_image_kind: 'logo',
             },
         };
 
@@ -1940,6 +1954,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     gallery_urls: (c.gallery_urls || []).join('\n'),
                     cover_image_url: u.cover_image_url || '',
                     cover_image_credit: u.cover_image_credit || '',
+                    cover_image_kind: u.cover_image_kind || '',
                 };
                 return {
                     ...u,
@@ -3152,6 +3167,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const [tab, setTab] = useState('eligibility');
             const cover = u.content && u.content.cover_image_url;
             const credit = u.content && u.content.cover_image_credit;
+            const isLogo = !!cover && (u.content.cover_image_kind === 'logo');
             const recruiting = TermLib.isRecruiting(u, SEMESTER.code);
             const slotsText = recruiting
                 ? `${u.quota}${u.quotaUnit ? ' ' + u.quotaUnit : ''}`
@@ -3172,10 +3188,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={(e)=>e.stopPropagation()}>
-                        <div className={`yz-cover ${cover ? 'has-img' : ''}`}
-                            style={cover ? {
+                        <div className={`yz-cover ${cover ? (isLogo ? 'is-logo' : 'has-img') : ''}`}
+                            style={cover && !isLogo ? {
                                 backgroundImage: `linear-gradient(180deg, rgba(15,20,25,0.20) 0%, rgba(15,20,25,0.70) 100%), url('${cover}')`,
                             } : undefined}>
+                            {isLogo && <img className="yz-cover-logo" src={cover} alt="" />}
                             {cameFromUpdateHistory && (
                                 <button className="modal-close-btn" onClick={onBack}
                                     aria-label="Back to Update History" style={{right:50}}>←</button>
