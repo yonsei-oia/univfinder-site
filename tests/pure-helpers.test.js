@@ -59,3 +59,10 @@ test('deriveLabels: Scholarship/New/Updated + window boundary', () => {
   assert.deepEqual(UF.deriveLabels('Y', recentAdd.concat(recentChange), now), ['Scholarship', 'New', 'Updated']);
   assert.deepEqual(UF.deriveLabels('', oldChange, now), []);
 });
+
+test('labelStyle: navy hierarchy + neutral fallback', () => {
+  assert.deepEqual(UF.labelStyle('Scholarship'), { bg: '#003876', color: '#ffffff', border: 'none' });
+  assert.deepEqual(UF.labelStyle('New'),         { bg: '#dbe4f0', color: '#003876', border: 'none' });
+  assert.deepEqual(UF.labelStyle('Updated'),     { bg: 'transparent', color: '#003876', border: '1.5px solid #003876' });
+  assert.deepEqual(UF.labelStyle('Whatever'),    { bg: '#eef1f5', color: '#3a4654', border: 'none' });
+});

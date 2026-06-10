@@ -1308,9 +1308,17 @@
         if (es.some(function (e) { return e.kind === 'changed' && withinDays(e.date, NEW_UPDATED_WINDOW_DAYS, nowMs); })) labels.push('Updated');
         return labels;
       }
+      var LABEL_STYLES = {
+        Scholarship: { bg: '#003876', color: '#ffffff', border: 'none' },
+        New:         { bg: '#dbe4f0', color: '#003876', border: 'none' },
+        Updated:     { bg: 'transparent', color: '#003876', border: '1.5px solid #003876' },
+      };
+      function labelStyle(label) {
+        return LABEL_STYLES[label] || { bg: '#eef1f5', color: '#3a4654', border: 'none' };
+      }
       root.UF = { NEW_UPDATED_WINDOW_DAYS: NEW_UPDATED_WINDOW_DAYS, FIELD_LABELS: FIELD_LABELS,
         valueFmt: valueFmt, formatChange: formatChange, describeEntry: describeEntry,
-        withinDays: withinDays, deriveLabels: deriveLabels };
+        withinDays: withinDays, deriveLabels: deriveLabels, labelStyle: labelStyle };
     })(typeof window !== 'undefined' ? window : globalThis);
     /* === UF-PURE-END === */
     </script>
