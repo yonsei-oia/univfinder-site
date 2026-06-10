@@ -64,3 +64,20 @@ test('semesterOptions: only the active season, with filter keys and flags', () =
     assert.deepStrictEqual(f.map(o => o.flag), ['fallOneSemester', 'fallCalendarYear']);
     assert.ok(f.every(o => o.label.includes('Fall') && o.chip.includes('Fall')));
 });
+
+test('codeFromYmd: Jun 15 / Dec 15 flips + windows', () => {
+    assert.strictEqual(TermLib.codeFromYmd(2026, 6, 14), '26F'); // before Jun 15 -> Fall of Y
+    assert.strictEqual(TermLib.codeFromYmd(2026, 6, 15), '27S'); // Jun 15 -> Spring of Y+1
+    assert.strictEqual(TermLib.codeFromYmd(2026, 12, 14), '27S'); // still Spring of Y+1
+    assert.strictEqual(TermLib.codeFromYmd(2026, 12, 15), '27F'); // Dec 15 -> Fall of Y+1
+    assert.strictEqual(TermLib.codeFromYmd(2027, 1, 5), '27F');  // Jan is the Dec15->Jun15 window
+    assert.strictEqual(TermLib.codeFromYmd(2027, 6, 15), '28S'); // year rollover
+    assert.strictEqual(TermLib.codeFromYmd(2027, 12, 15), '28F');
+});
+
+test('codeForDate: reads the date in KST, not UTC', () => {
+    // 2026-06-14T20:00:00Z == 2026-06-15 05:00 KST -> already flipped to 27S.
+    assert.strictEqual(TermLib.codeForDate(new Date('2026-06-14T20:00:00Z')), '27S');
+    // 2026-06-14T10:00:00Z == 2026-06-14 19:00 KST -> not yet flipped -> 26F.
+    assert.strictEqual(TermLib.codeForDate(new Date('2026-06-14T10:00:00Z')), '26F');
+});

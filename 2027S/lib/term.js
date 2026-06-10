@@ -80,9 +80,30 @@
               ];
     }
 
+    // Date (KST) -> SEMESTER_CODE. Recruiting cycle flips on Jun 15 and Dec 15:
+    //   Jun 15 (Y) .. Dec 14 (Y)      -> Spring of Y+1  (e.g. 2026-06-15 -> 27S)
+    //   Dec 15 (Y) .. Jun 14 (Y+1)    -> Fall   of Y+1  (e.g. 2026-12-15 -> 27F)
+    function codeFromYmd(y, m, d) {
+        const md = m * 100 + d;
+        let year, season;
+        if (md >= 1215) { year = y + 1; season = 'F'; }
+        else if (md >= 615) { year = y + 1; season = 'S'; }
+        else { year = y; season = 'F'; }
+        return String(year % 100).padStart(2, '0') + season;
+    }
+
+    // Same rule, anchored to Korea time regardless of the visitor's timezone.
+    function codeForDate(date) {
+        const s = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(date);                       // 'YYYY-MM-DD'
+        const parts = s.split('-').map(Number);
+        return codeFromYmd(parts[0], parts[1], parts[2]);
+    }
+
     const TermLib = { parseSemester, deadlineYear, orientationLabel,
                       activeDeadlineFields, formatDeadline, offersTerm, isRecruiting,
-                      semesterOptions };
+                      semesterOptions, codeFromYmd, codeForDate };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = TermLib;
     global.TermLib = TermLib;
