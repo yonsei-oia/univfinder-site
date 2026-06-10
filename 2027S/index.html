@@ -1309,12 +1309,12 @@
         return labels;
       }
       var LABEL_STYLES = {
-        Scholarship: { bg: '#003876', color: '#ffffff', border: 'none' },
-        New:         { bg: '#dbe4f0', color: '#003876', border: 'none' },
+        Scholarship: { bg: '#003876', color: '#ffffff', border: '1.5px solid transparent' },
+        New:         { bg: '#dbe4f0', color: '#003876', border: '1.5px solid transparent' },
         Updated:     { bg: 'transparent', color: '#003876', border: '1.5px solid #003876' },
       };
       function labelStyle(label) {
-        return LABEL_STYLES[label] || { bg: '#eef1f5', color: '#3a4654', border: 'none' };
+        return LABEL_STYLES[label] || { bg: '#eef1f5', color: '#3a4654', border: '1.5px solid transparent' };
       }
       root.UF = { NEW_UPDATED_WINDOW_DAYS: NEW_UPDATED_WINDOW_DAYS, FIELD_LABELS: FIELD_LABELS,
         valueFmt: valueFmt, formatChange: formatChange, describeEntry: describeEntry,
