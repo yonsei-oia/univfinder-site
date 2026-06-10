@@ -57,10 +57,12 @@ Replace the hex-per-label `LABEL_COLORS` map with a **pure style function**
 
 | Label | Form | bg | text color | border |
 |---|---|---|---|---|
-| **Scholarship** | solid (strongest) | `#003876` | `#ffffff` | none |
-| **New** | light navy tint (medium) | `#dbe4f0` | `#003876` | none |
+| **Scholarship** | solid (strongest) | `#003876` | `#ffffff` | `1.5px solid transparent` |
+| **New** | light navy tint (medium) | `#dbe4f0` | `#003876` | `1.5px solid transparent` |
 | **Updated** | outline (lightest) | `transparent` | `#003876` | `1.5px solid #003876` |
-| _(fallback)_ | neutral | `#eef1f5` | `#3a4654` | none |
+| _(fallback)_ | neutral | `#eef1f5` | `#3a4654` | `1.5px solid transparent` |
+
+All variants carry a 1.5px border (transparent for filled/fallback, navy for the outline) so every label renders at the same height.
 
 Differentiation is a **dark-fill → light-fill → outline** ladder: distinct in
 luminance and in form, so it survives grayscale / CVD. All combinations meet
