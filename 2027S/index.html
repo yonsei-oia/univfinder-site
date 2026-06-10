@@ -269,9 +269,9 @@
             margin: 30px 0 20px 0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .app-layout { display: grid; grid-template-columns: var(--sidebar-w, 260px) 1fr; gap: 24px; align-items: start; margin: 30px 0 20px; position: relative; }
+        .app-layout { display: grid; grid-template-columns: var(--sidebar-w, 340px) 1fr; gap: 24px; align-items: start; margin: 30px 0 20px; position: relative; }
         .app-main { min-width: 0; }
-        .sidebar-resizer { position: absolute; top: 0; bottom: 0; left: var(--sidebar-w, 260px); width: 12px; margin-left: -1px; cursor: col-resize; z-index: 5; }
+        .sidebar-resizer { position: absolute; top: 0; bottom: 0; left: var(--sidebar-w, 340px); width: 12px; margin-left: -1px; cursor: col-resize; z-index: 5; }
         .sidebar-resizer::after { content: ''; position: absolute; top: 0; bottom: 0; left: 1px; width: 2px; border-radius: 2px; background: transparent; transition: background .15s; }
         .sidebar-resizer:hover::after, body.is-resizing .sidebar-resizer::after { background: var(--brand, #003876); }
         body.is-resizing { cursor: col-resize; user-select: none; }
