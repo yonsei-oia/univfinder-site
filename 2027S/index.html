@@ -1361,12 +1361,11 @@
         const MASTER_JSON_URL = IS_LOCAL_DEV
             ? '../data/universities-data.json'
             : `${DATA_RAW}/universities-data.json`;
-        const NOTES_JSON_URL = IS_LOCAL_DEV
-            ? '../data/universities-notes.json'
-            : `${DATA_RAW}/universities-notes.json`;
+        const UPDATES_JSON_URL = IS_LOCAL_DEV
+            ? '../data/universities-updates.json'
+            : `${DATA_RAW}/universities-updates.json`;
 
         const MASTER_CSV_URL = '';
-        const NOTES_CSV_URL  = '';
 
         // =========================================================================
         // Mock data (시트 URL 비어있을 때만 사용)
@@ -1375,6 +1374,7 @@
         const MOCK_MASTER = [
             {
                 university_name: 'University of Washington',
+                slug: 'university-of-washington',
                 website: 'https://www.washington.edu',
                 continent: 'Americas', country: 'United States',
                 language_of_instruction_1: 'English', language_of_instruction_2: '',
@@ -1419,6 +1419,9 @@
             },
             {
                 university_name: 'Sciences Po',
+                slug: 'sciences-po',
+                scholarship: 'Y',
+                scholarship_info: 'Erasmus+ scholarship available for selected students.',
                 website: 'https://www.sciencespo.fr/en',
                 continent: 'Europe', country: 'France',
                 language_of_instruction_1: '', language_of_instruction_2: 'French',
@@ -1629,23 +1632,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             },
         };
 
-        const MOCK_NOTES = [
-            {
-                university_name: 'Sciences Po',
-                labels: 'Scholarship, Update',
-                note_text: 'Erasmus+ scholarship available for selected students.',
-                note_link: 'https://www.sciencespo.fr/scholarships',
-                update_date: '2027-01-15',
-                update_description: 'Quota reduced from 3 to 2; new scholarship added.',
-            },
-            {
-                university_name: 'Peking University',
-                labels: 'Popular',
-                note_text: 'Beijing Government Scholarship available.',
-                note_link: '',
-                update_date: '',
-                update_description: '',
-            },
+        const MOCK_UPDATES = [
+            { slug: 'sciences-po', date: '2026-06-08', kind: 'changed',
+              changes: [{ field: 'quota', from: 3, to: 2 }, { field: 'scholarship', from: '', to: 'Y' }],
+              note: 'Quota reduced; new scholarship added.' },
+            { slug: 'university-of-washington', date: '2026-06-07', kind: 'added', changes: [], note: null },
         ];
 
         // =========================================================================
@@ -1830,9 +1821,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         };
 
         // Normalize one master row into the internal shape used by UI/filters
-        const mapMasterRow = (row, index, notesMap, contentMap) => {
+        const mapMasterRow = (row, index, updatesBySlug, contentMap) => {
             const name = (row.university_name || '').trim();
-            const notes = notesMap[name] || {};
             const content = (contentMap && contentMap[name]) || null;
             return {
                 id: index,
@@ -1872,30 +1862,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 campusLat: row.campus_lat,
                 campusLng: row.campus_lng,
 
-                // From notes sheet
-                labels: notes.labels || [],
-                note: notes.note || null,
-                noteLink: notes.noteLink || null,
-                updateDate: notes.updateDate || null,
-                updateDescription: notes.updateDescription || null,
+                // Curation/labels derived from master + the updates feed
+                scholarship: row.scholarship || '',
+                scholarshipInfo: row.scholarship_info || '',
+                updates: updatesBySlug.get(row.slug) || [],
+                labels: UF.deriveLabels(row.scholarship || '', updatesBySlug.get(row.slug), Date.now()),
 
                 // From content sheet (학교별 상세 페이지) — null이면 detail view 새 섹션 자동 숨김
                 content,
             };
-        };
-
-        const parseNotesRow = (row) => {
-            const name = (row.university_name || '').trim();
-            if (!name) return null;
-            const labelsRaw = row.labels || '';
-            const labels = labelsRaw.split(',').map(s => s.trim()).filter(Boolean);
-            return [name, {
-                labels,
-                note: row.note_text || null,
-                noteLink: row.note_link || null,
-                updateDate: row.update_date || null,
-                updateDescription: row.update_description || null,
-            }];
         };
 
         // =========================================================================
@@ -1921,23 +1896,20 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             });
         }
 
-        // Normalize JSON payloads to the raw-row shape that mapMasterRow / parseNotesRow expect.
-        // Key differences from CSV:
+        // Normalize JSON payloads to the raw-row shape that mapMasterRow expects.
+        // Key differences from the raw feed:
         //   - quota is int (site expects string)
-        //   - notes link by slug (site links by name)
-        //   - labels is array (site expects comma-string)
+        //   - updates is a flat event array, joined to schools by slug downstream
         //   - content.useful_links / video_links are [{label,url}] (site expects "Label | URL\n..." string)
         //   - content.gallery_urls is string[] (site expects newline-joined string)
         //   - cover_image_url / cover_image_credit live at top level (site reads them off content)
         const linkPairsToPipe = (arr) =>
             (arr || []).map(p => `${p.label || ''} | ${p.url || ''}`).join('\n');
 
-        function normalizeJsonPayloads(masterJson, notesJson) {
+        function normalizeJsonPayloads(masterJson, updatesJson) {
             const masterRowsRaw = masterJson.universities || [];
-            const slugToName = {};
             const contentMap = {};
             const masterRows = masterRowsRaw.map(u => {
-                slugToName[u.slug] = u.university_name;
                 const c = u.content || {};
                 contentMap[u.university_name] = {
                     about_text: c.about_text || '',
@@ -1957,52 +1929,40 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     quota: u.quota == null ? '' : String(u.quota),
                 };
             });
-            const notesRows = (notesJson.notes || []).map(n => ({
-                ...n,
-                university_name: slugToName[n.university_slug] || '',
-                labels: Array.isArray(n.labels) ? n.labels.join(',') : (n.labels || ''),
-            }));
-            return { masterRows, notesRows, contentMap };
+            const updates = Array.isArray(updatesJson.updates) ? updatesJson.updates : [];
+            return { masterRows, updates, contentMap };
         }
 
         async function loadAllData() {
             // Priority 1: JSON (Notion pipeline)
-            if (MASTER_JSON_URL && NOTES_JSON_URL) {
-                const [masterJson, notesJson] = await Promise.all([
+            if (MASTER_JSON_URL && UPDATES_JSON_URL) {
+                const [masterJson, updatesJson] = await Promise.all([
                     fetchJson(MASTER_JSON_URL),
-                    fetchJson(NOTES_JSON_URL),
+                    fetchJson(UPDATES_JSON_URL),
                 ]);
-                const { masterRows, notesRows, contentMap } = normalizeJsonPayloads(masterJson, notesJson);
-                return { masterRows, notesRows, contentMap, mock: false, source: 'json' };
-            }
-            // Priority 2: CSV (legacy sheet)
-            if (MASTER_CSV_URL && NOTES_CSV_URL) {
-                const [masterRows, notesRows] = await Promise.all([
-                    fetchAndParseCsv(MASTER_CSV_URL),
-                    fetchAndParseCsv(NOTES_CSV_URL),
-                ]);
-                // TODO: 시트 발급 후 CONTENT_CSV_URL을 추가하면 라이브 모드에서도 content 합쳐짐
-                return { masterRows, notesRows, contentMap: {}, mock: false, source: 'csv' };
+                const { masterRows, updates, contentMap } = normalizeJsonPayloads(masterJson, updatesJson);
+                return { masterRows, updates, contentMap, mock: false, source: 'json' };
             }
             // Fallback: mock
             return {
                 masterRows: MOCK_MASTER,
-                notesRows: MOCK_NOTES,
+                updates: MOCK_UPDATES,
                 contentMap: MOCK_CONTENT,
                 mock: true,
                 source: 'mock',
             };
         }
 
-        function buildUniversities(masterRows, notesRows, contentMap = {}) {
-            const notesMap = {};
-            for (const row of notesRows) {
-                const parsed = parseNotesRow(row);
-                if (parsed) notesMap[parsed[0]] = parsed[1];
+        function buildUniversities(masterRows, updates, contentMap = {}) {
+            const updatesBySlug = new Map();
+            for (const e of (updates || [])) {
+                if (!updatesBySlug.has(e.slug)) updatesBySlug.set(e.slug, []);
+                updatesBySlug.get(e.slug).push(e);
             }
+            for (const list of updatesBySlug.values()) list.sort((a, b) => (a.date < b.date ? 1 : -1));
             return masterRows
                 .filter(r => r && r.university_name && r.university_name.trim())
-                .map((row, idx) => mapMasterRow(row, idx, notesMap, contentMap));
+                .map((row, idx) => mapMasterRow(row, idx, updatesBySlug, contentMap));
         }
 
         // =========================================================================
@@ -2241,8 +2201,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 setLoading(true);
                 setError(null);
                 try {
-                    const { masterRows, notesRows, contentMap, mock } = await loadAllData();
-                    setUniversities(buildUniversities(masterRows, notesRows, contentMap));
+                    const { masterRows, updates, contentMap, mock } = await loadAllData();
+                    setUniversities(buildUniversities(masterRows, updates, contentMap));
                     setUsingMock(mock);
                 } catch (e) {
                     setError(e.message || String(e));
