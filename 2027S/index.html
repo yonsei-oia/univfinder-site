@@ -1683,8 +1683,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         const LABEL_COLORS = {
             Scholarship: '#28a745',
             New: '#0066CC',
-            Popular: '#ff6b35',
-            Update: '#e83e8c',
+            Updated: '#e83e8c',
         };
 
         // =========================================================================
@@ -1980,7 +1979,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             if (filters.uicOnly && !isUIC(u)) return false;
             if (filters.uicExclude && isUIC(u)) return false;
             if (filters.scholarshipOnly && !u.labels.includes('Scholarship')) return false;
-            if (filters.updateOnly && !u.labels.includes('Update')) return false;
+            if (filters.updateOnly && !u.labels.includes('Updated')) return false;
 
             if (filters.studentType === 'Undergraduate' && !u.acceptsUG) return false;
             if (filters.studentType === 'Graduate' && !u.acceptsGrad) return false;
@@ -3837,8 +3836,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
         function UpdateHistoryModal({ universities, onClose, onPickUniversity }) {
             const rows = universities
-                .filter(u => u.labels.includes('Update') && u.updateDate)
-                .sort((a,b) => new Date(b.updateDate) - new Date(a.updateDate))
+                .flatMap(u => (u.updates || []).map(e => ({ entry: e, u })))
+                .sort((a, b) => (a.entry.date < b.entry.date ? 1 : -1))
                 .slice(0, 100);
             return (
                 <div className="modal-overlay" onClick={onClose}>
@@ -3863,16 +3862,16 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {rows.map((u, i) => (
+                                        {rows.map(({ entry, u }, i) => (
                                             <tr key={i}
                                                 style={{borderBottom:'1px solid var(--gray-200)', cursor:'pointer'}}
                                                 onClick={() => onPickUniversity(u)}
                                                 onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='var(--gray-100)'}
                                                 onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='transparent'}>
-                                                <td style={{padding:'12px 8px', color:'var(--gray-500)'}}>{u.updateDate}</td>
+                                                <td style={{padding:'12px 8px', color:'var(--gray-500)'}}>{entry.date}</td>
                                                 <td style={{padding:'12px 8px', color:'var(--yonsei-blue)', fontWeight:600}}>{u.name}</td>
                                                 <td style={{padding:'12px 8px'}}>{u.country || '-'}</td>
-                                                <td style={{padding:'12px 8px'}}>{u.updateDescription || '-'}</td>
+                                                <td style={{padding:'12px 8px'}}>{UF.describeEntry(entry)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
