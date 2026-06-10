@@ -1336,9 +1336,10 @@
         const { useState, useEffect, useMemo, useCallback } = React;
 
         // =========================================================================
-        // 학기 설정 — 새 학기 deploy 시 SEMESTER_CODE 한 줄만 바꾸면 모든 표기가 갱신됨
+        // 학기 설정 — 평상시 KST 날짜로 자동 계산(6/15·12/15 flip). 필요 시 한 줄로 고정.
         // =========================================================================
-        const SEMESTER_CODE = '27S'; // 27S = Spring 2027, 27F = Fall 2027 ...
+        const SEMESTER_OVERRIDE = '';   // '' = 자동; 예: '27F' 로 고정(테스트/비상)
+        const SEMESTER_CODE = SEMESTER_OVERRIDE || TermLib.codeForDate(new Date());
 
         function semesterCodeToYearPart(code) {
             const year = 2000 + parseInt(code.substring(0, 2));
