@@ -286,7 +286,9 @@
             color: var(--ink-muted, #6b7280); background: var(--gray-100, #f3f4f6); border: none; border-radius: 6px;
             cursor: pointer; font-family: inherit; letter-spacing: -0.01em; transition: background .15s, color .15s; }
         .sidebar-collapse-btn:hover { background: var(--gray-200, #e5e7eb); color: var(--brand, #003876); }
-        .sidebar-clear-btn { display: block; width: 100%; margin-bottom: 22px; }
+        .sidebar-clear-btn { display: block; width: 100%; margin-bottom: 0; }
+        /* Hide + Clear All pinned to the top of the scrolling sidebar */
+        .sidebar-sticky-header { position: sticky; top: 0; z-index: 3; background: #fff; margin: -25px -25px 14px; padding: 25px 25px 14px; }
         .sidebar-expand-btn { position: sticky; top: 20px; z-index: 4; display: inline-flex; align-items: center; gap: 6px;
             margin-bottom: 16px; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--brand, #003876);
             background: white; border: 1px solid var(--gray-200, #e5e7eb); border-radius: 8px; cursor: pointer;
@@ -1016,6 +1018,7 @@
             .sidebar-resizer { display: none; }
             .sidebar-collapse-btn, .sidebar-expand-btn { display: none; }
             .filter-sidebar { padding-left: 20px; padding-right: 20px; padding-bottom: 20px; }
+            .sidebar-sticky-header { position: static; margin: 0 0 14px; padding: 0; }
             .action-bar { flex-direction: column; align-items: stretch; }
             .action-buttons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
             .action-buttons button, .action-buttons select { flex: 1; min-width: calc(50% - 4px); }
@@ -1851,7 +1854,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 quotaUnit: (row.quota_unit || '').trim(),
                 acceptsUG: isYes(row.accepts_undergrad),
                 acceptsGrad: isYes(row.accepts_grad),
-                gpaRequired: parseGpaNum(row.gpa_required),
+                gpaRequired: parseGpaNum(row.gpa_required) ?? 2.8, // 빈칸 → OIA 최소 지원자격 2.8
                 fallOneSemester: isYes(row.fall_one_semester),
                 fallCalendarYear: isYes(row.fall_calendar_year),
                 springOneSemester: isYes(row.spring_one_semester),
@@ -2665,15 +2668,17 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 aria-label="필터 닫기">
                                 ×
                             </button>
-                            <button className="sidebar-collapse-btn"
-                                onClick={() => setSidebarCollapsed(true)}
-                                title="필터 사이드바 접기" aria-label="Collapse filters">
-                                ‹ Hide
-                            </button>
-                            {/* Reset (top of sidebar — resets all filter inputs below) */}
-                            <button className="btn btn-secondary sidebar-clear-btn" onClick={clearAllFilters}>
-                                Clear All Filters
-                            </button>
+                            <div className="sidebar-sticky-header">
+                                <button className="sidebar-collapse-btn"
+                                    onClick={() => setSidebarCollapsed(true)}
+                                    title="필터 사이드바 접기" aria-label="Collapse filters">
+                                    ‹ Hide
+                                </button>
+                                {/* Reset (top of sidebar — resets all filter inputs below) */}
+                                <button className="btn btn-secondary sidebar-clear-btn" onClick={clearAllFilters}>
+                                    Clear All Filters
+                                </button>
+                            </div>
                             {/* Student Type */}
                             <div className="filter-section">
                                 <label className="filter-label">Student Type</label>
