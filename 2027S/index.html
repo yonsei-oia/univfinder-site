@@ -1257,6 +1257,64 @@
 <body>
     <div id="root"></div>
 
+    <script id="uf-pure">
+    /* === UF-PURE-START === */
+    (function (root) {
+      var NEW_UPDATED_WINDOW_DAYS = 60;
+      var FIELD_LABELS = {
+        quota: 'Quota', quota_unit: 'Quota unit',
+        accepts_undergrad: 'Open to Undergraduate', accepts_grad: 'Open to Graduate',
+        gpa_required: 'GPA Required', toefl_total: 'TOEFL iBT',
+        toefl_subscores: 'TOEFL subscores',
+        lang2_level: 'Language level', language_other_notes: 'Language requirement',
+        fall_one_semester: 'Fall (1 semester)', fall_calendar_year: 'Fall (full year)',
+        spring_one_semester: 'Spring (1 semester)', spring_calendar_year: 'Spring (full year)',
+        available_areas: 'Available areas', restricted_areas: 'Restricted areas',
+        fall_nomination_deadline: 'Fall nomination deadline',
+        fall_application_deadline: 'Fall application deadline',
+        spring_nomination_deadline: 'Spring nomination deadline',
+        spring_application_deadline: 'Spring application deadline',
+        scholarship: 'Scholarship',
+      };
+      function valueFmt(field, v) {
+        if (v === null || v === undefined || v === '') return '—';
+        if (field === 'scholarship') return v === 'Y' ? 'Available' : (v === 'N' ? 'Not available' : String(v));
+        if (v === 'Y') return 'Yes';
+        if (v === 'N') return 'No';
+        return String(v);
+      }
+      function formatChange(c) {
+        var label = FIELD_LABELS[c.field] || c.field;
+        var from = valueFmt(c.field, c.from);
+        var to = valueFmt(c.field, c.to);
+        return from === '—' ? (label + ' → ' + to) : (label + ' ' + from + ' → ' + to);
+      }
+      function describeEntry(entry) {
+        if (entry.note && String(entry.note).trim()) return String(entry.note).trim();
+        if (entry.kind === 'added') return 'Added to the program';
+        if (entry.changes && entry.changes.length) return entry.changes.map(formatChange).join('; ');
+        return '—';
+      }
+      function withinDays(dateStr, days, nowMs) {
+        var t = Date.parse(dateStr);
+        if (isNaN(t)) return false;
+        return (nowMs - t) <= days * 86400000 && t <= nowMs;
+      }
+      function deriveLabels(scholarship, entries, nowMs) {
+        var labels = [];
+        if (scholarship === 'Y') labels.push('Scholarship');
+        var es = entries || [];
+        if (es.some(function (e) { return e.kind === 'added' && withinDays(e.date, NEW_UPDATED_WINDOW_DAYS, nowMs); })) labels.push('New');
+        if (es.some(function (e) { return e.kind === 'changed' && withinDays(e.date, NEW_UPDATED_WINDOW_DAYS, nowMs); })) labels.push('Updated');
+        return labels;
+      }
+      root.UF = { NEW_UPDATED_WINDOW_DAYS: NEW_UPDATED_WINDOW_DAYS, FIELD_LABELS: FIELD_LABELS,
+        valueFmt: valueFmt, formatChange: formatChange, describeEntry: describeEntry,
+        withinDays: withinDays, deriveLabels: deriveLabels };
+    })(typeof window !== 'undefined' ? window : globalThis);
+    /* === UF-PURE-END === */
+    </script>
+
     <script type="text/babel">
         const { useState, useEffect, useMemo, useCallback } = React;
 
