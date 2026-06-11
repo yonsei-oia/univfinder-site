@@ -1057,6 +1057,12 @@
 @media (max-width: 380px) {
     .yz-cover-logo { top:4%; height:32%; }
 }
+/* Desktop: the 16/7 logo banner reads too tall — slim it and rebalance the
+   logo so it still clears the bottom-left title block. Mobile keeps 16/7. */
+@media (min-width: 768px) {
+    .yz-cover.is-logo { aspect-ratio: 16/5.5; }
+    .yz-cover.is-logo .yz-cover-logo { top:7%; height:48%; }
+}
 .yz-cover-inner { position:absolute; inset:auto 0 0 0; padding:24px 28px; color:#fff; }
 .yz-cover-eyebrow { font-size:11px; font-weight:700; letter-spacing:0.12em;
     text-transform:uppercase; color:var(--brand-on-dark); margin:0 0 8px; }
