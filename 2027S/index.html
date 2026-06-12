@@ -758,82 +758,6 @@
             display: block;
         }
 
-        /* Compare modal (T2-F) */
-        .compare-modal { max-width: 1200px; width: 96vw; }
-        .compare-body {
-            padding: 0;
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: calc(90vh - 200px);
-        }
-        .compare-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        .compare-table thead th {
-            background: var(--bg-soft);
-            padding: 14px 12px;
-            border-bottom: 2px solid var(--line-strong);
-            text-align: left;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        .compare-table tbody th,
-        .compare-table tbody td {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--line);
-            text-align: left;
-            vertical-align: top;
-        }
-        .compare-attr-col {
-            background: var(--bg-soft);
-            font-weight: 600;
-            color: var(--ink-muted);
-            position: sticky;
-            left: 0;
-            min-width: 130px;
-            z-index: 1;
-        }
-        .compare-table thead .compare-attr-col {
-            z-index: 3;
-        }
-        .compare-uni-col {
-            min-width: 200px;
-        }
-        .compare-uni-header {
-            display: flex; align-items: flex-start; justify-content: space-between;
-            gap: 8px;
-        }
-        .compare-uni-name {
-            font-weight: 700;
-            color: var(--brand);
-            text-decoration: none;
-            font-size: 14px;
-            line-height: 1.3;
-        }
-        .compare-uni-name:hover { text-decoration: underline; }
-        .compare-remove-btn {
-            flex: 0 0 auto;
-            width: 22px; height: 22px;
-            border: none;
-            background: var(--gray-100);
-            color: var(--ink-muted);
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px; line-height: 1;
-            font-family: inherit;
-            transition: background-color 160ms ease, color 160ms ease;
-        }
-        .compare-remove-btn:hover {
-            background: var(--danger); color: white;
-        }
-        .compare-cell {
-            color: var(--ink);
-            font-variant-numeric: tabular-nums;
-        }
-
         /* Empty / Loading / Error states */
         .empty-state, .loading-state, .error-state {
             text-align: center;
@@ -2163,8 +2087,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 localStorage.setItem(`${TERM_SK}dismissedFirstVisitBanner`, 'true');
             };
 
-            // T2-F: Compare modal state
-            const [showCompareModal, setShowCompareModal] = useState(false);
 
             // T2-H: Mobile filter drawer state
             const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -2327,14 +2249,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
             // Keyboard: ESC to close, ←/→ to navigate
             useEffect(() => {
-                if (!selectedUniversity && !showUpdateHistory && !isFilterDrawerOpen && !showCompareModal) return;
+                if (!selectedUniversity && !showUpdateHistory && !isFilterDrawerOpen) return;
                 const onKey = (e) => {
                     if (e.key === 'Escape') {
                         if (selectedUniversity) {
                             setSelectedUniversity(null);
                             setCameFromUpdateHistory(false);
-                        } else if (showCompareModal) {
-                            setShowCompareModal(false);
                         } else if (showUpdateHistory) {
                             setShowUpdateHistory(false);
                         } else if (isFilterDrawerOpen) {
@@ -2349,7 +2269,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 };
                 window.addEventListener('keydown', onKey);
                 return () => window.removeEventListener('keydown', onKey);
-            }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, showCompareModal, navigateModal]);
+            }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, navigateModal]);
 
             // ---- favorites ----------------------------------------------------------
             const toggleFavorite = (id) => {
@@ -2847,12 +2767,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     onClick={()=>setHideNotRecruiting(v=>!v)}>
                                     {hideNotRecruiting ? 'Showing Recruiting Only' : 'Hide Not Recruiting'}
                                 </button>
-                                <button className="btn btn-secondary"
-                                    onClick={() => setShowCompareModal(true)}
-                                    disabled={favorites.length < 2}
-                                    title={favorites.length < 2 ? '비교하려면 ☆ 별표한 학교가 2개 이상 필요합니다' : '즐겨찾기 학교 비교'}>
-                                    🔀 Compare ({favorites.length})
-                                </button>
                                 {favorites.length > 0 && (
                                     <button className="btn btn-secondary btn-danger-text" onClick={clearAllFavorites}>
                                         Clear All Favorites
@@ -2950,18 +2864,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             hasNext={modalIdx >= 0 && modalIdx < sortedUniversities.length - 1}
                             modalIdx={modalIdx}
                             modalTotal={sortedUniversities.length} />
-                    )}
-
-                    {/* ===== Compare Modal (T2-F) ===== */}
-                    {showCompareModal && (
-                        <CompareModal
-                            universities={universities.filter(u => favorites.includes(u.id))}
-                            onClose={() => setShowCompareModal(false)}
-                            onRemove={(id) => {
-                                toggleFavorite(id);
-                                // If this was the last one or now <2, auto-close
-                                if (favorites.length - 1 < 2) setShowCompareModal(false);
-                            }} />
                     )}
 
                     {/* ===== Update History Modal ===== */}
@@ -3763,85 +3665,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 <div className="info-item">
                     <div className="info-label">{label}</div>
                     <div className="info-value">{value}</div>
-                </div>
-            );
-        }
-
-        function CompareModal({ universities, onClose, onRemove }) {
-            if (!universities || universities.length === 0) return null;
-
-            const yn = (v) => v ? '○' : '—';
-            const rows = [
-                { label: '국가',          render: u => `${COUNTRY_FLAGS[u.country] || ''} ${u.country}`.trim() },
-                { label: '대륙',          render: u => u.continent || '—' },
-                { label: '쿼터',          render: u => `${u.quota}${u.quotaUnit ? ' ' + u.quotaUnit : ''}` },
-                { label: '학부생 가능',    render: u => yn(u.acceptsUG) },
-                { label: '대학원생 가능',  render: u => yn(u.acceptsGrad) },
-                { label: 'GPA 요구',      render: u => u.gpaRequired ?? '—' },
-                { label: 'TOEFL 요구',    render: u => u.toefl ?? '—' },
-                { label: '수업 언어',      render: u => [u.language1, u.language2].filter(Boolean).join(', ') || '—' },
-                { label: '비영어 어학',    render: u => u.lang2Level || '—' },
-                { label: 'Fall 1학기',    render: u => yn(u.fallOneSemester) },
-                { label: 'Fall부터 1년',  render: u => yn(u.fallCalendarYear) },
-                { label: 'Spring 1학기',  render: u => yn(u.springOneSemester) },
-                { label: 'Spring부터 1년', render: u => yn(u.springCalendarYear) },
-                { label: '학사 시스템',    render: u => u.academicSystem || '—' },
-                { label: '제한 학과',      render: u => u.restrictedAreas || '—' },
-                { label: 'Fall 노미네이션', render: u => u.fallNominationDeadline || '—' },
-                { label: 'Fall 지원 마감', render: u => u.fallApplicationDeadline || '—' },
-                { label: 'Spring 노미네이션', render: u => u.springNominationDeadline || '—' },
-                { label: 'Spring 지원 마감', render: u => u.springApplicationDeadline || '—' },
-                { label: '기숙사 보장',    render: u => u.housingGuaranteed || '—' },
-                { label: '라벨',          render: u => u.labels && u.labels.length ? u.labels.join(', ') : '—' },
-            ];
-
-            return (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal compare-modal" onClick={(e)=>e.stopPropagation()}>
-                        <div className="modal-header" style={{position:'relative'}}>
-                            <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
-                            <div className="modal-title">학교 비교 ({universities.length}개)</div>
-                            <div className="modal-subtitle">즐겨찾기에 담긴 학교를 한눈에 비교</div>
-                        </div>
-                        <div className="modal-body compare-body">
-                            <table className="compare-table">
-                                <thead>
-                                    <tr>
-                                        <th className="compare-attr-col">속성</th>
-                                        {universities.map(u => (
-                                            <th key={u.id} className="compare-uni-col">
-                                                <div className="compare-uni-header">
-                                                    <a href={u.website || '#'} target="_blank" rel="noopener noreferrer"
-                                                       className="compare-uni-name">
-                                                        {u.name}
-                                                    </a>
-                                                    <button onClick={() => onRemove(u.id)}
-                                                            className="compare-remove-btn"
-                                                            aria-label={`${u.name} 비교에서 제거`}>×</button>
-                                                </div>
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {rows.map((row, i) => (
-                                        <tr key={i}>
-                                            <th className="compare-attr-col">{row.label}</th>
-                                            {universities.map(u => (
-                                                <td key={u.id} className="compare-cell">{row.render(u)}</td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div className="modal-footer">
-                            <span style={{fontSize:13, color:'var(--ink-muted)'}}>
-                                {universities.length}개 학교 비교 중 · 학교를 추가하려면 ☆ 별표로 즐겨찾기에 담으세요
-                            </span>
-                            <button className="btn btn-secondary" onClick={onClose}>Close</button>
-                        </div>
-                    </div>
                 </div>
             );
         }
