@@ -297,14 +297,6 @@
         }
         .filter-btn:hover { border-color: var(--yonsei-light-blue); color: var(--yonsei-blue); }
         .filter-btn.active { background: var(--yonsei-blue); border-color: var(--yonsei-blue); color: white; }
-        .filter-count {
-            margin-left: 6px;
-            font-size: 12px; font-weight: 500;
-            color: var(--ink-faint);
-            font-variant-numeric: tabular-nums;
-        }
-        .filter-btn.active .filter-count { color: rgba(255, 255, 255, 0.75); }
-        .checkbox-row .filter-count { color: var(--ink-faint); }
 
         .input-group { display: flex; gap: 10px; flex-wrap: wrap; }
         .input-field { flex: 1; min-width: 200px; }
@@ -2303,66 +2295,20 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 return Array.from(set).sort();
             }, [universities]);
 
-            // ---- filter counts (T1-C) ----------------------------------------------
-            // 각 옵션마다 "다른 필터를 그대로 둔 채 이 옵션만 켜면 결과가 N개"
-            // 라는 정확한 카운트를 계산. 학교 ~수백 개라 부담 없음.
-            const counts = useMemo(() => {
-                if (gpaWarning || toeflWarning) return null;
-                const opts = { favorites, showFavoritesOnly };
-                const countWith = (override) => {
-                    const f = { ...filters, ...override };
-                    let c = 0;
-                    for (const u of universities) if (passesFilter(u, f, opts)) c++;
-                    return c;
-                };
-
-                const continentCounts = {};
-                for (const c of continentOptions) {
-                    continentCounts[c] = countWith({ continent: c, country: '', university: '' });
-                }
-                const countryCounts = {};
-                for (const c of filteredCountries) {
-                    countryCounts[c] = countWith({ country: c, university: '' });
-                }
-
-                return {
-                    studentType: {
-                        Undergraduate: countWith({ studentType: 'Undergraduate' }),
-                        Graduate: countWith({ studentType: 'Graduate' }),
-                    },
-                    languageRegion: {
-                        English: countWith({ languageRegion: 'English' }),
-                        'Non-English': countWith({ languageRegion: 'Non-English' }),
-                    },
-                    semesterOption: {
-                        // "현재 필터 그대로 둔 채 이 옵션만 토글" 카운트
-                        wantFallOneSem:    countWith({ wantFallOneSem:    !filters.wantFallOneSem }),
-                        wantFallCalYear:   countWith({ wantFallCalYear:   !filters.wantFallCalYear }),
-                        wantSpringOneSem:  countWith({ wantSpringOneSem:  !filters.wantSpringOneSem }),
-                        wantSpringCalYear: countWith({ wantSpringCalYear: !filters.wantSpringCalYear }),
-                    },
-                    continent: continentCounts,
-                    country: countryCounts,
-                    uicOnly:        countWith({ uicOnly: true,  uicExclude: false }),
-                    uicExclude:     countWith({ uicExclude: true, uicOnly: false }),
-                    scholarshipOnly:countWith({ scholarshipOnly: true }),
-                    updateOnly:     countWith({ updateOnly: true }),
-                };
-            }, [universities, filters, favorites, showFavoritesOnly, gpaWarning, toeflWarning, continentOptions, filteredCountries]);
-
-            // ---- stats (reactive to filters) ----------------------------------------
-            // Stats reflect the currently filtered result set so the header summary
-            // updates live as the user adjusts filters.
+            // ---- stats (fixed program totals) ----------------------------------------
+            // The header summary always shows the WHOLE program — it reads as official
+            // OIA totals, so it must not fluctuate with filters. The filtered result
+            // count is communicated by "Found n universities" instead.
             const stats = useMemo(() => ({
-                total: filteredUniversities.length,
-                totalQuota: filteredUniversities.reduce((s,u)=>s+u.quota, 0),
-                countries: new Set(filteredUniversities.map(u=>u.country)).size,
-                americas:   filteredUniversities.filter(u => u.continent === 'Americas').length,
-                asiaOceania:filteredUniversities.filter(u => u.continent === 'Asia/Oceania').length,
-                europe:     filteredUniversities.filter(u => u.continent === 'Europe').length,
-                english:    filteredUniversities.filter(u => isEnglishOffered(u)).length,
-                nonEnglish: filteredUniversities.filter(u => isNonEnglishOffered(u)).length,
-            }), [filteredUniversities]);
+                total: universities.length,
+                totalQuota: universities.reduce((s,u)=>s+u.quota, 0),
+                countries: new Set(universities.map(u=>u.country)).size,
+                americas:   universities.filter(u => u.continent === 'Americas').length,
+                asiaOceania:universities.filter(u => u.continent === 'Asia/Oceania').length,
+                europe:     universities.filter(u => u.continent === 'Europe').length,
+                english:    universities.filter(u => isEnglishOffered(u)).length,
+                nonEnglish: universities.filter(u => isNonEnglishOffered(u)).length,
+            }), [universities]);
 
             // ---- exports (dynamic per semester) -------------------------------------
             const exportFileBase = `${SEMESTER.yearPart}_exchange-universities`;
@@ -2589,7 +2535,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                             className={`filter-btn ${filters.studentType===t?'active':''}`}
                                             onClick={() => setFilters(p => ({...p, studentType: p.studentType===t?'':t}))}>
                                             {t}
-                                            {counts && <span className="filter-count">({counts.studentType[t]})</span>}
                                         </button>
                                     ))}
                                 </div>
@@ -2604,7 +2549,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                             className={`filter-btn ${filters.languageRegion===t?'active':''}`}
                                             onClick={() => setFilters(p => ({...p, languageRegion: p.languageRegion===t?'':t}))}>
                                             {t}
-                                            {counts && <span className="filter-count">({counts.languageRegion[t]})</span>}
                                         </button>
                                     ))}
                                 </div>
@@ -2619,7 +2563,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                             <input type="checkbox" checked={filters[opt.key]}
                                                 onChange={(e)=>setFilters(p=>({...p, [opt.key]:e.target.checked}))} />
                                             <span>{opt.label}</span>
-                                            {counts && <span className="filter-count">({counts.semesterOption[opt.key]})</span>}
                                         </label>
                                     ))}
                                 </div>
@@ -2635,9 +2578,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                             onChange={(e)=>setFilters(p=>({...p, continent:e.target.value, country:'', university:''}))}>
                                             <option value="">All Continents</option>
                                             {continentOptions.map(c => (
-                                                <option key={c} value={c}>
-                                                    {c}{counts ? ` (${counts.continent[c] ?? 0})` : ''}
-                                                </option>
+                                                <option key={c} value={c}>{c}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -2647,9 +2588,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                             onChange={(e)=>setFilters(p=>({...p, country:e.target.value, university:''}))}>
                                             <option value="">All Countries</option>
                                             {filteredCountries.map(c => (
-                                                <option key={c} value={c}>
-                                                    {c}{counts ? ` (${counts.country[c] ?? 0})` : ''}
-                                                </option>
+                                                <option key={c} value={c}>{c}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -2729,25 +2668,21 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         <input type="checkbox" checked={filters.uicOnly}
                                             onChange={(e)=>setFilters(p=>({...p, uicOnly:e.target.checked, uicExclude:false}))} />
                                         <span>UIC Exclusive Programs Only</span>
-                                        {counts && <span className="filter-count">({counts.uicOnly})</span>}
                                     </label>
                                     <label className="checkbox-row">
                                         <input type="checkbox" checked={filters.uicExclude}
                                             onChange={(e)=>setFilters(p=>({...p, uicExclude:e.target.checked, uicOnly:false}))} />
                                         <span>Exclude UIC Exclusive Programs</span>
-                                        {counts && <span className="filter-count">({counts.uicExclude})</span>}
                                     </label>
                                     <label className="checkbox-row">
                                         <input type="checkbox" checked={filters.scholarshipOnly}
                                             onChange={(e)=>setFilters(p=>({...p, scholarshipOnly:e.target.checked}))} />
                                         <span>Scholarship Available Only</span>
-                                        {counts && <span className="filter-count">({counts.scholarshipOnly})</span>}
                                     </label>
                                     <label className="checkbox-row">
                                         <input type="checkbox" checked={filters.updateOnly}
                                             onChange={(e)=>setFilters(p=>({...p, updateOnly:e.target.checked}))} />
                                         <span style={{color:'#e83e8c'}}>Updated Universities Only</span>
-                                        {counts && <span className="filter-count">({counts.updateOnly})</span>}
                                     </label>
                                 </div>
                             </div>
