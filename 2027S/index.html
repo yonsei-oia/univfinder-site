@@ -1296,6 +1296,10 @@
         const IS_LOCAL_DEV = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
         const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/main';
 
+        // Visit counter (GAS web app, abroad@ — backoffice repo visit-counter-gas/).
+        // Stores daily/total numbers only; '' disables the widget entirely.
+        const VISIT_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbxWz4Emr0bL8PhlmmV_aPz3w-IArLBMFEjJpZdM1gLXa3K1TUQI-dVQTW2INeH6GqHuHQ/exec';
+
         const MASTER_JSON_URL = IS_LOCAL_DEV
             ? '../data/universities-data.json'
             : `${DATA_RAW}/universities-data.json`;
@@ -2065,6 +2069,31 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
             const [hideNotRecruiting, setHideNotRecruiting] = useState(false);
 
+            // Visitor counter — ping once per browser per day (?hit=1), otherwise
+            // read-only. Counts numbers only; widget stays hidden until data arrives.
+            const [visits, setVisits] = useState(null);
+            useEffect(() => {
+                if (!VISIT_COUNTER_URL) return;
+                let hit = false;
+                let url = VISIT_COUNTER_URL;
+                try {
+                    const today = new Date().toISOString().slice(0, 10);
+                    hit = localStorage.getItem('univfinderVisitedOn') !== today;
+                    if (hit) url += '?hit=1';
+                } catch (_) {}
+                fetch(url)
+                    .then(r => (r.ok ? r.json() : null))
+                    .then(d => {
+                        if (!d) return;
+                        setVisits(d);
+                        if (hit) {
+                            try { localStorage.setItem('univfinderVisitedOn', new Date().toISOString().slice(0, 10)); }
+                            catch (_) {}
+                        }
+                    })
+                    .catch(() => {});
+            }, []);
+
             const [selectedUniversity, setSelectedUniversity] = useState(null);
             const [showUpdateHistory, setShowUpdateHistory] = useState(false);
             const [cameFromUpdateHistory, setCameFromUpdateHistory] = useState(false);
@@ -2440,17 +2469,19 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <div className="hero__inner">
                             <div className="hero__top">
                                 <p className="hero__eyebrow">Exchange University Finder · {SEMESTER.full}</p>
-                                <div className="hero__counter" aria-label="결과 카운터">
-                                    <span className="hero__counter-item">
-                                        <span className="hero__counter-label">결과</span>
-                                        <strong>{sortedUniversities.length}</strong>
-                                    </span>
-                                    <span className="hero__counter-sep" aria-hidden="true">·</span>
-                                    <span className="hero__counter-item">
-                                        <span className="hero__counter-label">전체</span>
-                                        <strong>{universities.length}</strong>
-                                    </span>
-                                </div>
+                                {visits && (
+                                    <div className="hero__counter" aria-label="방문자 수">
+                                        <span className="hero__counter-item">
+                                            <span className="hero__counter-label">오늘</span>
+                                            <strong>{visits.today.toLocaleString()}명</strong>
+                                        </span>
+                                        <span className="hero__counter-sep" aria-hidden="true">·</span>
+                                        <span className="hero__counter-item">
+                                            <span className="hero__counter-label">누적</span>
+                                            <strong>{visits.total.toLocaleString()}명</strong>
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             <h1 id="page-title" className="hero__title">
                                 해외파견 프로그램 배정 가능 대학
