@@ -2554,16 +2554,23 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 </div>
                             </div>
 
-                            {/* Semester Option — only the active term's options (derived from SEMESTER_CODE) */}
+                            {/* Semester Option — only the active term's options (derived from
+                                SEMESTER_CODE). Single-select: combining lengths is a union and
+                                reads as a wrong count, so picking one clears the other. */}
                             <div className="filter-section">
-                                <label className="filter-label">Exchange Term &amp; Length (select any)</label>
-                                <div className="checkbox-list">
+                                <label className="filter-label">Exchange Term &amp; Length (select one)</label>
+                                <div className="filter-group">
                                     {TermLib.semesterOptions(SEMESTER.code).map(opt => (
-                                        <label key={opt.key} className="checkbox-row">
-                                            <input type="checkbox" checked={filters[opt.key]}
-                                                onChange={(e)=>setFilters(p=>({...p, [opt.key]:e.target.checked}))} />
-                                            <span>{opt.label}</span>
-                                        </label>
+                                        <button key={opt.key}
+                                            className={`filter-btn ${filters[opt.key]?'active':''}`}
+                                            onClick={() => setFilters(p => {
+                                                const next = {...p};
+                                                TermLib.semesterOptions(SEMESTER.code).forEach(o => { next[o.key] = false; });
+                                                next[opt.key] = !p[opt.key];
+                                                return next;
+                                            })}>
+                                            {opt.label}
+                                        </button>
                                     ))}
                                 </div>
                             </div>
