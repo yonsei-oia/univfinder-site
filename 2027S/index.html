@@ -1086,6 +1086,16 @@
 .yz-term-dur { font-size:13px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
 .yz-term-dur.is-none { font-weight:500; color:var(--ink-faint); }
 
+/* NOTICE from OIA — manager-curated student-facing note, shown above the tabs */
+.yz-notice { display:flex; gap:11px; align-items:flex-start; padding:14px 28px;
+    background:var(--brand-soft); border-bottom:1px solid var(--line); }
+.yz-notice svg { flex:0 0 auto; width:17px; height:17px; margin-top:2px; fill:none;
+    stroke:var(--brand); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.yz-notice-label { font-size:10.5px; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--brand); margin:0 0 3px; }
+.yz-notice-text { font-size:13.5px; color:var(--brand-deep); line-height:1.6; margin:0;
+    white-space:pre-line; }
+
 .yz-nav { display:flex; padding:6px 12px; gap:4px; border-bottom:1px solid var(--line);
     background:#fff; }
 .yz-nav-tab { padding:9px 14px; font-size:13px; font-weight:600; color:var(--ink-muted);
@@ -1465,7 +1475,7 @@
                 university_name: 'Sciences Po',
                 slug: 'sciences-po',
                 scholarship: 'Y',
-                scholarship_info: 'Erasmus+ scholarship available for selected students.',
+                notes: 'Erasmus+ scholarship available for selected students.\nHighly recommended for students interested in European politics and public affairs.',
                 website: 'https://www.sciencespo.fr/en',
                 continent: 'Europe', country: 'France',
                 language_of_instruction_1: '', language_of_instruction_2: 'French',
@@ -1907,7 +1917,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                 // Curation/labels derived from master + the updates feed
                 scholarship: row.scholarship || '',
-                scholarshipInfo: row.scholarship_info || '',
+                notes: row.notes || '',
                 updates: updatesBySlug.get(row.slug) || [],
                 labels: UF.deriveLabels(row.scholarship || '', updatesBySlug.get(row.slug), Date.now()),
 
@@ -3235,6 +3245,16 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             </div>
                             <div className="yz-meta-sub"><dt>System</dt><dd>{u.academicSystem || 'N/A'}</dd></div>
                         </dl>
+
+                        {u.notes && (
+                            <div className="yz-notice">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+                                <div>
+                                    <p className="yz-notice-label">Notice from OIA</p>
+                                    <p className="yz-notice-text">{linkifyText(u.notes)}</p>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="yz-nav">
                             {TABS.map(([key, label]) => (
