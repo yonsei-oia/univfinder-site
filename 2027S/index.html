@@ -182,8 +182,22 @@
         }
         .site-header__external svg { width: 11px; height: 11px; opacity: 0.7; }
 
+        /* Info-session banner tab — same pill as 27s-info-session's site-nav */
+        .site-nav { margin-left: auto; display: flex; gap: 4px; flex: 0 0 auto; }
+        .site-nav__tab {
+            display: inline-flex; align-items: center;
+            padding: 9px 16px; font-size: 14px; font-weight: 600;
+            color: var(--brand); background: var(--brand-soft);
+            text-decoration: none; border-radius: 6px;
+            transition: background-color 160ms ease, color 160ms ease;
+        }
+        .site-nav__tab:hover { background: var(--brand); color: #fff; }
+        .site-nav + .site-header__external { margin-left: 0; }
+
         @media (max-width: 540px) {
             .site-header__inner { flex-wrap: wrap; gap: 10px 14px; }
+            .site-nav { margin-left: 0; width: 100%; }
+            .site-nav__tab { flex: 1; justify-content: center; }
             .site-header__external { margin-left: auto; }
         }
 
@@ -221,6 +235,7 @@
             color: #fff; font-weight: 700; font-variant-numeric: tabular-nums;
             letter-spacing: 0.01em;
         }
+        .hero__counter-item { display: inline-flex; align-items: baseline; gap: 5px; }
         .hero__counter-label { opacity: 0.85; }
         .hero__counter-sep { opacity: 0.4; }
         .hero__title {
@@ -970,16 +985,6 @@
 .yz-term-dur { font-size:13px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
 .yz-term-dur.is-none { font-weight:500; color:var(--ink-faint); }
 
-/* NOTICE from OIA — manager-curated student-facing note, shown above the tabs */
-.yz-notice { display:flex; gap:11px; align-items:flex-start; padding:14px 28px;
-    background:var(--brand-soft); border-bottom:1px solid var(--line); }
-.yz-notice svg { flex:0 0 auto; width:17px; height:17px; margin-top:2px; fill:none;
-    stroke:var(--brand); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-.yz-notice-label { font-size:10.5px; font-weight:700; letter-spacing:0.08em;
-    text-transform:uppercase; color:var(--brand); margin:0 0 3px; }
-.yz-notice-text { font-size:13.5px; color:var(--brand-deep); line-height:1.6; margin:0;
-    white-space:pre-line; }
-
 .yz-nav { display:flex; padding:6px 12px; gap:4px; border-bottom:1px solid var(--line);
     background:#fff; }
 .yz-nav-tab { padding:9px 14px; font-size:13px; font-weight:600; color:var(--ink-muted);
@@ -1299,6 +1304,13 @@
         // Visit counter (GAS web app, abroad@ — backoffice repo visit-counter-gas/).
         // Stores daily/total numbers only; '' disables the widget entirely.
         const VISIT_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbxWz4Emr0bL8PhlmmV_aPz3w-IArLBMFEjJpZdM1gLXa3K1TUQI-dVQTW2INeH6GqHuHQ/exec';
+
+        // Header banner links (pill tabs next to the logo). Term-specific —
+        // update labels/URLs each term; empty array hides the nav entirely.
+        const HEADER_LINKS = [
+            { label: '2027S Info-Session', url: 'https://oiaexchange.netlify.app/' },
+            { label: 'Application Guide', url: 'https://docs.google.com/document/d/1rUtUTPkHxSd-sgkwYybfkPF7_NbtY2WCnSflCnLrcK8/edit?usp=sharing' },
+        ];
 
         const MASTER_JSON_URL = IS_LOCAL_DEV
             ? '../data/universities-data.json'
@@ -1981,28 +1993,28 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const chips = [];
             const add = (key, label, reset) => chips.push({ key, label, reset });
 
-            if (filters.studentType) add('studentType', `학생: ${filters.studentType}`, { studentType: '' });
-            if (filters.languageRegion) add('languageRegion', `언어권: ${filters.languageRegion}`, { languageRegion: '' });
+            if (filters.studentType) add('studentType', `Student: ${filters.studentType}`, { studentType: '' });
+            if (filters.languageRegion) add('languageRegion', `Language: ${filters.languageRegion}`, { languageRegion: '' });
             TermLib.semesterOptions(SEMESTER.code).forEach(opt => {
                 if (filters[opt.key]) add(opt.key, `Term: ${opt.chip}`, { [opt.key]: false });
             });
-            if (filters.continent) add('continent', `대륙: ${filters.continent}`, { continent: '', country: '', university: '' });
+            if (filters.continent) add('continent', `Continent: ${filters.continent}`, { continent: '', country: '', university: '' });
             if (filters.country) {
                 const flag = COUNTRY_FLAGS[filters.country] || '';
-                add('country', `국가: ${flag ? flag + ' ' : ''}${filters.country}`, { country: '', university: '' });
+                add('country', `Country: ${flag ? flag + ' ' : ''}${filters.country}`, { country: '', university: '' });
             }
-            if (filters.university) add('university', `학교: ${filters.university}`, { university: '' });
-            if (filters.universitySearch) add('universitySearch', `검색: "${filters.universitySearch}"`, { universitySearch: '' });
+            if (filters.university) add('university', `University: ${filters.university}`, { university: '' });
+            if (filters.universitySearch) add('universitySearch', `Search: "${filters.universitySearch}"`, { universitySearch: '' });
             if (filters.gpa) {
                 add('gpa', `GPA ≥ ${filters.gpa} (4.3)`, { gpa: '' });
             }
             if (filters.toefl) add('toefl', `TOEFL ≥ ${filters.toefl}`, { toefl: '' });
-            if (filters.nonEnglishLanguage) add('nonEnglishLanguage', `비영어: ${filters.nonEnglishLanguage}`, { nonEnglishLanguage: '', nonEnglishLevel: '' });
-            if (filters.nonEnglishLevel) add('nonEnglishLevel', `레벨: ${filters.nonEnglishLevel}`, { nonEnglishLevel: '' });
-            if (filters.uicOnly) add('uicOnly', 'UIC Exclusive만', { uicOnly: false });
-            if (filters.uicExclude) add('uicExclude', 'UIC 제외', { uicExclude: false });
-            if (filters.scholarshipOnly) add('scholarshipOnly', '장학금 있음', { scholarshipOnly: false });
-            if (filters.updateOnly) add('updateOnly', '업데이트만', { updateOnly: false });
+            if (filters.nonEnglishLanguage) add('nonEnglishLanguage', `Language: ${filters.nonEnglishLanguage}`, { nonEnglishLanguage: '', nonEnglishLevel: '' });
+            if (filters.nonEnglishLevel) add('nonEnglishLevel', `Level: ${filters.nonEnglishLevel}`, { nonEnglishLevel: '' });
+            if (filters.uicOnly) add('uicOnly', 'UIC Exclusive only', { uicOnly: false });
+            if (filters.uicExclude) add('uicExclude', 'UIC excluded', { uicExclude: false });
+            if (filters.scholarshipOnly) add('scholarshipOnly', 'Scholarship available', { scholarshipOnly: false });
+            if (filters.updateOnly) add('updateOnly', 'Updated only', { updateOnly: false });
             return chips;
         }
 
@@ -2201,13 +2213,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const gpaWarning = useMemo(() => {
                 if (!filters.gpa) return '';
                 const v = parseFloat(filters.gpa);
-                if (isNaN(v) || v < 0 || v > 4.3) return 'GPA는 0.0 ~ 4.3 사이여야 합니다.';
+                if (isNaN(v) || v < 0 || v > 4.3) return 'GPA must be between 0.0 and 4.3.';
                 return '';
             }, [filters.gpa]);
             const toeflWarning = useMemo(() => {
                 if (!filters.toefl) return '';
                 const v = parseInt(filters.toefl, 10);
-                if (isNaN(v) || v < 0 || v > 120) return 'TOEFL iBT는 0 ~ 120 사이여야 합니다.';
+                if (isNaN(v) || v < 0 || v > 120) return 'TOEFL iBT must be between 0 and 120.';
                 return '';
             }, [filters.toefl]);
 
@@ -2346,15 +2358,17 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const exportToPDF = () => {
                 try {
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
+                    const doc = new jsPDF({ orientation: 'landscape' });
                     doc.setFontSize(18);
                     doc.text(exportTitle, 14, 22);
                     doc.setFontSize(11);
                     doc.text(`Generated: ${new Date().toLocaleDateString('ko-KR')}`, 14, 30);
                     doc.text(`Total: ${sortedUniversities.length} universities`, 14, 36);
 
+                    const dl = TermLib.activeDeadlineFields(SEMESTER.code);
                     const tableData = sortedUniversities.map(u => [
                         u.name, u.country,
+                        [u.acceptsUG?'UG':null, u.acceptsGrad?'G':null].filter(Boolean).join(', ') || 'N/A',
                         u.language1 + (u.language2 ? ', ' + u.language2 : ''),
                         u.quota,
                         u.toefl ?? 'N/A',
@@ -2362,42 +2376,70 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         [u.fallOneSemester?'Fall 1-sem':null, u.fallCalendarYear?'Fall 1-yr':null,
                          u.springOneSemester?'Spring 1-sem':null, u.springCalendarYear?'Spring 1-yr':null]
                          .filter(Boolean).join(', ') || 'N/A',
+                        u[dl.nom] || 'N/A',
+                        u[dl.app] || 'N/A',
                     ]);
                     doc.autoTable({
                         startY: 42,
-                        head: [['University','Country','Language','Quota','TOEFL','GPA','Options']],
+                        head: [['University','Country','Open to','Language','Quota','TOEFL','GPA','Options',
+                                'Nomination DL','Application DL']],
                         body: tableData,
                         styles: { fontSize: 6 },
                         headStyles: { fillColor: [0, 56, 118] },
                     });
+                    doc.setFontSize(9);
+                    doc.text('Full details (deadlines, areas, housing, notices) are available in the Excel download.',
+                        14, doc.lastAutoTable.finalY + 8);
                     doc.save(`${exportFileBase}.pdf`);
                 } catch (e) {
-                    alert(`PDF 다운로드에 실패했습니다: ${e.message || e}`);
+                    alert(`PDF download failed: ${e.message || e}`);
                 }
             };
 
             const exportToExcel = () => {
                 try {
                     const data = sortedUniversities.map(u => ({
+                        'Favorite': favorites.includes(u.id) ? '★' : '',
                         University: u.name,
                         Country: u.country,
                         Continent: u.continent,
-                        Language: u.language1 + (u.language2 ? ', ' + u.language2 : ''),
+                        'Open to Undergraduate': u.acceptsUG ? 'Y' : 'N',
+                        'Open to Graduate': u.acceptsGrad ? 'Y' : 'N',
                         Quota: u.quota,
-                        TOEFL: u.toefl ?? 'N/A',
-                        GPA: u.gpaRequired ?? 'N/A',
+                        'Quota Unit': u.quotaUnit,
+                        'Academic System': u.academicSystem,
+                        Language: u.language1 + (u.language2 ? ', ' + u.language2 : ''),
+                        'TOEFL iBT': u.toefl ?? 'Not specified',
+                        'TOEFL Subscores': u.toeflSubscores,
+                        'Language Level': u.lang2Level,
+                        'Language Notes': u.languageOtherNotes,
+                        'GPA Required': u.gpaRequired ?? 'N/A',
                         'Fall One Semester':   u.fallOneSemester  ? 'Y' : 'N',
                         'Fall Calendar Year':  u.fallCalendarYear ? 'Y' : 'N',
                         'Spring One Semester': u.springOneSemester  ? 'Y' : 'N',
                         'Spring Calendar Year':u.springCalendarYear ? 'Y' : 'N',
+                        'Fall Nomination Deadline': u.fallNominationDeadline,
+                        'Fall Application Deadline': u.fallApplicationDeadline,
+                        'Spring Nomination Deadline': u.springNominationDeadline,
+                        'Spring Application Deadline': u.springApplicationDeadline,
+                        'Available Areas': u.availableAreas,
+                        'Restricted Areas': u.restrictedAreas,
+                        'Admission Notes': u.admissionNotes,
+                        'Housing Guaranteed': u.housingGuaranteed,
+                        'Housing Info': u.housingInfo,
+                        'Scholarship': u.scholarship,
+                        'Notice from OIA': u.notes,
+                        'Labels': u.labels.join(', '),
                         Website: u.website,
+                        'Factsheet': u.recentFactsheet,
+                        'Detail Link': `${window.location.origin}${window.location.pathname}${HashRoute.hashForSlug(u.slug)}`,
                     }));
                     const ws = XLSX.utils.json_to_sheet(data);
                     const wb = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(wb, ws, 'Universities');
                     XLSX.writeFile(wb, `${exportFileBase}.xlsx`);
                 } catch (e) {
-                    alert(`Excel 다운로드에 실패했습니다: ${e.message || e}`);
+                    alert(`Excel download failed: ${e.message || e}`);
                 }
             };
 
@@ -2418,9 +2460,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 return (
                     <div className="error-state">
                         <div className="error-state-icon">⚠️</div>
-                        <div className="error-state-text">데이터를 불러오지 못했습니다.</div>
+                        <div className="error-state-text">Failed to load data.</div>
                         <div className="error-state-detail">{error}</div>
-                        <button className="error-retry-btn" onClick={loadData}>다시 시도</button>
+                        <button className="error-retry-btn" onClick={loadData}>Try again</button>
                     </div>
                 );
             }
@@ -2435,11 +2477,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             // ============================== RENDER ===================================
             return (
                 <>
-                    <a href="#main" className="skip-link">본문으로 건너뛰기</a>
+                    <a href="#main" className="skip-link">Skip to content</a>
 
                     <header className="site-header">
                         <div className="site-header__inner">
-                            <a href="#" className="site-header__brand-group" aria-label="홈으로">
+                            <a href="#" className="site-header__brand-group" aria-label="Home">
                                 <img
                                     src="assets/yonsei-logo.png"
                                     alt="Yonsei University"
@@ -2450,12 +2492,22 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     <span translate="no">Yonsei University · Office of International Affairs</span>
                                 </div>
                             </a>
+                            {HEADER_LINKS.length > 0 && (
+                                <nav className="site-nav" aria-label="Related links">
+                                    {HEADER_LINKS.map(l => (
+                                        <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer"
+                                            className="site-nav__tab">
+                                            {l.label}
+                                        </a>
+                                    ))}
+                                </nav>
+                            )}
                             <a
                                 href="https://oia.yonsei.ac.kr"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="site-header__external">
-                                국제처 홈페이지
+                                OIA Official Website
                                 <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
                                     <path d="M3 3h6v6M3 9l6-6"
                                         stroke="currentColor" strokeWidth="1.5"
@@ -2470,15 +2522,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             <div className="hero__top">
                                 <p className="hero__eyebrow">Exchange University Finder · {SEMESTER.full}</p>
                                 {visits && (
-                                    <div className="hero__counter" aria-label="방문자 수">
+                                    <div className="hero__counter" aria-label="Visitor count">
                                         <span className="hero__counter-item">
-                                            <span className="hero__counter-label">오늘</span>
-                                            <strong>{visits.today.toLocaleString()}명</strong>
+                                            <span className="hero__counter-label">TODAY</span>
+                                            <strong>{visits.today.toLocaleString()}</strong>
                                         </span>
                                         <span className="hero__counter-sep" aria-hidden="true">·</span>
                                         <span className="hero__counter-item">
-                                            <span className="hero__counter-label">누적</span>
-                                            <strong>{visits.total.toLocaleString()}명</strong>
+                                            <span className="hero__counter-label">TOTAL</span>
+                                            <strong>{visits.total.toLocaleString()}</strong>
                                         </span>
                                     </div>
                                 )}
@@ -2537,8 +2589,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         {/* ===== Mobile filter trigger (T2-H) ===== */}
                         <button className="mobile-filter-trigger"
                             onClick={() => setIsFilterDrawerOpen(true)}
-                            aria-label="필터 열기">
-                            🔍 필터
+                            aria-label="Open filters">
+                            🔍 Filters
                             {activeChips.length > 0 && (
                                 <span className="mobile-filter-trigger-count">{activeChips.length}</span>
                             )}
@@ -2554,7 +2606,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <section className={`filter-panel ${isFilterDrawerOpen ? 'is-open' : ''}`}>
                             <button className="filter-drawer-close"
                                 onClick={() => setIsFilterDrawerOpen(false)}
-                                aria-label="필터 닫기">
+                                aria-label="Close filters">
                                 ×
                             </button>
                             {/* Student Type */}
@@ -2753,18 +2805,18 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                         {/* ===== Active Filter Chips (T1-A) ===== */}
                         {activeChips.length > 0 && (
-                            <div className="active-chips" role="region" aria-label="현재 적용된 필터">
-                                <span className="active-chips-label">활성 필터</span>
+                            <div className="active-chips" role="region" aria-label="Active filters">
+                                <span className="active-chips-label">Active filters</span>
                                 {activeChips.map(chip => (
                                     <button key={chip.key} className="active-chip"
                                         onClick={() => removeChip(chip.reset)}
-                                        aria-label={`${chip.label} 필터 제거`}>
+                                        aria-label={`Remove ${chip.label} filter`}>
                                         <span>{chip.label}</span>
                                         <span className="active-chip-x" aria-hidden="true">×</span>
                                     </button>
                                 ))}
                                 <button className="active-chip-clear" onClick={clearAllFilters}>
-                                    모두 지우기
+                                    Clear all
                                 </button>
                             </div>
                         )}
@@ -3056,16 +3108,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             <div className="yz-meta-sub"><dt>System</dt><dd>{u.academicSystem || 'N/A'}</dd></div>
                         </dl>
 
-                        {u.notes && (
-                            <div className="yz-notice">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
-                                <div>
-                                    <p className="yz-notice-label">Notice from OIA</p>
-                                    <p className="yz-notice-text">{linkifyText(u.notes)}</p>
-                                </div>
-                            </div>
-                        )}
-
                         <div className="yz-nav">
                             {TABS.map(([key, label]) => (
                                 <button key={key} type="button"
@@ -3084,12 +3126,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <div className="modal-footer">
                             <div className="modal-nav-group">
                                 <button type="button" className="btn btn-secondary"
-                                    onClick={onPrev} disabled={!hasPrev} aria-label="이전 학교 (← key)">← Prev</button>
+                                    onClick={onPrev} disabled={!hasPrev} aria-label="Previous university (← key)">← Prev</button>
                                 <span className="modal-nav-counter">
                                     {modalIdx >= 0 ? `${modalIdx + 1} / ${modalTotal}` : ''}
                                 </span>
                                 <button type="button" className="btn btn-secondary"
-                                    onClick={onNext} disabled={!hasNext} aria-label="다음 학교 (→ key)">Next →</button>
+                                    onClick={onNext} disabled={!hasNext} aria-label="Next university (→ key)">Next →</button>
                             </div>
                             {u.website && (
                                 <a href={u.website} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
@@ -3123,21 +3165,22 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const otherReq = u.lang2Level ? `${u.language2} · ${u.lang2Level}` : u.language2;
             return (
                 <>
-                    {(u.labels.length > 0 || u.note) && (
+                    {(u.labels.length > 0 || u.notes) && (
                         <div className="yz-sect">
                             <div className="yz-sect-head">
                                 <p className="yz-sect-label">Notice</p>
                                 <h3 className="yz-sect-title">From OIA</h3>
                             </div>
                             {u.labels.length > 0 && (
-                                <div style={{marginBottom: u.note ? 10 : 0}}>
+                                <div style={{marginBottom: u.notes ? 10 : 0}}>
                                     {u.labels.map(l => <LabelTag key={l} label={l} size="large" />)}
                                 </div>
                             )}
-                            {u.note && (u.noteLink ? (
-                                <a href={u.noteLink} target="_blank" rel="noopener noreferrer"
-                                   className="yz-prose" style={{color:'var(--brand)', textDecoration:'underline'}}>{u.note}</a>
-                            ) : <div className="yz-prose"><p>{u.note}</p></div>)}
+                            {u.notes && (
+                                <div className="yz-prose" style={{whiteSpace:'pre-line'}}>
+                                    <p>{linkifyText(u.notes)}</p>
+                                </div>
+                            )}
                         </div>
                     )}
 
