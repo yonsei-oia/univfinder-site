@@ -275,33 +275,6 @@
             margin: 30px 0 20px 0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .app-layout { display: grid; grid-template-columns: var(--sidebar-w, 340px) 1fr; gap: 24px; align-items: start; margin: 30px 0 20px; position: relative; }
-        .app-main { min-width: 0; }
-        .sidebar-resizer { position: absolute; top: 0; bottom: 0; left: var(--sidebar-w, 340px); width: 12px; margin-left: -1px; cursor: col-resize; z-index: 5; }
-        .sidebar-resizer::after { content: ''; position: absolute; top: 0; bottom: 0; left: 1px; width: 2px; border-radius: 2px; background: transparent; transition: background .15s; }
-        .sidebar-resizer:hover::after, body.is-resizing .sidebar-resizer::after { background: var(--brand, #003876); }
-        body.is-resizing { cursor: col-resize; user-select: none; }
-        /* Sidebar collapse / expand (desktop) */
-        .sidebar-collapse-btn { display: block; width: fit-content; margin: -6px 0 14px auto; padding: 4px 10px; font-size: 12px; font-weight: 600;
-            color: var(--ink-muted, #6b7280); background: var(--gray-100, #f3f4f6); border: none; border-radius: 6px;
-            cursor: pointer; font-family: inherit; letter-spacing: -0.01em; transition: background .15s, color .15s; }
-        .sidebar-collapse-btn:hover { background: var(--gray-200, #e5e7eb); color: var(--brand, #003876); }
-        .sidebar-clear-btn { display: block; width: 100%; margin-bottom: 0; }
-        /* Hide + Clear All pinned to the top of the scrolling sidebar */
-        .sidebar-sticky-header { position: sticky; top: 0; z-index: 3; background: #fff; margin: -25px -25px 14px; padding: 25px 25px 14px; }
-        .sidebar-expand-btn { position: sticky; top: 20px; z-index: 4; display: inline-flex; align-items: center; gap: 6px;
-            margin-bottom: 16px; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--brand, #003876);
-            background: white; border: 1px solid var(--gray-200, #e5e7eb); border-radius: 8px; cursor: pointer;
-            font-family: inherit; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: box-shadow .15s, background .15s; }
-        .sidebar-expand-btn:hover { background: var(--gray-100, #f3f4f6); box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
-        @media (min-width: 769px) {
-            .app-layout.is-collapsed { grid-template-columns: 1fr; }
-            .app-layout.is-collapsed > .filter-sidebar,
-            .app-layout.is-collapsed > .sidebar-resizer { display: none; }
-        }
-        .filter-sidebar, .filter-rest { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .filter-sidebar { position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; }
-        .filter-rest { margin-bottom: 20px; }
         .filter-section { margin-bottom: 25px; }
         .filter-section:last-child { margin-bottom: 0; }
         .filter-label {
@@ -970,9 +943,8 @@
                 padding: 2px 8px; border-radius: 999px;
                 font-size: 12px;
             }
-            .filter-sidebar {
+            .filter-panel {
                 position: fixed;
-                max-height: none;
                 top: 0; right: 0; bottom: 0;
                 width: 92vw; max-width: 400px;
                 margin: 0;
@@ -984,7 +956,7 @@
                 padding-top: 56px;
                 box-shadow: -4px 0 20px rgba(0, 0, 0, 0.18);
             }
-            .filter-sidebar.is-open { transform: translateX(0); }
+            .filter-panel.is-open { transform: translateX(0); }
             .filter-drawer-close {
                 display: inline-flex;
                 position: fixed; top: 12px; right: 12px;
@@ -1014,11 +986,7 @@
             .stats-bar { gap: 15px; }
             .stat-value { font-size: 20px; }
             .university-grid { grid-template-columns: 1fr; }
-            .app-layout { display: block; }
-            .sidebar-resizer { display: none; }
-            .sidebar-collapse-btn, .sidebar-expand-btn { display: none; }
-            .filter-sidebar { padding-left: 20px; padding-right: 20px; padding-bottom: 20px; }
-            .sidebar-sticky-header { position: static; margin: 0 0 14px; padding: 0; }
+            .filter-panel { padding-left: 20px; padding-right: 20px; padding-bottom: 20px; }
             .action-bar { flex-direction: column; align-items: stretch; }
             .action-buttons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
             .action-buttons button, .action-buttons select { flex: 1; min-width: calc(50% - 4px); }
@@ -2207,16 +2175,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 return () => { document.body.style.overflow = ''; };
             }, [isFilterDrawerOpen]);
 
-            // Desktop sidebar collapse state (persisted)
-            const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-                try { return localStorage.getItem('univfinderSidebarCollapsed') === '1'; }
-                catch (_) { return false; }
-            });
-            useEffect(() => {
-                try { localStorage.setItem('univfinderSidebarCollapsed', sidebarCollapsed ? '1' : '0'); }
-                catch (_) {}
-            }, [sidebarCollapsed]);
-
             // ---- persist filters/sortBy/favorites/qualifications --------------------
             useEffect(() => { sessionStorage.setItem(`${TERM_SK}filters`, JSON.stringify(filters)); }, [filters]);
             useEffect(() => { sessionStorage.setItem(`${TERM_SK}sortBy`, JSON.stringify(sortBy)); }, [sortBy]);
@@ -2673,7 +2631,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             <div className="first-visit-banner">
                                 <span className="first-visit-icon" aria-hidden="true">💡</span>
                                 <span className="first-visit-text">
-                                    <strong>New here?</strong> Set your <strong>Student Type, Language, and GPA</strong> to narrow the list quickly. Star ☆ the schools you want to keep.
+                                    <strong>New here?</strong> Set your <strong>Student Type, Language, and GPA</strong> below to narrow the list quickly. Star ☆ the schools you want to keep.
                                 </span>
                                 <button className="first-visit-close" onClick={dismissFirstVisitBanner} aria-label="Dismiss tip">×</button>
                             </div>
@@ -2696,26 +2654,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             aria-hidden="true" />
 
                         {/* ===== Filter Panel (drawer on mobile, inline on desktop) ===== */}
-                        <div className={`app-layout ${sidebarCollapsed ? 'is-collapsed' : ''}`}>
-                        <div className="sidebar-resizer" onPointerDown={startSidebarResize}
-                            title="드래그하여 사이드바 너비 조절" role="separator" aria-orientation="vertical" />
-                        <aside className={`filter-sidebar ${isFilterDrawerOpen ? 'is-open' : ''}`}>
+                        <section className={`filter-panel ${isFilterDrawerOpen ? 'is-open' : ''}`}>
                             <button className="filter-drawer-close"
                                 onClick={() => setIsFilterDrawerOpen(false)}
                                 aria-label="필터 닫기">
                                 ×
                             </button>
-                            <div className="sidebar-sticky-header">
-                                <button className="sidebar-collapse-btn"
-                                    onClick={() => setSidebarCollapsed(true)}
-                                    title="필터 사이드바 접기" aria-label="Collapse filters">
-                                    ‹ Hide
-                                </button>
-                                {/* Reset (top of sidebar — resets all filter inputs below) */}
-                                <button className="btn btn-secondary sidebar-clear-btn" onClick={clearAllFilters}>
-                                    Clear All Filters
-                                </button>
-                            </div>
                             {/* Student Type */}
                             <div className="filter-section">
                                 <label className="filter-label">Student Type</label>
@@ -2792,46 +2736,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 </div>
                             </div>
 
-                            {/* Toggle checkboxes */}
-                            <div className="filter-section">
-                                <div className="checkbox-list">
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.uicOnly}
-                                            onChange={(e)=>setFilters(p=>({...p, uicOnly:e.target.checked, uicExclude:false}))} />
-                                        <span>UIC Exclusive Programs Only</span>
-                                        {counts && <span className="filter-count">({counts.uicOnly})</span>}
-                                    </label>
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.uicExclude}
-                                            onChange={(e)=>setFilters(p=>({...p, uicExclude:e.target.checked, uicOnly:false}))} />
-                                        <span>Exclude UIC Exclusive Programs</span>
-                                        {counts && <span className="filter-count">({counts.uicExclude})</span>}
-                                    </label>
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.scholarshipOnly}
-                                            onChange={(e)=>setFilters(p=>({...p, scholarshipOnly:e.target.checked}))} />
-                                        <span>Scholarship Available Only</span>
-                                        {counts && <span className="filter-count">({counts.scholarshipOnly})</span>}
-                                    </label>
-                                    <label className="checkbox-row">
-                                        <input type="checkbox" checked={filters.updateOnly}
-                                            onChange={(e)=>setFilters(p=>({...p, updateOnly:e.target.checked}))} />
-                                        <span style={{color:'#e83e8c'}}>Updated Universities Only</span>
-                                        {counts && <span className="filter-count">({counts.updateOnly})</span>}
-                                    </label>
-                                </div>
-                            </div>
-                        </aside>
-                        <div className="app-main">
-                        {sidebarCollapsed && (
-                            <button className="sidebar-expand-btn"
-                                onClick={() => setSidebarCollapsed(false)}
-                                title="필터 사이드바 펼치기">
-                                Filters ›
-                            </button>
-                        )}
-                        <div className="filter-rest">
-
                             {/* University Search */}
                             <div className="filter-section">
                                 <label className="filter-label">Search University</label>
@@ -2898,8 +2802,41 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 </div>
                             </div>
 
-                            {/* Result-view actions: view toggles → favorites actions → info */}
+                            {/* Toggle checkboxes */}
+                            <div className="filter-section">
+                                <div className="checkbox-list">
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.uicOnly}
+                                            onChange={(e)=>setFilters(p=>({...p, uicOnly:e.target.checked, uicExclude:false}))} />
+                                        <span>UIC Exclusive Programs Only</span>
+                                        {counts && <span className="filter-count">({counts.uicOnly})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.uicExclude}
+                                            onChange={(e)=>setFilters(p=>({...p, uicExclude:e.target.checked, uicOnly:false}))} />
+                                        <span>Exclude UIC Exclusive Programs</span>
+                                        {counts && <span className="filter-count">({counts.uicExclude})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.scholarshipOnly}
+                                            onChange={(e)=>setFilters(p=>({...p, scholarshipOnly:e.target.checked}))} />
+                                        <span>Scholarship Available Only</span>
+                                        {counts && <span className="filter-count">({counts.scholarshipOnly})</span>}
+                                    </label>
+                                    <label className="checkbox-row">
+                                        <input type="checkbox" checked={filters.updateOnly}
+                                            onChange={(e)=>setFilters(p=>({...p, updateOnly:e.target.checked}))} />
+                                        <span style={{color:'#e83e8c'}}>Updated Universities Only</span>
+                                        {counts && <span className="filter-count">({counts.updateOnly})</span>}
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Buttons: reset → view toggles → favorites actions → info */}
                             <div style={{display:'flex', justifyContent:'center', gap:10, marginTop:20, flexWrap:'wrap'}}>
+                                <button className="btn btn-secondary" onClick={clearAllFilters}>
+                                    Clear All Filters
+                                </button>
                                 <button
                                     className={`btn ${showFavoritesOnly?'btn-primary':'btn-secondary'}`}
                                     onClick={()=>setShowFavoritesOnly(v=>!v)}>
@@ -2925,7 +2862,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     📋 Update History
                                 </button>
                             </div>
-                        </div>
+                        </section>
 
                         {/* ===== Active Filter Chips (T1-A) ===== */}
                         {activeChips.length > 0 && (
@@ -2993,8 +2930,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 ))}
                             </div>
                         )}
-                        </div>
-                    </div>
                     </main>
 
                     {/* ===== Detail Modal ===== */}
@@ -3962,34 +3897,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 </div>
             );
         }
-
-        // --- Resizable sidebar: drag the divider to set its width (persisted) ---
-        const SIDEBAR_MIN = 200, SIDEBAR_MAX = 480;
-        function startSidebarResize(e) {
-            e.preventDefault();
-            const layout = e.currentTarget.parentElement;
-            const onMove = (ev) => {
-                const w = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN,
-                    ev.clientX - layout.getBoundingClientRect().left));
-                document.documentElement.style.setProperty('--sidebar-w', w + 'px');
-            };
-            const onUp = () => {
-                document.removeEventListener('pointermove', onMove);
-                document.removeEventListener('pointerup', onUp);
-                document.body.classList.remove('is-resizing');
-                try {
-                    localStorage.setItem('univfinderSidebarW',
-                        getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w').trim());
-                } catch (_) {}
-            };
-            document.body.classList.add('is-resizing');
-            document.addEventListener('pointermove', onMove);
-            document.addEventListener('pointerup', onUp);
-        }
-        try {
-            const _sw = localStorage.getItem('univfinderSidebarW');
-            if (_sw) document.documentElement.style.setProperty('--sidebar-w', _sw);
-        } catch (_) {}
 
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
