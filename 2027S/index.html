@@ -765,6 +765,36 @@
             display: block;
         }
 
+        .yz-socials {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .yz-social {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .15s, border-color .15s, color .15s;
+        }
+        .yz-social:hover {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: #fff;
+        }
+        .yz-social svg {
+            width: 13px; height: 13px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
         /* Empty / Loading / Error states */
         .empty-state, .loading-state, .error-state {
             text-align: center;
@@ -1690,6 +1720,22 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             return m ? `https://player.vimeo.com/video/${m[1]}` : null;
         }
 
+        function getSocialPlatform(url) {
+            if (!url) return 'Link';
+            const u = url.toLowerCase();
+            if (/instagram\.com/.test(u)) return 'Instagram';
+            if (/facebook\.com|fb\.com/.test(u)) return 'Facebook';
+            if (/twitter\.com|\/\/x\.com|\.x\.com/.test(u)) return 'X';
+            if (/tiktok\.com/.test(u)) return 'TikTok';
+            if (/youtube\.com|youtu\.be/.test(u)) return 'YouTube';
+            if (/linkedin\.com/.test(u)) return 'LinkedIn';
+            if (/weibo\.com/.test(u)) return 'Weibo';
+            if (/threads\.net/.test(u)) return 'Threads';
+            if (/vimeo\.com/.test(u)) return 'Vimeo';
+            const m = url.match(/https?:\/\/(?:www\.)?([^/]+)/);
+            return m ? m[1] : 'Link';
+        }
+
         function getVideoEmbedUrl(url) {
             return getYouTubeEmbedUrl(url) || getVimeoEmbedUrl(url);
         }
@@ -1874,6 +1920,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     useful_links: linkPairsToPipe(c.useful_links),
                     video_links: linkPairsToPipe(c.video_links),
                     gallery_urls: (c.gallery_urls || []).join('\n'),
+                    social_links: linkPairsToPipe(c.social_links),
                     cover_image_url: u.cover_image_url || '',
                     cover_image_credit: u.cover_image_credit || '',
                     cover_image_kind: u.cover_image_kind || '',
@@ -3421,10 +3468,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const gallery = c.gallery_urls
                 ? String(c.gallery_urls).split('\n').map(s => s.trim()).filter(Boolean)
                 : [];
-            if (videos.length === 0 && gallery.length === 0) {
+            const socials = c.social_links ? parsePipeLines(c.social_links).slice(0, 10) : [];
+            if (videos.length === 0 && gallery.length === 0 && socials.length === 0) {
                 return (
                     <div className="yz-prose" style={{color:'var(--ink-muted)'}}>
-                        <p>No videos or photos have been added for this university yet.</p>
+                        <p>No videos, photos, or social channels have been added for this university yet.</p>
                     </div>
                 );
             }
@@ -3467,6 +3515,23 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             <div className="detail-gallery">
                                 {gallery.map((src, i) => (
                                     <img key={i} src={src} alt={`${u.name} photo ${i + 1}`} loading="lazy" />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {socials.length > 0 && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Social</p>
+                                <h3 className="yz-sect-title">Follow the university</h3>
+                            </div>
+                            <div className="yz-socials">
+                                {socials.map((s, i) => (
+                                    <a key={i} className="yz-social" href={s.url || '#'}
+                                       target="_blank" rel="noopener noreferrer">
+                                        <span className="yz-social-name">{getSocialPlatform(s.url)}</span>
+                                        <IconExternal />
+                                    </a>
                                 ))}
                             </div>
                         </div>
