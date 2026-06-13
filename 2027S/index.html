@@ -1764,7 +1764,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 if (linkIdx !== -1 && (boldIdx === -1 || linkIdx < boldIdx)) {
                     if (linkIdx > 0) out.push(remaining.slice(0, linkIdx));
                     out.push(
-                        <a key={key++} href={linkMatch[2]} target="_blank" rel="noopener noreferrer">
+                        <a key={key++} href={safeHttpUrl(linkMatch[2])} target="_blank" rel="noopener noreferrer">
                             {linkMatch[1]}
                         </a>
                     );
@@ -2283,7 +2283,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 const urlRe = /^https?:\/\/[^\s]+$/;
                 return text.split(splitRe).map((part, i) =>
                     urlRe.test(part)
-                        ? <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+                        ? <a key={i} href={safeHttpUrl(part)} target="_blank" rel="noopener noreferrer"
                              style={{color:'var(--yonsei-light-blue)', textDecoration:'underline'}}>{part}</a>
                         : part
                 );
@@ -2548,7 +2548,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             {HEADER_LINKS.length > 0 && (
                                 <nav className="site-nav" aria-label="Related links">
                                     {HEADER_LINKS.map(l => (
-                                        <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer"
+                                        <a key={l.label} href={safeHttpUrl(l.url)} target="_blank" rel="noopener noreferrer"
                                             className="site-nav__tab">
                                             {l.label}
                                         </a>
@@ -3063,7 +3063,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             View Details
                         </button>
                         {u.website && (
-                            <a href={u.website} target="_blank" rel="noopener noreferrer"
+                            <a href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer"
                                 className="btn btn-secondary" style={{flex:1, fontSize:13, padding:'8px 12px'}}>
                                 Website
                             </a>
@@ -3205,7 +3205,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     onClick={onNext} disabled={!hasNext} aria-label="Next university (→ key)">Next →</button>
                             </div>
                             {u.website && (
-                                <a href={u.website} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                                <a href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
                                     Visit Website
                                 </a>
                             )}
@@ -3482,7 +3482,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const urlRe = /^https?:\/\/[^\s]+$/;
             return String(text).split(splitRe).map((part, i) =>
                 urlRe.test(part)
-                    ? <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+                    ? <a key={i} href={safeHttpUrl(part)} target="_blank" rel="noopener noreferrer"
                          style={{color:'var(--brand)', textDecoration:'underline'}}>{part}</a>
                     : part);
         }
@@ -3513,7 +3513,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     const ytId = getYouTubeId(v.url);
                                     const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
                                     return (
-                                        <a key={i} className="yz-video" href={v.url || '#'}
+                                        <a key={i} className="yz-video" href={safeHttpUrl(v.url)}
                                            target="_blank" rel="noopener noreferrer">
                                             <div className="yz-video-thumb"
                                                  style={thumb ? { backgroundImage:
@@ -3676,7 +3676,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <p className="yz-prose" style={{color:'var(--ink-muted)', margin:'0 0 14px'}}>Familiarize yourself with your host country and university — available departments, course offerings, and housing procedures.</p>
                         <div className="yz-links">
                             {u.recentFactsheet && (
-                                <a className="yz-link" href={u.recentFactsheet} target="_blank" rel="noopener noreferrer">
+                                <a className="yz-link" href={safeHttpUrl(u.recentFactsheet)} target="_blank" rel="noopener noreferrer">
                                     <span className="yz-link-icon"><IconFile /></span>
                                     <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
                                         <p className="yz-link-url">Detailed university information (PDF)</p></div>
@@ -3684,7 +3684,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 </a>
                             )}
                             {u.website && (
-                                <a className="yz-link" href={u.website} target="_blank" rel="noopener noreferrer">
+                                <a className="yz-link" href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer">
                                     <span className="yz-link-icon"><IconGlobe /></span>
                                     <div className="yz-link-body"><p className="yz-link-title">Host university website</p>
                                         <p className="yz-link-url">{u.website}</p></div>
@@ -3746,7 +3746,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             </div>
                             <div className="yz-links">
                                 {u.recentFactsheet && (
-                                    <a className="yz-link" href={u.recentFactsheet} target="_blank" rel="noopener noreferrer">
+                                    <a className="yz-link" href={safeHttpUrl(u.recentFactsheet)} target="_blank" rel="noopener noreferrer">
                                         <span className="yz-link-icon"><IconFile /></span>
                                         <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
                                             <p className="yz-link-url">Detailed university information (PDF)</p></div>
@@ -3754,7 +3754,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     </a>
                                 )}
                                 {u.website && (
-                                    <a className="yz-link" href={u.website} target="_blank" rel="noopener noreferrer">
+                                    <a className="yz-link" href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer">
                                         <span className="yz-link-icon"><IconGlobe /></span>
                                         <div className="yz-link-body"><p className="yz-link-title">Host university website</p>
                                             <p className="yz-link-url">{u.website}</p></div>
