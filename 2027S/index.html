@@ -344,6 +344,7 @@
         /* Mobile filter drawer trigger (T2-H) — hidden on desktop */
         .mobile-filter-trigger { display: none; }
         .filter-drawer-close { display: none; }
+        .filter-drawer-header { display: none; }
         .filter-drawer-backdrop { display: none; }
 
         /* First-visit banner (T2-I) */
@@ -907,30 +908,43 @@
             .filter-panel {
                 position: fixed;
                 top: 0; right: 0; bottom: 0;
-                width: 92vw; max-width: 400px;
+                width: 86vw; max-width: 360px;
                 margin: 0;
                 border-radius: 0;
                 z-index: 1001;
                 transform: translateX(100%);
                 transition: transform 280ms ease;
                 overflow-y: auto;
-                padding-top: 56px;
+                padding-top: 0;
                 box-shadow: -4px 0 20px rgba(0, 0, 0, 0.18);
             }
             .filter-panel.is-open { transform: translateX(0); }
+            .filter-drawer-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: sticky;
+                top: 0;
+                z-index: 2;
+                background: #fff;
+                margin: 0 -20px 12px;
+                padding: 13px 16px 13px 20px;
+                border-bottom: 1px solid var(--line);
+            }
+            .filter-drawer-title {
+                font-size: 16px; font-weight: 700; color: var(--ink);
+            }
             .filter-drawer-close {
                 display: inline-flex;
-                position: fixed; top: 12px; right: 12px;
-                width: 36px; height: 36px;
+                width: 44px; height: 44px;
                 align-items: center; justify-content: center;
-                border: none;
-                background: var(--gray-100);
-                border-radius: 50%;
-                font-size: 22px; line-height: 1; cursor: pointer;
-                color: var(--ink); font-family: inherit;
-                z-index: 1002;
+                border: 1px solid var(--line);
+                background: var(--brand-soft);
+                border-radius: 10px;
+                font-size: 26px; line-height: 1; cursor: pointer;
+                color: var(--brand); font-family: inherit;
             }
-            .filter-drawer-close:hover { background: var(--gray-200); }
+            .filter-drawer-close:active { background: var(--brand); color: #fff; }
             .filter-drawer-backdrop {
                 display: none;
                 position: fixed; inset: 0;
@@ -2657,11 +2671,14 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                         {/* ===== Filter Panel (drawer on mobile, inline on desktop) ===== */}
                         <section className={`filter-panel ${isFilterDrawerOpen ? 'is-open' : ''}`}>
-                            <button className="filter-drawer-close"
-                                onClick={() => setIsFilterDrawerOpen(false)}
-                                aria-label="Close filters">
-                                ×
-                            </button>
+                            <div className="filter-drawer-header">
+                                <span className="filter-drawer-title">Filters</span>
+                                <button className="filter-drawer-close"
+                                    onClick={() => setIsFilterDrawerOpen(false)}
+                                    aria-label="Close filters">
+                                    ×
+                                </button>
+                            </div>
                             {/* Student Type */}
                             <div className="filter-section">
                                 <label className="filter-label">Student Type</label>
