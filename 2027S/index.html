@@ -3378,6 +3378,23 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             )}
                         </div>
                     )}
+
+                    {u.recentFactsheet && (
+                        <div className="yz-sect">
+                            <div className="yz-sect-head">
+                                <p className="yz-sect-label">Reference</p>
+                                <h3 className="yz-sect-title">Factsheet</h3>
+                            </div>
+                            <div className="yz-links">
+                                <a className="yz-link" href={safeHttpUrl(u.recentFactsheet)} target="_blank" rel="noopener noreferrer">
+                                    <span className="yz-link-icon"><IconFile /></span>
+                                    <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
+                                        <p className="yz-link-url">Detailed university information (PDF)</p></div>
+                                    <span className="yz-link-cta">Open ↗</span>
+                                </a>
+                            </div>
+                        </div>
+                    )}
                 </>
             );
         }
@@ -3694,14 +3711,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </div>
                         <p className="yz-prose" style={{color:'var(--ink-muted)', margin:'0 0 14px'}}>Familiarize yourself with your host country and university — available departments, course offerings, and housing procedures.</p>
                         <div className="yz-links">
-                            {u.recentFactsheet && (
-                                <a className="yz-link" href={safeHttpUrl(u.recentFactsheet)} target="_blank" rel="noopener noreferrer">
-                                    <span className="yz-link-icon"><IconFile /></span>
-                                    <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
-                                        <p className="yz-link-url">Detailed university information (PDF)</p></div>
-                                    <span className="yz-link-cta">Open ↗</span>
-                                </a>
-                            )}
                             {u.website && (
                                 <a className="yz-link" href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer">
                                     <span className="yz-link-icon"><IconGlobe /></span>
@@ -3757,21 +3766,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             </div>
                         </div>
                     </div>
-                    {(u.recentFactsheet || u.website) && (
+                    {u.website && (
                         <div className="yz-sect">
                             <div className="yz-sect-head">
                                 <p className="yz-sect-label">Learn more</p>
                                 <h3 className="yz-sect-title">About this university</h3>
                             </div>
                             <div className="yz-links">
-                                {u.recentFactsheet && (
-                                    <a className="yz-link" href={safeHttpUrl(u.recentFactsheet)} target="_blank" rel="noopener noreferrer">
-                                        <span className="yz-link-icon"><IconFile /></span>
-                                        <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
-                                            <p className="yz-link-url">Detailed university information (PDF)</p></div>
-                                        <span className="yz-link-cta">Open ↗</span>
-                                    </a>
-                                )}
                                 {u.website && (
                                     <a className="yz-link" href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer">
                                         <span className="yz-link-icon"><IconGlobe /></span>
