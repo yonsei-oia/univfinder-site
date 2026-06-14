@@ -69,4 +69,4 @@
 - **범위 밖**: SEO·소셜 미리보기 프리렌더, path 기반 URL, per-partner 접근제어, 데이터/공개범위 변경.
 
 ## 8. 공유 URL 예시
-`https://yonsei-oia-univfinder.netlify.app/#/vrije-universiteit-amsterdam` → VU Amsterdam 디테일 모달이 열린 상태로 진입.
+`https://oiaunivfinder.netlify.app/#/vrije-universiteit-amsterdam` → VU Amsterdam 디테일 모달이 열린 상태로 진입.
