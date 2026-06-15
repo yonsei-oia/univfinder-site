@@ -3610,17 +3610,33 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const orientation = TermLib.orientationLabel(SEMESTER.code);
             const [openAcc, setOpenAcc] = useState('steps'); // 'steps' | 'nom' | 'decisions' | null
             const toggle = (k) => setOpenAcc(prev => prev === k ? null : k);
+            const uic = isUIC(u);              // (UIC Exclusive) 대학: 노미네이션을 OIA가 아닌 UIC가 진행
+            const ORG = uic ? 'UIC' : 'OIA';
 
             if (!recruiting) return <ApplyNotRecruiting u={u} />;
 
-            const STEPS = [
+            const orientationSub = `${orientation} · online (${TermLib.parseSemester(SEMESTER.code).season === 'spring' ? 'Spring intake: the November before departure' : 'Fall intake: the May before departure'})`;
+
+            const STEPS = uic ? [
+                { n:1, who:'oia',  tag:'OIA · UIC', text:'Review the OIA and UIC exchange program general information',
+                  sub:'You may also be invited to a UIC-exclusive exchange mingling event held at the beginning of the semester.', subTag:'UIC · You', subWho:'you' },
+                { n:2, who:'oia',  tag:'UIC',        text:'UIC submits your nomination to the host university' },
+                { n:3, who:'host', tag:'Host',       text:'Host university confirms the nomination' },
+                { n:4, who:'oia',  tag:'UIC · Host', text:'Host university and UIC send application instructions by email' },
+                { n:5, who:'you',  tag:'You',        text:'You submit your application and required documents to the host' },
+                { n:6, who:'you',  tag:'You',        text:'Check the OIA online pre-departure orientation materials which also apply to UIC-exclusive exchange students in most cases.',
+                  sub:orientationSub },
+                { n:7, who:'host', tag:'Host',       text:'Receive the Letter of Acceptance from the host' },
+                { n:8, who:'you',  tag:'You',        text:'Apply for your visa' },
+                { n:9, who:'you',  tag:'You',        text:'Prepare for departure' },
+            ] : [
                 { n:1, who:'oia',  tag:'OIA',        text:'Review the OIA exchange program general information' },
                 { n:2, who:'oia',  tag:'OIA',        text:'OIA submits your nomination to the host university' },
                 { n:3, who:'host', tag:'Host',       text:'Host university confirms the nomination' },
                 { n:4, who:'oia',  tag:'OIA · Host', text:'Host university and OIA send application instructions by email' },
                 { n:5, who:'you',  tag:'You',        text:'You submit your application and required documents to the host' },
                 { n:6, who:'you',  tag:'You',        text:'Attend the OIA online pre-departure orientation',
-                  sub:`${orientation} · online (${TermLib.parseSemester(SEMESTER.code).season === 'spring' ? 'Spring intake: the November before departure' : 'Fall intake: the May before departure'})` },
+                  sub:orientationSub },
                 { n:7, who:'host', tag:'Host',       text:'Receive the Letter of Acceptance from the host' },
                 { n:8, who:'you',  tag:'You',        text:'Apply for your visa' },
                 { n:9, who:'you',  tag:'You',        text:'Prepare for departure' },
@@ -3636,10 +3652,10 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <div className="yz-seq">
                             <div className="yz-seq-card is-1">
                                 <p className="yz-seq-step">Step 1</p>
-                                <p className="yz-seq-who">OIA nominates you</p>
+                                <p className="yz-seq-who">{ORG} nominates you</p>
                                 <p className="yz-seq-label">Nomination deadline</p>
                                 <p className="yz-seq-date">{nomDate}</p>
-                                <p className="yz-seq-desc">OIA submits your nomination to the host university. You cannot do this step yourself.</p>
+                                <p className="yz-seq-desc">{ORG} submits your nomination to the host university. You cannot do this step yourself.</p>
                             </div>
                             <div className="yz-seq-arrow"><IconArrowRight /></div>
                             <div className="yz-seq-card is-2">
@@ -3652,7 +3668,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </div>
                         <div className="yz-keynote">
                             <IconInfo />
-                            <span>Meeting the application deadline alone does not secure your place. You must first be nominated by OIA during the nomination period — students cannot complete the nomination step themselves.</span>
+                            <span>Meeting the application deadline alone does not secure your place. You must first be nominated by {ORG} during the nomination period — students cannot complete the nomination step themselves.</span>
                         </div>
                     </div>
 
@@ -3673,7 +3689,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </div>
 
                         <Accordion title="Steps to final admission" open={openAcc==='steps'} onToggle={() => toggle('steps')}>
-                            <div className="yz-flow-legend"><span>Who acts: <b>You</b> = your action · OIA / Host = handled for you</span></div>
+                            <div className="yz-flow-legend"><span>Who acts: <b>You</b> = your action · {ORG} / Host = handled for you</span></div>
                             <div className="yz-flow">
                                 {STEPS.map(s => (
                                     <div key={s.n} className={`yz-fstep ${s.who==='you' ? 'is-you' : ''}`}>
@@ -3681,7 +3697,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         <div className="yz-fstep-body">
                                             <p className="yz-fstep-text">{s.text}
                                                 <span className={`yz-fstep-tag tag-${s.who}`}>{s.tag}</span></p>
-                                            {s.sub && <p className="yz-fstep-sub">{s.sub}</p>}
+                                            {s.sub && <p className="yz-fstep-sub">{s.sub}{s.subTag && <span className={`yz-fstep-tag tag-${s.subWho||'you'}`}>{s.subTag}</span>}</p>}
                                         </div>
                                     </div>
                                 ))}
@@ -3690,10 +3706,10 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                         <Accordion title="What is nomination?" open={openAcc==='nom'} onToggle={() => toggle('nom')}>
                             <div className="yz-prose">
-                                <p>Nomination is the process where OIA officially recommends students to the host university during the designated nomination period. Students cannot complete this step themselves.</p>
-                                <p>Once the host university confirms the nomination, both OIA and the host will send you application instructions individually. Please submit your documents according to those instructions.</p>
+                                <p>Nomination is the process where {ORG} officially recommends students to the host university during the designated nomination period. Students cannot complete this step themselves.</p>
+                                <p>Once the host university confirms the nomination, both {ORG} and the host will send you application instructions individually. Please submit your documents according to those instructions.</p>
                             </div>
-                            <p className="yz-inline-note">If you do not receive an email from OIA by the nomination deadline, please check your spam folder and contact us.</p>
+                            <p className="yz-inline-note">If you do not receive an email from {ORG} by the nomination deadline, please check your spam folder and contact us.</p>
                         </Accordion>
 
                         <Accordion title="How admission decisions work" open={openAcc==='decisions'} onToggle={() => toggle('decisions')}>
