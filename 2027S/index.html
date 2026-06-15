@@ -3735,10 +3735,10 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     <span className="yz-link-cta">Open ↗</span>
                                 </a>
                             )}
-                            <a className="yz-link" href="https://portal.yonsei.ac.kr" target="_blank" rel="noopener noreferrer">
+                            <a className="yz-link" href={uic ? 'https://uic.yonsei.ac.kr' : 'https://portal.yonsei.ac.kr'} target="_blank" rel="noopener noreferrer">
                                 <span className="yz-link-icon"><IconMessage /></span>
-                                <div className="yz-link-body"><p className="yz-link-title">Yonsei Portal — Experience Reports</p>
-                                    <p className="yz-link-url">Academic Information System → International Student Exchange</p></div>
+                                <div className="yz-link-body"><p className="yz-link-title">{uic ? 'UIC Website — Experience Reports' : 'Yonsei Portal — Experience Reports'}</p>
+                                    <p className="yz-link-url">{uic ? 'ACADEMICS > Exclusive Programs > Study Abroad > Experience Report' : 'Academic Information System → International Student Exchange'}</p></div>
                                 <span className="yz-link-cta">Open ↗</span>
                             </a>
                         </div>
