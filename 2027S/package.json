@@ -1,0 +1,11 @@
+{
+  "name": "univfinder-site",
+  "private": true,
+  "description": "Yonsei OIA Exchange University Finder. Source: index.src.html (JSX in <script type=text/babel>). Build: `npm install && npm run build` -> index.html (precompiled, no in-browser Babel). Do not hand-edit index.html.",
+  "scripts": {
+    "build": "node build.cjs"
+  },
+  "devDependencies": {
+    "@babel/standalone": "^7.29.7"
+  }
+}

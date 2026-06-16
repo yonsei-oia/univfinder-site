@@ -3,3 +3,5 @@
 
 # Brainstorming visual-companion mockups (local, ephemeral)
 /.superpowers/
+node_modules/
+2027S/node_modules/
