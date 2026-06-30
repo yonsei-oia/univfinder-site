@@ -3746,6 +3746,10 @@ function AboutPanel({
 }) {
   const c = u.content || {};
   const links = c.useful_links ? parsePipeLines(c.useful_links).slice(0, 6) : [];
+  if (u.additionalLink) links.push({
+    label: 'More information',
+    url: u.additionalLink
+  });
   const hasLiving = c.accommodation || u.housingInfo || u.academicCalendar || u.housingGuaranteed;
   const schoolShort = u.name.split(' - ')[0];
   const mapSrc = CampusMap.osmSrc(u.campusLat, u.campusLng);
