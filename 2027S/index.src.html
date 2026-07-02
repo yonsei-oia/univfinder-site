@@ -116,10 +116,19 @@
         }
 
         a { color: inherit; }
-        a:focus-visible, button:focus-visible {
+        a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
             outline: 2px solid var(--focus);
             outline-offset: 3px;
             border-radius: 4px;
+        }
+        button, a, select, input, [role="button"] { touch-action: manipulation; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
 
         .skip-link {
@@ -308,7 +317,7 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
             color: var(--gray-700);
         }
         .filter-btn:hover { border-color: var(--yonsei-light-blue); color: var(--yonsei-blue); }
@@ -443,7 +452,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -482,7 +491,7 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            transition: box-shadow 0.3s, transform 0.3s, border-color 0.3s;
             border: 2px solid transparent;
         }
         .university-card:hover {
@@ -515,7 +524,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: background-color 0.2s, color 0.2s;
             font-size: 16px;
         }
         .icon-btn:hover { background: var(--gray-200); }
@@ -588,8 +597,11 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            overscroll-behavior: contain;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
+        /* Programmatic focus target on open — focus ring stays on inner controls */
+        .modal:focus { outline: none; }
         .modal-header {
             background: var(--yonsei-blue);
             color: white;
@@ -881,7 +893,8 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease,
+                background-color 0.3s ease, box-shadow 0.3s ease;
             z-index: 1000;
         }
         .scroll-to-top.visible { opacity: 1; visibility: visible; }
@@ -938,6 +951,7 @@
                 transform: translateX(100%);
                 transition: transform 280ms ease;
                 overflow-y: auto;
+                overscroll-behavior: contain;
                 padding-top: 0;
                 box-shadow: -4px 0 20px rgba(0, 0, 0, 0.18);
             }
@@ -2217,12 +2231,14 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
             // T2-H: Mobile filter drawer state
             const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
+            // Body scroll lock while ANY overlay is open (drawer, detail modal,
+            // update-history modal) — stops background scrolling on mobile.
             useEffect(() => {
-                // Body scroll lock while drawer is open
-                if (isFilterDrawerOpen) document.body.style.overflow = 'hidden';
-                else document.body.style.overflow = '';
+                const overlayOpen = isFilterDrawerOpen || !!selectedUniversity || showUpdateHistory;
+                document.body.style.overflow = overlayOpen ? 'hidden' : '';
                 return () => { document.body.style.overflow = ''; };
-            }, [isFilterDrawerOpen]);
+            }, [isFilterDrawerOpen, selectedUniversity, showUpdateHistory]);
 
             // ---- persist filters/sortBy/favorites/qualifications --------------------
             useEffect(() => { sessionStorage.setItem(`${TERM_SK}filters`, JSON.stringify(filters)); }, [filters]);
@@ -2255,7 +2271,10 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 return () => window.removeEventListener('scroll', onScroll);
             }, []);
 
-            const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+            const scrollToTop = () => window.scrollTo({
+                top: 0,
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+            });
 
             // ---- data loading -------------------------------------------------------
             const loadData = useCallback(async () => {
@@ -2547,7 +2566,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 return (
                     <div className="loading-state">
                         <div className="spinner"></div>
-                        <p>Loading data...</p>
+                        <p>Loading data…</p>
                     </div>
                 );
             }
@@ -2710,8 +2729,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             </div>
                             {/* Student Type */}
                             <div className="filter-section">
-                                <label className="filter-label">Student Type</label>
-                                <div className="filter-group">
+                                <span className="filter-label" id="fl-student-type">Student Type</span>
+                                <div className="filter-group" role="group" aria-labelledby="fl-student-type">
                                     {['Undergraduate','Graduate'].map(t => (
                                         <button key={t}
                                             className={`filter-btn ${filters.studentType===t?'active':''}`}
@@ -2724,8 +2743,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                             {/* Language Region */}
                             <div className="filter-section">
-                                <label className="filter-label">Language Region (Select One)</label>
-                                <div className="filter-group">
+                                <span className="filter-label" id="fl-language-region">Language Region (Select One)</span>
+                                <div className="filter-group" role="group" aria-labelledby="fl-language-region">
                                     {['English','Non-English'].map(t => (
                                         <button key={t}
                                             className={`filter-btn ${filters.languageRegion===t?'active':''}`}
@@ -2740,8 +2759,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 SEMESTER_CODE). Single-select: combining lengths is a union and
                                 reads as a wrong count, so picking one clears the other. */}
                             <div className="filter-section">
-                                <label className="filter-label">Exchange Term &amp; Length (select one)</label>
-                                <div className="filter-group">
+                                <span className="filter-label" id="fl-term">Exchange Term &amp; Length (select one)</span>
+                                <div className="filter-group" role="group" aria-labelledby="fl-term">
                                     {TermLib.semesterOptions(SEMESTER.code).map(opt => (
                                         <button key={opt.key}
                                             className={`filter-btn ${filters[opt.key]?'active':''}`}
@@ -2759,11 +2778,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                             {/* Continent & Country */}
                             <div className="filter-section">
-                                <label className="filter-label">Continent &amp; Country</label>
+                                <span className="filter-label">Continent &amp; Country</span>
                                 <div className="input-group">
                                     <div className="input-field">
-                                        <label>Continent</label>
-                                        <select value={filters.continent}
+                                        <label htmlFor="f-continent">Continent</label>
+                                        <select id="f-continent" value={filters.continent}
                                             onChange={(e)=>setFilters(p=>({...p, continent:e.target.value, country:'', university:''}))}>
                                             <option value="">All Continents</option>
                                             {continentOptions.map(c => (
@@ -2772,8 +2791,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         </select>
                                     </div>
                                     <div className="input-field">
-                                        <label>Country</label>
-                                        <select value={filters.country}
+                                        <label htmlFor="f-country">Country</label>
+                                        <select id="f-country" value={filters.country}
                                             onChange={(e)=>setFilters(p=>({...p, country:e.target.value, university:''}))}>
                                             <option value="">All Countries</option>
                                             {filteredCountries.map(c => (
@@ -2786,16 +2805,18 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                             {/* University Search */}
                             <div className="filter-section">
-                                <label className="filter-label">Search University</label>
+                                <label className="filter-label" htmlFor="f-university">Search University</label>
                                 <div className="input-field">
-                                    <select value={filters.university}
+                                    <select id="f-university" value={filters.university}
                                         onChange={(e)=>setFilters(p=>({...p, university:e.target.value}))}>
                                         <option value="">All Universities</option>
                                         {universityNameOptions.filter(Boolean).map(n => <option key={n} value={n}>{n}</option>)}
                                     </select>
                                 </div>
                                 <div className="input-field" style={{marginTop:10}}>
-                                    <input type="text" placeholder="Type university name to search..."
+                                    <input type="text" placeholder="Type university name to search…"
+                                        aria-label="Search university by name"
+                                        autoComplete="off" spellCheck={false}
                                         value={filters.universitySearch}
                                         onChange={(e)=>setFilters(p=>({...p, universitySearch:e.target.value}))} />
                                 </div>
@@ -2803,32 +2824,34 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                             {/* My Qualifications */}
                             <div className="filter-section">
-                                <label className="filter-label">My Qualifications</label>
+                                <span className="filter-label">My Qualifications</span>
                                 <div className="input-group">
                                     <div className="input-field">
-                                        <label>GPA (4.3 scale)</label>
-                                        <input type="number" step="0.01" min="0" max="4.3"
+                                        <label htmlFor="f-gpa">GPA (4.3 scale)</label>
+                                        <input id="f-gpa" type="number" step="0.01" min="0" max="4.3"
+                                            inputMode="decimal"
                                             placeholder="e.g., 3.5"
                                             value={filters.gpa}
                                             onChange={(e)=>setFilters(p=>({...p, gpa:e.target.value}))} />
-                                        {gpaWarning && <div className="warning-text">{gpaWarning}</div>}
+                                        {gpaWarning && <div className="warning-text" role="alert">{gpaWarning}</div>}
                                     </div>
 
                                     {filters.languageRegion === 'English' && (
                                         <div className="input-field">
-                                            <label>TOEFL iBT</label>
-                                            <input type="number" min="0" max="120" placeholder="e.g., 90"
+                                            <label htmlFor="f-toefl">TOEFL iBT</label>
+                                            <input id="f-toefl" type="number" min="0" max="120" placeholder="e.g., 90"
+                                                inputMode="numeric"
                                                 value={filters.toefl}
                                                 onChange={(e)=>setFilters(p=>({...p, toefl:e.target.value}))} />
-                                            {toeflWarning && <div className="warning-text">{toeflWarning}</div>}
+                                            {toeflWarning && <div className="warning-text" role="alert">{toeflWarning}</div>}
                                         </div>
                                     )}
 
                                     {filters.languageRegion === 'Non-English' && (
                                         <>
                                             <div className="input-field">
-                                                <label>Language</label>
-                                                <select value={filters.nonEnglishLanguage}
+                                                <label htmlFor="f-lang">Language</label>
+                                                <select id="f-lang" value={filters.nonEnglishLanguage}
                                                     onChange={(e)=>setFilters(p=>({...p, nonEnglishLanguage:e.target.value, nonEnglishLevel:''}))}>
                                                     <option value="">Select Language</option>
                                                     {Object.keys(LANGUAGE_LEVEL_OPTIONS).map(l => <option key={l} value={l}>{l}</option>)}
@@ -2836,8 +2859,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                             </div>
                                             {filters.nonEnglishLanguage && (
                                                 <div className="input-field">
-                                                    <label>{filters.nonEnglishLanguage} Level</label>
-                                                    <select value={filters.nonEnglishLevel}
+                                                    <label htmlFor="f-lang-level">{filters.nonEnglishLanguage} Level</label>
+                                                    <select id="f-lang-level" value={filters.nonEnglishLevel}
                                                         onChange={(e)=>setFilters(p=>({...p, nonEnglishLevel:e.target.value}))}>
                                                         <option value="">Select Level</option>
                                                         {LANGUAGE_LEVEL_OPTIONS[filters.nonEnglishLanguage].map(lv =>
@@ -2923,11 +2946,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                         {/* ===== Action Bar ===== */}
                         <div className="action-bar">
-                            <div className="result-count">
+                            <div className="result-count" aria-live="polite">
                                 Found <strong>{sortedUniversities.length}</strong> universities
                             </div>
                             <div className="action-buttons">
-                                <select className="sort-select" value={sortBy} onChange={(e)=>setSortBy(e.target.value)}>
+                                <select className="sort-select" aria-label="Sort universities"
+                                    value={sortBy} onChange={(e)=>setSortBy(e.target.value)}>
                                     <option value="quota-desc">Quota (High to Low)</option>
                                     <option value="quota-asc">Quota (Low to High)</option>
                                     <option value="name-asc">University Name (A-Z)</option>
@@ -3051,7 +3075,10 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </div>
                         <div className="card-actions">
                             <button className={`icon-btn ${isFavorited?'active':''}`}
-                                onClick={onToggleFavorite} title="Favorite">
+                                onClick={onToggleFavorite}
+                                aria-label={isFavorited ? `Remove ${u.name} from favorites` : `Add ${u.name} to favorites`}
+                                aria-pressed={isFavorited}
+                                title="Favorite">
                                 {isFavorited?'★':'☆'}
                             </button>
                         </div>
@@ -3169,9 +3196,43 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             return <IconExternal />;
         }
 
+        // Dialog focus management — move focus into the dialog on open, keep Tab
+        // cycling inside it, and return focus to the opener on close. Runs once
+        // per mount, so prev/next navigation inside DetailModal does not re-steal focus.
+        function useModalFocus() {
+            const ref = React.useRef(null);
+            useEffect(() => {
+                const node = ref.current;
+                if (!node) return;
+                const opener = document.activeElement;
+                node.focus();
+                const onKeyDown = (e) => {
+                    if (e.key !== 'Tab') return;
+                    const focusables = node.querySelectorAll(
+                        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    if (!focusables.length) return;
+                    const first = focusables[0];
+                    const last = focusables[focusables.length - 1];
+                    if (e.shiftKey && (document.activeElement === first || document.activeElement === node)) {
+                        e.preventDefault(); last.focus();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        e.preventDefault(); first.focus();
+                    }
+                };
+                node.addEventListener('keydown', onKeyDown);
+                return () => {
+                    node.removeEventListener('keydown', onKeyDown);
+                    if (opener && typeof opener.focus === 'function') opener.focus();
+                };
+            }, []);
+            return ref;
+        }
+
         function DetailModal({ u, onClose, cameFromUpdateHistory, onBack, linkify,
                               onPrev, onNext, hasPrev, hasNext, modalIdx, modalTotal }) {
             const [tab, setTab] = useState('eligibility');
+            const modalRef = useModalFocus();
             const cover = u.content && u.content.cover_image_url;
             const credit = u.content && u.content.cover_image_credit;
             const isLogo = !!cover && (u.content.cover_image_kind === 'logo');
@@ -3194,7 +3255,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
             return (
                 <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={(e)=>e.stopPropagation()}>
+                    <div className="modal" onClick={(e)=>e.stopPropagation()}
+                        role="dialog" aria-modal="true" aria-label={u.name}
+                        tabIndex={-1} ref={modalRef}>
                         <div className={`yz-cover ${cover ? (isLogo ? 'is-logo' : 'has-img') : ''}`}
                             style={cover && !isLogo ? {
                                 backgroundImage: `linear-gradient(180deg, rgba(15,20,25,0.20) 0%, rgba(15,20,25,0.70) 100%), url('${cover}')`,
@@ -3207,7 +3270,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
                             <div className="yz-cover-inner">
                                 <p className="yz-cover-eyebrow">{u.continent} · {u.country}</p>
-                                <h1 className="yz-cover-title">{u.name}</h1>
+                                <h2 className="yz-cover-title">{u.name}</h2>
                             </div>
                             {credit && <div className="yz-cover-credit">{credit}</div>}
                         </div>
@@ -3860,13 +3923,16 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         }
 
         function UpdateHistoryModal({ universities, onClose, onPickUniversity }) {
+            const modalRef = useModalFocus();
             const rows = universities
                 .flatMap(u => (u.updates || []).map(e => ({ entry: e, u })))
                 .sort((a, b) => (a.entry.date < b.entry.date ? 1 : -1))
                 .slice(0, 100);
             return (
                 <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={(e)=>e.stopPropagation()} style={{maxWidth:800}}>
+                    <div className="modal" onClick={(e)=>e.stopPropagation()} style={{maxWidth:800}}
+                        role="dialog" aria-modal="true" aria-label="Update History"
+                        tabIndex={-1} ref={modalRef}>
                         <div className="modal-header" style={{position:'relative'}}>
                             <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
                             <h2 style={{fontSize:20, fontWeight:700, display:'flex', alignItems:'center', gap:8}}>
@@ -3893,7 +3959,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         {rows.map(({ entry, u }, i) => (
                                             <tr key={i}
                                                 style={{borderBottom:'1px solid var(--gray-200)', cursor:'pointer'}}
+                                                role="button" tabIndex={0}
+                                                aria-label={`Open ${u.name} details`}
                                                 onClick={() => onPickUniversity(u)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        onPickUniversity(u);
+                                                    }
+                                                }}
                                                 onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='var(--gray-100)'}
                                                 onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='transparent'}>
                                                 <td style={{padding:'12px 8px', color:'var(--gray-500)'}}>{entry.date}</td>

@@ -115,10 +115,19 @@
         }
 
         a { color: inherit; }
-        a:focus-visible, button:focus-visible {
+        a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
             outline: 2px solid var(--focus);
             outline-offset: 3px;
             border-radius: 4px;
+        }
+        button, a, select, input, [role="button"] { touch-action: manipulation; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
 
         .skip-link {
@@ -307,7 +316,7 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
             color: var(--gray-700);
         }
         .filter-btn:hover { border-color: var(--yonsei-light-blue); color: var(--yonsei-blue); }
@@ -442,7 +451,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -481,7 +490,7 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            transition: box-shadow 0.3s, transform 0.3s, border-color 0.3s;
             border: 2px solid transparent;
         }
         .university-card:hover {
@@ -514,7 +523,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: background-color 0.2s, color 0.2s;
             font-size: 16px;
         }
         .icon-btn:hover { background: var(--gray-200); }
@@ -587,8 +596,11 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            overscroll-behavior: contain;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
+        /* Programmatic focus target on open — focus ring stays on inner controls */
+        .modal:focus { outline: none; }
         .modal-header {
             background: var(--yonsei-blue);
             color: white;
@@ -880,7 +892,8 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease,
+                background-color 0.3s ease, box-shadow 0.3s ease;
             z-index: 1000;
         }
         .scroll-to-top.visible { opacity: 1; visibility: visible; }
@@ -937,6 +950,7 @@
                 transform: translateX(100%);
                 transition: transform 280ms ease;
                 overflow-y: auto;
+                overscroll-behavior: contain;
                 padding-top: 0;
                 box-shadow: -4px 0 20px rgba(0, 0, 0, 0.18);
             }
@@ -2277,11 +2291,12 @@ function App() {
   };
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   useEffect(() => {
-    if (isFilterDrawerOpen) document.body.style.overflow = 'hidden';else document.body.style.overflow = '';
+    const overlayOpen = isFilterDrawerOpen || !!selectedUniversity || showUpdateHistory;
+    document.body.style.overflow = overlayOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isFilterDrawerOpen]);
+  }, [isFilterDrawerOpen, selectedUniversity, showUpdateHistory]);
   useEffect(() => {
     sessionStorage.setItem(`${TERM_SK}filters`, JSON.stringify(filters));
   }, [filters]);
@@ -2326,7 +2341,7 @@ function App() {
   }, []);
   const scrollToTop = () => window.scrollTo({
     top: 0,
-    behavior: 'smooth'
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
   });
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -2608,7 +2623,7 @@ function App() {
       className: "loading-state"
     }, React.createElement("div", {
       className: "spinner"
-    }), React.createElement("p", null, "Loading data..."));
+    }), React.createElement("p", null, "Loading data\u2026"));
   }
   if (error) {
     return React.createElement("div", {
@@ -2757,10 +2772,13 @@ function App() {
     "aria-label": "Close filters"
   }, "\xD7")), React.createElement("div", {
     className: "filter-section"
-  }, React.createElement("label", {
-    className: "filter-label"
+  }, React.createElement("span", {
+    className: "filter-label",
+    id: "fl-student-type"
   }, "Student Type"), React.createElement("div", {
-    className: "filter-group"
+    className: "filter-group",
+    role: "group",
+    "aria-labelledby": "fl-student-type"
   }, ['Undergraduate', 'Graduate'].map(t => React.createElement("button", {
     key: t,
     className: `filter-btn ${filters.studentType === t ? 'active' : ''}`,
@@ -2770,10 +2788,13 @@ function App() {
     }))
   }, t)))), React.createElement("div", {
     className: "filter-section"
-  }, React.createElement("label", {
-    className: "filter-label"
+  }, React.createElement("span", {
+    className: "filter-label",
+    id: "fl-language-region"
   }, "Language Region (Select One)"), React.createElement("div", {
-    className: "filter-group"
+    className: "filter-group",
+    role: "group",
+    "aria-labelledby": "fl-language-region"
   }, ['English', 'Non-English'].map(t => React.createElement("button", {
     key: t,
     className: `filter-btn ${filters.languageRegion === t ? 'active' : ''}`,
@@ -2783,10 +2804,13 @@ function App() {
     }))
   }, t)))), React.createElement("div", {
     className: "filter-section"
-  }, React.createElement("label", {
-    className: "filter-label"
+  }, React.createElement("span", {
+    className: "filter-label",
+    id: "fl-term"
   }, "Exchange Term & Length (select one)"), React.createElement("div", {
-    className: "filter-group"
+    className: "filter-group",
+    role: "group",
+    "aria-labelledby": "fl-term"
   }, TermLib.semesterOptions(SEMESTER.code).map(opt => React.createElement("button", {
     key: opt.key,
     className: `filter-btn ${filters[opt.key] ? 'active' : ''}`,
@@ -2802,13 +2826,16 @@ function App() {
     })
   }, opt.label)))), React.createElement("div", {
     className: "filter-section"
-  }, React.createElement("label", {
+  }, React.createElement("span", {
     className: "filter-label"
   }, "Continent & Country"), React.createElement("div", {
     className: "input-group"
   }, React.createElement("div", {
     className: "input-field"
-  }, React.createElement("label", null, "Continent"), React.createElement("select", {
+  }, React.createElement("label", {
+    htmlFor: "f-continent"
+  }, "Continent"), React.createElement("select", {
+    id: "f-continent",
     value: filters.continent,
     onChange: e => setFilters(p => ({
       ...p,
@@ -2823,7 +2850,10 @@ function App() {
     value: c
   }, c)))), React.createElement("div", {
     className: "input-field"
-  }, React.createElement("label", null, "Country"), React.createElement("select", {
+  }, React.createElement("label", {
+    htmlFor: "f-country"
+  }, "Country"), React.createElement("select", {
+    id: "f-country",
     value: filters.country,
     onChange: e => setFilters(p => ({
       ...p,
@@ -2838,10 +2868,12 @@ function App() {
   }, c)))))), React.createElement("div", {
     className: "filter-section"
   }, React.createElement("label", {
-    className: "filter-label"
+    className: "filter-label",
+    htmlFor: "f-university"
   }, "Search University"), React.createElement("div", {
     className: "input-field"
   }, React.createElement("select", {
+    id: "f-university",
     value: filters.university,
     onChange: e => setFilters(p => ({
       ...p,
@@ -2859,7 +2891,10 @@ function App() {
     }
   }, React.createElement("input", {
     type: "text",
-    placeholder: "Type university name to search...",
+    placeholder: "Type university name to search\u2026",
+    "aria-label": "Search university by name",
+    autoComplete: "off",
+    spellCheck: false,
     value: filters.universitySearch,
     onChange: e => setFilters(p => ({
       ...p,
@@ -2867,17 +2902,21 @@ function App() {
     }))
   }))), React.createElement("div", {
     className: "filter-section"
-  }, React.createElement("label", {
+  }, React.createElement("span", {
     className: "filter-label"
   }, "My Qualifications"), React.createElement("div", {
     className: "input-group"
   }, React.createElement("div", {
     className: "input-field"
-  }, React.createElement("label", null, "GPA (4.3 scale)"), React.createElement("input", {
+  }, React.createElement("label", {
+    htmlFor: "f-gpa"
+  }, "GPA (4.3 scale)"), React.createElement("input", {
+    id: "f-gpa",
     type: "number",
     step: "0.01",
     min: "0",
     max: "4.3",
+    inputMode: "decimal",
     placeholder: "e.g., 3.5",
     value: filters.gpa,
     onChange: e => setFilters(p => ({
@@ -2885,24 +2924,33 @@ function App() {
       gpa: e.target.value
     }))
   }), gpaWarning && React.createElement("div", {
-    className: "warning-text"
+    className: "warning-text",
+    role: "alert"
   }, gpaWarning)), filters.languageRegion === 'English' && React.createElement("div", {
     className: "input-field"
-  }, React.createElement("label", null, "TOEFL iBT"), React.createElement("input", {
+  }, React.createElement("label", {
+    htmlFor: "f-toefl"
+  }, "TOEFL iBT"), React.createElement("input", {
+    id: "f-toefl",
     type: "number",
     min: "0",
     max: "120",
     placeholder: "e.g., 90",
+    inputMode: "numeric",
     value: filters.toefl,
     onChange: e => setFilters(p => ({
       ...p,
       toefl: e.target.value
     }))
   }), toeflWarning && React.createElement("div", {
-    className: "warning-text"
+    className: "warning-text",
+    role: "alert"
   }, toeflWarning)), filters.languageRegion === 'Non-English' && React.createElement(React.Fragment, null, React.createElement("div", {
     className: "input-field"
-  }, React.createElement("label", null, "Language"), React.createElement("select", {
+  }, React.createElement("label", {
+    htmlFor: "f-lang"
+  }, "Language"), React.createElement("select", {
+    id: "f-lang",
     value: filters.nonEnglishLanguage,
     onChange: e => setFilters(p => ({
       ...p,
@@ -2916,7 +2964,10 @@ function App() {
     value: l
   }, l)))), filters.nonEnglishLanguage && React.createElement("div", {
     className: "input-field"
-  }, React.createElement("label", null, filters.nonEnglishLanguage, " Level"), React.createElement("select", {
+  }, React.createElement("label", {
+    htmlFor: "f-lang-level"
+  }, filters.nonEnglishLanguage, " Level"), React.createElement("select", {
+    id: "f-lang-level",
     value: filters.nonEnglishLevel,
     onChange: e => setFilters(p => ({
       ...p,
@@ -3019,11 +3070,13 @@ function App() {
   }, "Clear all")), React.createElement("div", {
     className: "action-bar"
   }, React.createElement("div", {
-    className: "result-count"
+    className: "result-count",
+    "aria-live": "polite"
   }, "Found ", React.createElement("strong", null, sortedUniversities.length), " universities"), React.createElement("div", {
     className: "action-buttons"
   }, React.createElement("select", {
     className: "sort-select",
+    "aria-label": "Sort universities",
     value: sortBy,
     onChange: e => setSortBy(e.target.value)
   }, React.createElement("option", {
@@ -3151,6 +3204,8 @@ function UniversityCard({
   }, React.createElement("button", {
     className: `icon-btn ${isFavorited ? 'active' : ''}`,
     onClick: onToggleFavorite,
+    "aria-label": isFavorited ? `Remove ${u.name} from favorites` : `Add ${u.name} to favorites`,
+    "aria-pressed": isFavorited,
     title: "Favorite"
   }, isFavorited ? '★' : '☆'))), React.createElement("div", {
     className: "card-meta"
@@ -3514,6 +3569,35 @@ function usefulLinkIcon(label) {
   if (/catalogue|catalog|course|module|curriculum/.test(s)) return React.createElement(IconBookOpen, null);
   return React.createElement(IconExternal, null);
 }
+function useModalFocus() {
+  const ref = React.useRef(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const opener = document.activeElement;
+    node.focus();
+    const onKeyDown = e => {
+      if (e.key !== 'Tab') return;
+      const focusables = node.querySelectorAll('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === node)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    node.addEventListener('keydown', onKeyDown);
+    return () => {
+      node.removeEventListener('keydown', onKeyDown);
+      if (opener && typeof opener.focus === 'function') opener.focus();
+    };
+  }, []);
+  return ref;
+}
 function DetailModal({
   u,
   onClose,
@@ -3528,6 +3612,7 @@ function DetailModal({
   modalTotal
 }) {
   const [tab, setTab] = useState('eligibility');
+  const modalRef = useModalFocus();
   const cover = u.content && u.content.cover_image_url;
   const credit = u.content && u.content.cover_image_credit;
   const isLogo = !!cover && u.content.cover_image_kind === 'logo';
@@ -3546,7 +3631,12 @@ function DetailModal({
     onClick: onClose
   }, React.createElement("div", {
     className: "modal",
-    onClick: e => e.stopPropagation()
+    onClick: e => e.stopPropagation(),
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": u.name,
+    tabIndex: -1,
+    ref: modalRef
   }, React.createElement("div", {
     className: `yz-cover ${cover ? isLogo ? 'is-logo' : 'has-img' : ''}`,
     style: cover && !isLogo ? {
@@ -3571,7 +3661,7 @@ function DetailModal({
     className: "yz-cover-inner"
   }, React.createElement("p", {
     className: "yz-cover-eyebrow"
-  }, u.continent, " \xB7 ", u.country), React.createElement("h1", {
+  }, u.continent, " \xB7 ", u.country), React.createElement("h2", {
     className: "yz-cover-title"
   }, u.name)), credit && React.createElement("div", {
     className: "yz-cover-credit"
@@ -4373,6 +4463,7 @@ function UpdateHistoryModal({
   onClose,
   onPickUniversity
 }) {
+  const modalRef = useModalFocus();
   const rows = universities.flatMap(u => (u.updates || []).map(e => ({
     entry: e,
     u
@@ -4385,7 +4476,12 @@ function UpdateHistoryModal({
     onClick: e => e.stopPropagation(),
     style: {
       maxWidth: 800
-    }
+    },
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": "Update History",
+    tabIndex: -1,
+    ref: modalRef
   }, React.createElement("div", {
     className: "modal-header",
     style: {
@@ -4455,7 +4551,16 @@ function UpdateHistoryModal({
       borderBottom: '1px solid var(--gray-200)',
       cursor: 'pointer'
     },
+    role: "button",
+    tabIndex: 0,
+    "aria-label": `Open ${u.name} details`,
     onClick: () => onPickUniversity(u),
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onPickUniversity(u);
+      }
+    },
     onMouseEnter: e => e.currentTarget.style.backgroundColor = 'var(--gray-100)',
     onMouseLeave: e => e.currentTarget.style.backgroundColor = 'transparent'
   }, React.createElement("td", {
