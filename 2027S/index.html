@@ -524,6 +524,28 @@
         .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-700); }
         .meta-icon { color: var(--gray-500); }
 
+        /* Inline Feather-style SVG icons (stroke = currentColor) — replaces the
+           mixed emoji glyphs so rendering is identical across OS/browsers.
+           Country flag emojis stay (see COUNTRY_FLAGS comment). */
+        .meta-icon svg, .btn-icon svg, .first-visit-icon svg,
+        .mobile-filter-trigger-icon svg, .modal-title-icon svg,
+        .empty-state-icon svg, .error-state-icon svg {
+            display: block;
+            fill: none; stroke: currentColor;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .meta-icon svg { width: 14px; height: 14px; }
+        .first-visit-icon svg { width: 20px; height: 20px; }
+        .btn-icon { display: inline-flex; }
+        .btn-icon svg { width: 15px; height: 15px; }
+        .mobile-filter-trigger-icon { display: inline-flex; }
+        .mobile-filter-trigger-icon svg { width: 16px; height: 16px; }
+        .modal-title-icon { display: inline-flex; }
+        .modal-title-icon svg { width: 18px; height: 18px; }
+        .empty-state-icon svg, .error-state-icon svg {
+            width: 48px; height: 48px; margin: 0 auto; stroke-width: 1.5;
+        }
+
         .card-specs {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -2592,8 +2614,9 @@ function App() {
     return React.createElement("div", {
       className: "error-state"
     }, React.createElement("div", {
-      className: "error-state-icon"
-    }, "\u26A0\uFE0F"), React.createElement("div", {
+      className: "error-state-icon",
+      "aria-hidden": "true"
+    }, React.createElement(IconAlert, null)), React.createElement("div", {
       className: "error-state-text"
     }, "Failed to load data."), React.createElement("div", {
       className: "error-state-detail"
@@ -2703,7 +2726,7 @@ function App() {
   }, React.createElement("span", {
     className: "first-visit-icon",
     "aria-hidden": "true"
-  }, "\uD83D\uDCA1"), React.createElement("span", {
+  }, React.createElement(IconLightbulb, null)), React.createElement("span", {
     className: "first-visit-text"
   }, React.createElement("strong", null, "New here?"), " Set your ", React.createElement("strong", null, "Student Type, Language, and GPA"), " below to narrow the list quickly. Star \u2606 the schools you want to keep."), React.createElement("button", {
     className: "first-visit-close",
@@ -2713,7 +2736,10 @@ function App() {
     className: "mobile-filter-trigger",
     onClick: () => setIsFilterDrawerOpen(true),
     "aria-label": "Open filters"
-  }, "\uD83D\uDD0D Filters", activeChips.length > 0 && React.createElement("span", {
+  }, React.createElement("span", {
+    className: "mobile-filter-trigger-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconFilter, null)), "Filters", activeChips.length > 0 && React.createElement("span", {
     className: "mobile-filter-trigger-count"
   }, activeChips.length)), React.createElement("div", {
     className: `filter-drawer-backdrop ${isFilterDrawerOpen ? 'is-open' : ''}`,
@@ -2970,7 +2996,10 @@ function App() {
   }, "Clear All Favorites"), React.createElement("button", {
     className: "btn btn-secondary",
     onClick: () => setShowUpdateHistory(true)
-  }, "\uD83D\uDCCB Update History"))), activeChips.length > 0 && React.createElement("div", {
+  }, React.createElement("span", {
+    className: "btn-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconClipboard, null)), "Update History"))), activeChips.length > 0 && React.createElement("div", {
     className: "active-chips",
     role: "region",
     "aria-label": "Active filters"
@@ -3026,8 +3055,9 @@ function App() {
   }, "Download Excel"))), sortedUniversities.length === 0 ? React.createElement("div", {
     className: "empty-state"
   }, React.createElement("div", {
-    className: "empty-state-icon"
-  }, "\uD83D\uDD0D"), React.createElement("div", {
+    className: "empty-state-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconSearch, null)), React.createElement("div", {
     className: "empty-state-text"
   }, "No universities match your criteria. Try adjusting your filters.")) : React.createElement("div", {
     className: "university-grid"
@@ -3127,18 +3157,21 @@ function UniversityCard({
   }, React.createElement("div", {
     className: "meta-item"
   }, React.createElement("span", {
-    className: "meta-icon"
-  }, COUNTRY_FLAGS[u.country] || '🌐'), u.country), React.createElement("div", {
+    className: "meta-icon",
+    "aria-hidden": "true"
+  }, COUNTRY_FLAGS[u.country] || React.createElement(IconGlobe, null)), u.country), React.createElement("div", {
     className: "meta-item"
   }, React.createElement("span", {
-    className: "meta-icon"
-  }, "\uD83D\uDC65"), TermLib.isRecruiting(u, SEMESTER.code) ? React.createElement(React.Fragment, null, u.quota, " ", u.quotaUnit ? `(${u.quotaUnit})` : '') : React.createElement("span", {
+    className: "meta-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconUsers, null)), TermLib.isRecruiting(u, SEMESTER.code) ? React.createElement(React.Fragment, null, u.quota, " ", u.quotaUnit ? `(${u.quotaUnit})` : '') : React.createElement("span", {
     className: "yz-norecruit-badge"
   }, "Not recruiting this term")), React.createElement("div", {
     className: "meta-item"
   }, React.createElement("span", {
-    className: "meta-icon"
-  }, "\uD83D\uDCAC"), [u.language1, u.language2].filter(Boolean).join(', ') || '—')), React.createElement("div", {
+    className: "meta-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconMessage, null)), [u.language1, u.language2].filter(Boolean).join(', ') || '—')), React.createElement("div", {
     className: "card-specs"
   }, React.createElement("div", {
     className: "spec-item"
@@ -3403,6 +3436,57 @@ const IconTikTok = () => React.createElement("svg", {
   cx: "18",
   cy: "16",
   r: "3"
+}));
+const IconSearch = () => React.createElement("svg", {
+  viewBox: "0 0 24 24"
+}, React.createElement("circle", {
+  cx: "11",
+  cy: "11",
+  r: "8"
+}), React.createElement("line", {
+  x1: "21",
+  y1: "21",
+  x2: "16.65",
+  y2: "16.65"
+}));
+const IconUsers = () => React.createElement("svg", {
+  viewBox: "0 0 24 24"
+}, React.createElement("path", {
+  d: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+}), React.createElement("circle", {
+  cx: "9",
+  cy: "7",
+  r: "4"
+}), React.createElement("path", {
+  d: "M23 21v-2a4 4 0 0 0-3-3.87"
+}), React.createElement("path", {
+  d: "M16 3.13a4 4 0 0 1 0 7.75"
+}));
+const IconClipboard = () => React.createElement("svg", {
+  viewBox: "0 0 24 24"
+}, React.createElement("path", {
+  d: "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+}), React.createElement("rect", {
+  x: "8",
+  y: "2",
+  width: "8",
+  height: "4",
+  rx: "1",
+  ry: "1"
+}));
+const IconFilter = () => React.createElement("svg", {
+  viewBox: "0 0 24 24"
+}, React.createElement("polygon", {
+  points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+}));
+const IconLightbulb = () => React.createElement("svg", {
+  viewBox: "0 0 24 24"
+}, React.createElement("path", {
+  d: "M9 18h6"
+}), React.createElement("path", {
+  d: "M10 22h4"
+}), React.createElement("path", {
+  d: "M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z"
 }));
 function getSocialIcon(url) {
   switch (getSocialPlatform(url)) {
@@ -4314,9 +4398,15 @@ function UpdateHistoryModal({
   }, "\xD7"), React.createElement("h2", {
     style: {
       fontSize: 20,
-      fontWeight: 700
+      fontWeight: 700,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
     }
-  }, "\uD83D\uDCCB Update History")), React.createElement("div", {
+  }, React.createElement("span", {
+    className: "modal-title-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconClipboard, null)), "Update History")), React.createElement("div", {
     className: "modal-body",
     style: {
       maxHeight: '60vh',

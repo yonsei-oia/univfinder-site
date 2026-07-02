@@ -525,6 +525,28 @@
         .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray-700); }
         .meta-icon { color: var(--gray-500); }
 
+        /* Inline Feather-style SVG icons (stroke = currentColor) — replaces the
+           mixed emoji glyphs so rendering is identical across OS/browsers.
+           Country flag emojis stay (see COUNTRY_FLAGS comment). */
+        .meta-icon svg, .btn-icon svg, .first-visit-icon svg,
+        .mobile-filter-trigger-icon svg, .modal-title-icon svg,
+        .empty-state-icon svg, .error-state-icon svg {
+            display: block;
+            fill: none; stroke: currentColor;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .meta-icon svg { width: 14px; height: 14px; }
+        .first-visit-icon svg { width: 20px; height: 20px; }
+        .btn-icon { display: inline-flex; }
+        .btn-icon svg { width: 15px; height: 15px; }
+        .mobile-filter-trigger-icon { display: inline-flex; }
+        .mobile-filter-trigger-icon svg { width: 16px; height: 16px; }
+        .modal-title-icon { display: inline-flex; }
+        .modal-title-icon svg { width: 18px; height: 18px; }
+        .empty-state-icon svg, .error-state-icon svg {
+            width: 48px; height: 48px; margin: 0 auto; stroke-width: 1.5;
+        }
+
         .card-specs {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -2532,7 +2554,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             if (error) {
                 return (
                     <div className="error-state">
-                        <div className="error-state-icon">⚠️</div>
+                        <div className="error-state-icon" aria-hidden="true"><IconAlert /></div>
                         <div className="error-state-text">Failed to load data.</div>
                         <div className="error-state-detail">{error}</div>
                         <button className="error-retry-btn" onClick={loadData}>Try again</button>
@@ -2651,7 +2673,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         {/* ===== First-visit banner (T2-I) ===== */}
                         {showFirstVisitBanner && (
                             <div className="first-visit-banner">
-                                <span className="first-visit-icon" aria-hidden="true">💡</span>
+                                <span className="first-visit-icon" aria-hidden="true"><IconLightbulb /></span>
                                 <span className="first-visit-text">
                                     <strong>New here?</strong> Set your <strong>Student Type, Language, and GPA</strong> below to narrow the list quickly. Star ☆ the schools you want to keep.
                                 </span>
@@ -2663,7 +2685,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <button className="mobile-filter-trigger"
                             onClick={() => setIsFilterDrawerOpen(true)}
                             aria-label="Open filters">
-                            🔍 Filters
+                            <span className="mobile-filter-trigger-icon" aria-hidden="true"><IconFilter /></span>
+                            Filters
                             {activeChips.length > 0 && (
                                 <span className="mobile-filter-trigger-count">{activeChips.length}</span>
                             )}
@@ -2874,7 +2897,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     </button>
                                 )}
                                 <button className="btn btn-secondary" onClick={()=>setShowUpdateHistory(true)}>
-                                    📋 Update History
+                                    <span className="btn-icon" aria-hidden="true"><IconClipboard /></span>
+                                    Update History
                                 </button>
                             </div>
                         </section>
@@ -2929,7 +2953,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         {/* ===== Grid ===== */}
                         {sortedUniversities.length === 0 ? (
                             <div className="empty-state">
-                                <div className="empty-state-icon">🔍</div>
+                                <div className="empty-state-icon" aria-hidden="true"><IconSearch /></div>
                                 <div className="empty-state-text">
                                     No universities match your criteria. Try adjusting your filters.
                                 </div>
@@ -3035,17 +3059,17 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                     <div className="card-meta">
                         <div className="meta-item">
-                            <span className="meta-icon">{COUNTRY_FLAGS[u.country] || '🌐'}</span>
+                            <span className="meta-icon" aria-hidden="true">{COUNTRY_FLAGS[u.country] || <IconGlobe />}</span>
                             {u.country}
                         </div>
                         <div className="meta-item">
-                            <span className="meta-icon">👥</span>
+                            <span className="meta-icon" aria-hidden="true"><IconUsers /></span>
                             {TermLib.isRecruiting(u, SEMESTER.code)
                                 ? <>{u.quota} {u.quotaUnit ? `(${u.quotaUnit})` : ''}</>
                                 : <span className="yz-norecruit-badge">Not recruiting this term</span>}
                         </div>
                         <div className="meta-item">
-                            <span className="meta-icon">💬</span>
+                            <span className="meta-icon" aria-hidden="true"><IconMessage /></span>
                             {[u.language1, u.language2].filter(Boolean).join(', ') || '—'}
                         </div>
                     </div>
@@ -3118,6 +3142,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         const IconYouTube = () => <svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>;
         const IconLinkedIn = () => <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>;
         const IconTikTok = () => <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>;
+        const IconSearch = () => <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+        const IconUsers = () => <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+        const IconClipboard = () => <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>;
+        const IconFilter = () => <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
+        const IconLightbulb = () => <svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg>;
         function getSocialIcon(url) {
             switch (getSocialPlatform(url)) {
                 case 'Instagram': return IconInstagram;
@@ -3840,7 +3869,10 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     <div className="modal" onClick={(e)=>e.stopPropagation()} style={{maxWidth:800}}>
                         <div className="modal-header" style={{position:'relative'}}>
                             <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
-                            <h2 style={{fontSize:20, fontWeight:700}}>📋 Update History</h2>
+                            <h2 style={{fontSize:20, fontWeight:700, display:'flex', alignItems:'center', gap:8}}>
+                                <span className="modal-title-icon" aria-hidden="true"><IconClipboard /></span>
+                                Update History
+                            </h2>
                         </div>
                         <div className="modal-body" style={{maxHeight:'60vh', overflowY:'auto'}}>
                             {rows.length === 0 ? (
