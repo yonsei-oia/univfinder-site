@@ -2099,6 +2099,7 @@ function buildUniversities(masterRows, updates, contentMap = {}) {
 const isEnglishOffered = u => u.language1 === 'English';
 const isNonEnglishOffered = u => !!u.language2;
 const isUIC = u => /UIC Exclusive/i.test(u.name);
+const favKey = u => u.slug || u.name;
 const acceptsOneSemester = u => u.fallOneSemester || u.springOneSemester;
 const acceptsCalendarYear = u => u.fallCalendarYear || u.springCalendarYear;
 function passesFilter(u, filters, opts) {
@@ -2106,7 +2107,7 @@ function passesFilter(u, filters, opts) {
     favorites = [],
     showFavoritesOnly = false
   } = opts || {};
-  if (showFavoritesOnly && !favorites.includes(u.id)) return false;
+  if (showFavoritesOnly && !favorites.includes(favKey(u))) return false;
   if (filters.uicOnly && !isUIC(u)) return false;
   if (filters.uicExclude && isUIC(u)) return false;
   if (filters.scholarshipOnly && !u.labels.includes('Scholarship')) return false;
@@ -2364,6 +2365,14 @@ function App() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+  useEffect(() => {
+    if (!universities.length) return;
+    setFavorites(prev => {
+      if (!prev.some(f => typeof f === 'number')) return prev;
+      const mapped = prev.map(f => typeof f === 'number' ? universities[f] ? favKey(universities[f]) : null : f);
+      return Array.from(new Set(mapped.filter(Boolean)));
+    });
+  }, [universities]);
   const applyHash = useCallback(() => {
     if (!universities.length) return;
     const slug = HashRoute.slugFromHash(window.location.hash);
@@ -2499,8 +2508,8 @@ function App() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, navigateModal]);
-  const toggleFavorite = id => {
-    setFavorites(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggleFavorite = key => {
+    setFavorites(prev => prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key]);
   };
   const clearAllFavorites = () => {
     setFavorites([]);
@@ -2573,7 +2582,7 @@ function App() {
   const exportToExcel = () => {
     try {
       const data = sortedUniversities.map(u => ({
-        'Favorite': favorites.includes(u.id) ? '★' : '',
+        'Favorite': favorites.includes(favKey(u)) ? '★' : '',
         University: u.name,
         Country: u.country,
         Continent: u.continent,
@@ -3115,10 +3124,10 @@ function App() {
   }, "No universities match your criteria. Try adjusting your filters.")) : React.createElement("div", {
     className: "university-grid"
   }, sortedUniversities.map(u => React.createElement(UniversityCard, {
-    key: u.id,
+    key: favKey(u),
     u: u,
-    isFavorited: favorites.includes(u.id),
-    onToggleFavorite: () => toggleFavorite(u.id),
+    isFavorited: favorites.includes(favKey(u)),
+    onToggleFavorite: () => toggleFavorite(favKey(u)),
     onOpenDetail: () => setSelectedUniversity(u)
   })))), selectedUniversity && React.createElement(DetailModal, {
     u: selectedUniversity,
