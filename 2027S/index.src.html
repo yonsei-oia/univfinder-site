@@ -38,10 +38,9 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- PDF/Excel export libs (jspdf·autotable·xlsx) are loaded on demand when a
+         download button is clicked — see loadScript()/ensurePdfLibs(). Keeping
+         them out of <head> cuts ~440KB gzip of parser-blocking JS on first load. -->
     <!-- Pure term/deadline logic (unit-tested in 2027S/tests/term.test.js) -->
     <script src="lib/term.js"></script>
     <script src="lib/campus_map.js"></script>
@@ -64,6 +63,8 @@
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 
     <style>
@@ -1379,8 +1380,7 @@
         //   - 로컬 dev (localhost): '../data/...' 상대 경로 — 같은 폴더 위계 가정
         //   - 운영 (Netlify): GitHub raw URL (yonsei-oia/univfinder-data main)
         //     백오피스(private)에서 매일 자동 미러링되는 public data repo.
-        // [CSV 모드] 시트 발급 후 두 URL 채우면 활성화. JSON URL이 비어있을 때만 사용.
-        // [mock 모드] JSON/CSV 모두 빈 문자열이면 로컬 미리보기.
+        // [mock 모드] JSON URL이 빈 문자열이면 로컬 미리보기.
         // =========================================================================
         const IS_LOCAL_DEV = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
         const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/main';
@@ -1402,8 +1402,6 @@
         const UPDATES_JSON_URL = IS_LOCAL_DEV
             ? '../data/universities-updates.json'
             : `${DATA_RAW}/universities-updates.json`;
-
-        const MASTER_CSV_URL = '';
 
         // =========================================================================
         // Mock data (시트 URL 비어있을 때만 사용)
@@ -1942,19 +1940,33 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             return res.json();
         }
 
-        async function fetchAndParseCsv(url) {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
-            const text = await res.text();
-            return new Promise((resolve, reject) => {
-                Papa.parse(text, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: (r) => resolve(r.data),
-                    error: reject,
+        // On-demand CDN script loader — export libs (jspdf/autotable/xlsx, ~440KB
+        // gzip combined) load on the first download click instead of blocking
+        // first paint in <head>. Promise is cached; a failed load can be retried.
+        const _scriptPromises = {};
+        function loadScript(src) {
+            if (!_scriptPromises[src]) {
+                _scriptPromises[src] = new Promise((resolve, reject) => {
+                    const el = document.createElement('script');
+                    el.src = src;
+                    el.onload = resolve;
+                    el.onerror = () => {
+                        delete _scriptPromises[src];
+                        el.remove();
+                        reject(new Error(`Failed to load ${src}`));
+                    };
+                    document.head.appendChild(el);
                 });
-            });
+            }
+            return _scriptPromises[src];
         }
+        async function ensurePdfLibs() {
+            // autotable is a jspdf plugin — must load strictly after jspdf.
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
+        }
+        const ensureXlsxLib = () =>
+            loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
 
         // Normalize JSON payloads to the raw-row shape that mapMasterRow expects.
         // Key differences from the raw feed:
@@ -2037,6 +2049,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         // index shifts whenever the upstream feed reorders or inserts schools,
         // which would silently re-point saved stars at the wrong universities.
         const favKey = (u) => u.slug || u.name;
+
+        // Diacritic-insensitive text for search — "tubingen" must find "Tübingen",
+        // "universite" must find "Université ...". NFD splits base char + accent,
+        // then the combining marks (U+0300-036F) are stripped.
+        const searchNorm = (s) =>
+            String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
         const acceptsOneSemester = (u) => u.fallOneSemester || u.springOneSemester;
         const acceptsCalendarYear = (u) => u.fallCalendarYear || u.springCalendarYear;
 
@@ -2071,8 +2089,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             if (filters.university && u.name !== filters.university) return false;
 
             if (filters.universitySearch) {
-                const q = filters.universitySearch.toLowerCase();
-                if (!u.name.toLowerCase().includes(q)) return false;
+                const q = searchNorm(filters.universitySearch);
+                if (!searchNorm(u.name).includes(q) && !searchNorm(u.country).includes(q)) return false;
             }
 
             if (filters.gpa && u.gpaRequired !== null) {
@@ -2487,8 +2505,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const exportFileBase = `${SEMESTER.yearPart}_exchange-universities`;
             const exportTitle    = `${SEMESTER.yearPart} Exchange Universities`;
 
-            const exportToPDF = () => {
+            // 'pdf' | 'excel' | null — first click also downloads the CDN lib (~1-2s)
+            const [exporting, setExporting] = useState(null);
+
+            const exportToPDF = async () => {
                 try {
+                    setExporting('pdf');
+                    await ensurePdfLibs();
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF({ orientation: 'landscape' });
                     doc.setFontSize(18);
@@ -2525,11 +2548,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     doc.save(`${exportFileBase}.pdf`);
                 } catch (e) {
                     alert(`PDF download failed: ${e.message || e}`);
+                } finally {
+                    setExporting(null);
                 }
             };
 
-            const exportToExcel = () => {
+            const exportToExcel = async () => {
                 try {
+                    setExporting('excel');
+                    await ensureXlsxLib();
                     const data = sortedUniversities.map(u => ({
                         'Favorite': favorites.includes(favKey(u)) ? '★' : '',
                         University: u.name,
@@ -2573,6 +2600,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     XLSX.writeFile(wb, `${exportFileBase}.xlsx`);
                 } catch (e) {
                     alert(`Excel download failed: ${e.message || e}`);
+                } finally {
+                    setExporting(null);
                 }
             };
 
@@ -2833,8 +2862,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     </select>
                                 </div>
                                 <div className="input-field" style={{marginTop:10}}>
-                                    <input type="text" placeholder="Type university name to search…"
-                                        aria-label="Search university by name"
+                                    <input type="text" placeholder="Type university or country to search…"
+                                        aria-label="Search university by name or country"
                                         autoComplete="off" spellCheck={false}
                                         value={filters.universitySearch}
                                         onChange={(e)=>setFilters(p=>({...p, universitySearch:e.target.value}))} />
@@ -2982,13 +3011,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 </select>
                                 <button type="button" className="btn btn-secondary"
                                     onClick={exportToPDF}
-                                    disabled={sortedUniversities.length === 0}>
-                                    Download PDF
+                                    disabled={sortedUniversities.length === 0 || exporting !== null}>
+                                    {exporting === 'pdf' ? 'Preparing…' : 'Download PDF'}
                                 </button>
                                 <button type="button" className="btn btn-secondary"
                                     onClick={exportToExcel}
-                                    disabled={sortedUniversities.length === 0}>
-                                    Download Excel
+                                    disabled={sortedUniversities.length === 0 || exporting !== null}>
+                                    {exporting === 'excel' ? 'Preparing…' : 'Download Excel'}
                                 </button>
                             </div>
                         </div>

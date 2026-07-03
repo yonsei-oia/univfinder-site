@@ -37,10 +37,9 @@
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- PDF/Excel export libs (jspdf·autotable·xlsx) are loaded on demand when a
+         download button is clicked — see loadScript()/ensurePdfLibs(). Keeping
+         them out of <head> cuts ~440KB gzip of parser-blocking JS on first load. -->
     <!-- Pure term/deadline logic (unit-tested in 2027S/tests/term.test.js) -->
     <script src="lib/term.js"></script>
     <script src="lib/campus_map.js"></script>
@@ -63,6 +62,8 @@
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 
     <style>
@@ -1383,7 +1384,6 @@ const HEADER_LINKS = [{
 }];
 const MASTER_JSON_URL = IS_LOCAL_DEV ? '../data/universities-data.json' : `${DATA_RAW}/universities-data.json`;
 const UPDATES_JSON_URL = IS_LOCAL_DEV ? '../data/universities-updates.json' : `${DATA_RAW}/universities-updates.json`;
-const MASTER_CSV_URL = '';
 const MOCK_MASTER = [{
   university_name: 'University of Washington',
   slug: 'university-of-washington',
@@ -2017,19 +2017,28 @@ async function fetchJson(url) {
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
   return res.json();
 }
-async function fetchAndParseCsv(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
-  const text = await res.text();
-  return new Promise((resolve, reject) => {
-    Papa.parse(text, {
-      header: true,
-      skipEmptyLines: true,
-      complete: r => resolve(r.data),
-      error: reject
+const _scriptPromises = {};
+function loadScript(src) {
+  if (!_scriptPromises[src]) {
+    _scriptPromises[src] = new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = resolve;
+      el.onerror = () => {
+        delete _scriptPromises[src];
+        el.remove();
+        reject(new Error(`Failed to load ${src}`));
+      };
+      document.head.appendChild(el);
     });
-  });
+  }
+  return _scriptPromises[src];
 }
+async function ensurePdfLibs() {
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
+}
+const ensureXlsxLib = () => loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
 const linkPairsToPipe = arr => (arr || []).map(p => `${p.label || ''} | ${p.url || ''}`).join('\n');
 function normalizeJsonPayloads(masterJson, updatesJson) {
   const masterRowsRaw = masterJson.universities || [];
@@ -2100,6 +2109,7 @@ const isEnglishOffered = u => u.language1 === 'English';
 const isNonEnglishOffered = u => !!u.language2;
 const isUIC = u => /UIC Exclusive/i.test(u.name);
 const favKey = u => u.slug || u.name;
+const searchNorm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const acceptsOneSemester = u => u.fallOneSemester || u.springOneSemester;
 const acceptsCalendarYear = u => u.fallCalendarYear || u.springCalendarYear;
 function passesFilter(u, filters, opts) {
@@ -2125,8 +2135,8 @@ function passesFilter(u, filters, opts) {
   if (filters.country && u.country !== filters.country) return false;
   if (filters.university && u.name !== filters.university) return false;
   if (filters.universitySearch) {
-    const q = filters.universitySearch.toLowerCase();
-    if (!u.name.toLowerCase().includes(q)) return false;
+    const q = searchNorm(filters.universitySearch);
+    if (!searchNorm(u.name).includes(q) && !searchNorm(u.country).includes(q)) return false;
   }
   if (filters.gpa && u.gpaRequired !== null) {
     const myGpa = parseFloat(filters.gpa);
@@ -2546,8 +2556,11 @@ function App() {
   }), [universities]);
   const exportFileBase = `${SEMESTER.yearPart}_exchange-universities`;
   const exportTitle = `${SEMESTER.yearPart} Exchange Universities`;
-  const exportToPDF = () => {
+  const [exporting, setExporting] = useState(null);
+  const exportToPDF = async () => {
     try {
+      setExporting('pdf');
+      await ensurePdfLibs();
       const {
         jsPDF
       } = window.jspdf;
@@ -2577,10 +2590,14 @@ function App() {
       doc.save(`${exportFileBase}.pdf`);
     } catch (e) {
       alert(`PDF download failed: ${e.message || e}`);
+    } finally {
+      setExporting(null);
     }
   };
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     try {
+      setExporting('excel');
+      await ensureXlsxLib();
       const data = sortedUniversities.map(u => ({
         'Favorite': favorites.includes(favKey(u)) ? '★' : '',
         University: u.name,
@@ -2624,6 +2641,8 @@ function App() {
       XLSX.writeFile(wb, `${exportFileBase}.xlsx`);
     } catch (e) {
       alert(`Excel download failed: ${e.message || e}`);
+    } finally {
+      setExporting(null);
     }
   };
   const activeChips = useMemo(() => buildActiveChips(filters), [filters]);
@@ -2900,8 +2919,8 @@ function App() {
     }
   }, React.createElement("input", {
     type: "text",
-    placeholder: "Type university name to search\u2026",
-    "aria-label": "Search university by name",
+    placeholder: "Type university or country to search\u2026",
+    "aria-label": "Search university by name or country",
     autoComplete: "off",
     spellCheck: false,
     value: filters.universitySearch,
@@ -3108,13 +3127,13 @@ function App() {
     type: "button",
     className: "btn btn-secondary",
     onClick: exportToPDF,
-    disabled: sortedUniversities.length === 0
-  }, "Download PDF"), React.createElement("button", {
+    disabled: sortedUniversities.length === 0 || exporting !== null
+  }, exporting === 'pdf' ? 'Preparing…' : 'Download PDF'), React.createElement("button", {
     type: "button",
     className: "btn btn-secondary",
     onClick: exportToExcel,
-    disabled: sortedUniversities.length === 0
-  }, "Download Excel"))), sortedUniversities.length === 0 ? React.createElement("div", {
+    disabled: sortedUniversities.length === 0 || exporting !== null
+  }, exporting === 'excel' ? 'Preparing…' : 'Download Excel'))), sortedUniversities.length === 0 ? React.createElement("div", {
     className: "empty-state"
   }, React.createElement("div", {
     className: "empty-state-icon",
