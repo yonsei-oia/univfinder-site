@@ -1,0 +1,2 @@
+# Seasonal program finder shares the same SPA bundle; serve index for the route.
+/seasonal/*   /index.html   200
