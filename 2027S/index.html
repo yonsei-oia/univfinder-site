@@ -3210,7 +3210,8 @@ function App() {
     programs: programs,
     search: programSearch,
     onSearchChange: setProgramSearch,
-    onOpenDetail: setSelectedProgram
+    onOpenDetail: setSelectedProgram,
+    seasonalConfig: seasonalConfig
   })), selectedUniversity && React.createElement(DetailModal, {
     u: selectedUniversity,
     onClose: () => {
@@ -3382,13 +3383,29 @@ function SeasonalMain({
   programs,
   search,
   onSearchChange,
-  onOpenDetail
+  onOpenDetail,
+  seasonalConfig
 }) {
   const filtered = useMemo(() => {
     const q = searchNorm(search.trim());
     if (!q) return programs;
     return programs.filter(p => searchNorm(`${p.university_name} ${p.program_name} ${p.country}`).includes(q));
   }, [programs, search]);
+  if (seasonalConfig && seasonalConfig.is_live === false) {
+    return React.createElement("div", {
+      className: "empty-state",
+      role: "status"
+    }, React.createElement("div", {
+      className: "empty-state-icon",
+      "aria-hidden": "true"
+    }, React.createElement(IconCalendar, null)), React.createElement("div", {
+      className: "empty-state-text"
+    }, React.createElement("strong", null, seasonalConfig.season_label || 'Seasonal Programs'), React.createElement("div", {
+      style: {
+        marginTop: 8
+      }
+    }, "The seasonal program list is being prepared. Please check back soon.")));
+  }
   return React.createElement(React.Fragment, null, React.createElement("div", {
     className: "filter-panel",
     style: {
