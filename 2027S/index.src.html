@@ -43,6 +43,8 @@
          them out of <head> cuts ~440KB gzip of parser-blocking JS on first load. -->
     <!-- Pure term/deadline logic (unit-tested in 2027S/tests/term.test.js) -->
     <script src="lib/term.js"></script>
+    <!-- Pure seasonal (summer/winter) helpers (unit-tested in 2027S/tests/seasonal.test.js) -->
+    <script src="lib/seasonal.js"></script>
     <script src="lib/campus_map.js"></script>
     <script src="lib/hashroute.js"></script>
 
@@ -278,6 +280,39 @@
         .hero__meta dd { margin: 0; display: inline; font-variant-numeric: tabular-nums; }
 
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Cross-nav pill — regular <-> seasonal finder, same pill language as .site-nav__tab */
+        .cross-nav {
+            display: inline-flex; align-items: center;
+            padding: 9px 16px; font-size: 14px; font-weight: 600;
+            color: var(--brand); background: var(--brand-soft);
+            text-decoration: none; border-radius: 6px;
+            flex: 0 0 auto; white-space: nowrap;
+            transition: background-color 160ms ease, color 160ms ease;
+        }
+        .cross-nav:hover { background: var(--brand); color: #fff; }
+        @media (max-width: 540px) {
+            .cross-nav { flex: 1; justify-content: center; }
+        }
+
+        /* Seasonal card cover — same navy-gradient fallback as the detail modal's
+           .yz-cover, scaled down and bled to the card edges. */
+        .seasonal-card-cover {
+            aspect-ratio: 16 / 9;
+            margin: -20px -20px 14px;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+        }
+        .seasonal-card-cover.has-img { background-size: cover; background-position: center; }
+        .seasonal-badge {
+            position: absolute; top: 10px; right: 10px;
+            padding: 4px 10px; border-radius: 999px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+        }
+        .seasonal-badge--esp { background: var(--brand-soft); color: var(--brand); }
+        .seasonal-badge--vsp { background: var(--brand); color: #fff; }
 
         /* Notice */
         .notice-bar {
@@ -1388,6 +1423,12 @@
         const IS_LOCAL_DEV = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
         const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/main';
 
+        // 계절학기 모드 — /seasonal/ 경로에서만 계절 데이터 로드. 정규 초기 로딩 무영향.
+        const IS_SEASONAL = SeasonalLib.isSeasonalPath(window.location.pathname);
+        const SEASONAL_URL = IS_LOCAL_DEV
+            ? '../../20-univ-finder/data/seasonal-data.json'
+            : `${DATA_RAW}/seasonal-data.json`;
+
         // Visit counter (GAS web app, abroad@ — backoffice repo visit-counter-gas/).
         // Stores daily/total numbers only; '' disables the widget entirely.
         const VISIT_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbxWz4Emr0bL8PhlmmV_aPz3w-IArLBMFEjJpZdM1gLXa3K1TUQI-dVQTW2INeH6GqHuHQ/exec';
@@ -2200,6 +2241,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const [error, setError]       = useState(null);
             const [usingMock, setUsingMock] = useState(false);
 
+            // ---- seasonal (summer/winter) mode — /seasonal/ path only ---------------
+            const [programs, setPrograms] = useState([]);
+            const [seasonalConfig, setSeasonalConfig] = useState({});
+            const [selectedProgram, setSelectedProgram] = useState(null);
+            const [programSearch, setProgramSearch] = useState('');
+
             const [filters, setFilters] = useState(() => {
                 // Active filters live in sessionStorage. If absent (new session),
                 // restore saved qualifications from localStorage so the student
@@ -2260,10 +2307,10 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             // Body scroll lock while ANY overlay is open (drawer, detail modal,
             // update-history modal) — stops background scrolling on mobile.
             useEffect(() => {
-                const overlayOpen = isFilterDrawerOpen || !!selectedUniversity || showUpdateHistory;
+                const overlayOpen = isFilterDrawerOpen || !!selectedUniversity || showUpdateHistory || !!selectedProgram;
                 document.body.style.overflow = overlayOpen ? 'hidden' : '';
                 return () => { document.body.style.overflow = ''; };
-            }, [isFilterDrawerOpen, selectedUniversity, showUpdateHistory]);
+            }, [isFilterDrawerOpen, selectedUniversity, showUpdateHistory, selectedProgram]);
 
             // ---- persist filters/sortBy/favorites/qualifications --------------------
             useEffect(() => { sessionStorage.setItem(`${TERM_SK}filters`, JSON.stringify(filters)); }, [filters]);
@@ -2306,6 +2353,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 setLoading(true);
                 setError(null);
                 try {
+                    if (IS_SEASONAL) {
+                        // Seasonal path — fetch seasonal-data.json instead of the
+                        // regular Notion-pipeline JSONs. Returns early so the
+                        // regular fetch below is never reached in this mode.
+                        const sj = await fetchJson(SEASONAL_URL);
+                        setSeasonalConfig(sj.config || {});
+                        setPrograms(Array.isArray(sj.programs) ? sj.programs : []);
+                        return;
+                    }
                     const { masterRows, updates, contentMap, mock } = await loadAllData();
                     setUniversities(buildUniversities(masterRows, updates, contentMap));
                     setUsingMock(mock);
@@ -2435,7 +2491,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
             // Keyboard: ESC to close, ←/→ to navigate
             useEffect(() => {
-                if (!selectedUniversity && !showUpdateHistory && !isFilterDrawerOpen) return;
+                if (!selectedUniversity && !showUpdateHistory && !isFilterDrawerOpen && !selectedProgram) return;
                 const onKey = (e) => {
                     if (e.key === 'Escape') {
                         if (selectedUniversity) {
@@ -2445,6 +2501,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             setShowUpdateHistory(false);
                         } else if (isFilterDrawerOpen) {
                             setIsFilterDrawerOpen(false);
+                        } else if (selectedProgram) {
+                            setSelectedProgram(null);
                         }
                         return;
                     }
@@ -2455,7 +2513,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                 };
                 window.addEventListener('keydown', onKey);
                 return () => window.removeEventListener('keydown', onKey);
-            }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, navigateModal]);
+            }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, navigateModal, selectedProgram]);
 
             // ---- favorites (keyed by slug — see favKey) ------------------------------
             const toggleFavorite = (key) => {
@@ -2657,6 +2715,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     <span translate="no">Yonsei University · Office of International Affairs</span>
                                 </div>
                             </a>
+                            {IS_SEASONAL
+                                ? <a href="/" className="cross-nav">&larr; Regular semester exchange (University Finder)</a>
+                                : <a href="/seasonal/" className="cross-nav">Summer / Winter programs (Seasonal Finder) &rarr;</a>}
                             {HEADER_LINKS.length > 0 && (
                                 <nav className="site-nav" aria-label="Related links">
                                     {HEADER_LINKS.map(l => (
@@ -2685,7 +2746,9 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     <section className="hero" aria-labelledby="page-title">
                         <div className="hero__inner">
                             <div className="hero__top">
-                                <p className="hero__eyebrow">Exchange University Finder · {SEMESTER.full}</p>
+                                <p className="hero__eyebrow">
+                                    {IS_SEASONAL ? 'Yonsei OIA · Seasonal Programs' : `Exchange University Finder · ${SEMESTER.full}`}
+                                </p>
                                 {visits && (
                                     <div className="hero__counter" aria-label="Visitor count">
                                         <span className="hero__counter-item">
@@ -2701,45 +2764,71 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 )}
                             </div>
                             <h1 id="page-title" className="hero__title">
-                                해외파견 프로그램 배정 가능 대학
+                                {IS_SEASONAL ? (seasonalConfig.season_label || 'Seasonal Program') : '해외파견 프로그램 배정 가능 대학'}
                             </h1>
                             <p className="hero__subtitle">
-                                List of Host Universities for Yonsei Outbound Exchange Program
+                                {IS_SEASONAL ? 'Seasonal Program Finder' : 'List of Host Universities for Yonsei Outbound Exchange Program'}
                             </p>
                             <p className="hero__lede">
-                                연세대학교 국제처가 운영하는 교환학생 프로그램에서 지원 가능한 해외 파트너 대학 명단입니다.
-                                대륙·언어·학점·어학 요건으로 좁혀 검색하고, 관심 학교는 즐겨찾기에 담아 비교해 보세요.
+                                {IS_SEASONAL
+                                    ? 'Short-term Summer and Winter programs at Yonsei OIA partner universities, separate from the regular semester exchange. Search by university or program name, and open a program for fees, scholarship, and eligibility details.'
+                                    : '연세대학교 국제처가 운영하는 교환학생 프로그램에서 지원 가능한 해외 파트너 대학 명단입니다. 대륙·언어·학점·어학 요건으로 좁혀 검색하고, 관심 학교는 즐겨찾기에 담아 비교해 보세요.'}
                             </p>
                             <dl className="hero__meta">
-                                <div><dt>Total</dt><dd>{stats.total}</dd></div>
-                                <div><dt>Quota</dt><dd>{stats.totalQuota}</dd></div>
-                                <div><dt>Countries</dt><dd>{stats.countries}</dd></div>
-                                <div><dt>Americas</dt><dd>{stats.americas}</dd></div>
-                                <div><dt>Asia/Oceania</dt><dd>{stats.asiaOceania}</dd></div>
-                                <div><dt>Europe</dt><dd>{stats.europe}</dd></div>
-                                <div><dt>English</dt><dd>{stats.english}</dd></div>
-                                <div><dt>Non-English</dt><dd>{stats.nonEnglish}</dd></div>
+                                {IS_SEASONAL ? (
+                                    <>
+                                        <div><dt>Programs</dt><dd>{programs.length}</dd></div>
+                                        <div><dt>Quota</dt><dd>{programs.reduce((s,p)=>s+(Number(p.quota)||0), 0)}</dd></div>
+                                        <div><dt>Countries</dt><dd>{new Set(programs.map(p=>p.country).filter(Boolean)).size}</dd></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div><dt>Total</dt><dd>{stats.total}</dd></div>
+                                        <div><dt>Quota</dt><dd>{stats.totalQuota}</dd></div>
+                                        <div><dt>Countries</dt><dd>{stats.countries}</dd></div>
+                                        <div><dt>Americas</dt><dd>{stats.americas}</dd></div>
+                                        <div><dt>Asia/Oceania</dt><dd>{stats.asiaOceania}</dd></div>
+                                        <div><dt>Europe</dt><dd>{stats.europe}</dd></div>
+                                        <div><dt>English</dt><dd>{stats.english}</dd></div>
+                                        <div><dt>Non-English</dt><dd>{stats.nonEnglish}</dd></div>
+                                    </>
+                                )}
                             </dl>
                         </div>
                     </section>
 
                     <div className="notice-bar">
                         <div className="notice-inner">
-                            <p>
-                                <strong>유의사항:</strong> 연세대학교 국제처와 교환학생 협정을 맺은 해외 대학 목록입니다. 일부 단과대학 단독 교환 프로그램을 운영하는 대학은 검색되지 않을 수 있으므로, 해당 경우는 소속 단과대학으로 문의 바랍니다. 교환대학의 모집 인원, 지원 자격, 세부 조건은 매 학기 변경될 수 있습니다. 또한, 여기에 안내된 어학 성적 및 GPA 기준은 최소 요건이며, 최종 선발 여부는 상대교의 심사를 통해 결정됩니다.
-                            </p>
-                            <p>
-                                <strong>Notice:</strong> This list shows OIA partner universities with student exchange agreements through Yonsei University's Office of International Affairs. Some colleges or departments that operate exchange programs exclusively may not appear in this list; in such cases, please contact your college or department for further information. Exchange conditions may change each semester. The language proficiency and GPA requirements listed here represent the minimum requirements; final admission decisions are made by the host institution.
-                            </p>
-                            {usingMock && (
-                                <p style={{marginTop:8, color:'#a06000'}}>
-                                    <strong>(개발 모드)</strong> 현재 mock 데이터로 동작 중입니다. Google Sheets URL이 코드에 설정되지 않았습니다.
-                                </p>
+                            {IS_SEASONAL ? (
+                                <>
+                                    <p>
+                                        <strong>유의사항:</strong> 이 목록은 하계(Summer)·동계(Winter) 계절학기 프로그램으로, 정규 학기 교환학생(Regular semester exchange)과는 별도로 운영됩니다. 학비, 장학금, 마감일 등 세부 조건은 변경될 수 있으니 지원 전 국제처 공지사항을 통해 최종 확인하시기 바랍니다.
+                                    </p>
+                                    <p>
+                                        <strong>Notice:</strong> This list shows short-term Summer and Winter seasonal programs, separate from the regular semester exchange. Program fees, scholarships, and deadlines are subject to change; please confirm final details through the OIA notice board before applying.
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p>
+                                        <strong>유의사항:</strong> 연세대학교 국제처와 교환학생 협정을 맺은 해외 대학 목록입니다. 일부 단과대학 단독 교환 프로그램을 운영하는 대학은 검색되지 않을 수 있으므로, 해당 경우는 소속 단과대학으로 문의 바랍니다. 교환대학의 모집 인원, 지원 자격, 세부 조건은 매 학기 변경될 수 있습니다. 또한, 여기에 안내된 어학 성적 및 GPA 기준은 최소 요건이며, 최종 선발 여부는 상대교의 심사를 통해 결정됩니다.
+                                    </p>
+                                    <p>
+                                        <strong>Notice:</strong> This list shows OIA partner universities with student exchange agreements through Yonsei University's Office of International Affairs. Some colleges or departments that operate exchange programs exclusively may not appear in this list; in such cases, please contact your college or department for further information. Exchange conditions may change each semester. The language proficiency and GPA requirements listed here represent the minimum requirements; final admission decisions are made by the host institution.
+                                    </p>
+                                    {usingMock && (
+                                        <p style={{marginTop:8, color:'#a06000'}}>
+                                            <strong>(개발 모드)</strong> 현재 mock 데이터로 동작 중입니다. Google Sheets URL이 코드에 설정되지 않았습니다.
+                                        </p>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
 
                     <main id="main" className="container">
+                      {!IS_SEASONAL && (
+                        <>
                         {/* ===== First-visit banner (T2-I) ===== */}
                         {showFirstVisitBanner && (
                             <div className="first-visit-banner">
@@ -3044,6 +3133,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 ))}
                             </div>
                         )}
+                        </>
+                      )}
+                      {IS_SEASONAL && (
+                        <SeasonalMain
+                            programs={programs}
+                            search={programSearch}
+                            onSearchChange={setProgramSearch}
+                            onOpenDetail={setSelectedProgram} />
+                      )}
                     </main>
 
                     {/* ===== Detail Modal ===== */}
@@ -3064,6 +3162,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             hasNext={modalIdx >= 0 && modalIdx < sortedUniversities.length - 1}
                             modalIdx={modalIdx}
                             modalTotal={sortedUniversities.length} />
+                    )}
+
+                    {/* ===== Seasonal Detail Modal ===== */}
+                    {IS_SEASONAL && selectedProgram && (
+                        <SeasonalDetailModal
+                            p={selectedProgram}
+                            onClose={() => setSelectedProgram(null)} />
                     )}
 
                     {/* ===== Update History Modal ===== */}
@@ -3190,6 +3295,121 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         {u.website && (
                             <a href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer"
                                 className="btn btn-secondary" style={{flex:1, fontSize:13, padding:'8px 12px'}}>
+                                Website
+                            </a>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // Seasonal (Summer/Winter) mode — search + card grid.
+        // Mirrors the regular grid's visual language (university-card, card-meta,
+        // card-specs, btn classes) but reads from `programs`, not `universities`.
+        // =========================================================================
+        function SeasonalMain({ programs, search, onSearchChange, onOpenDetail }) {
+            const filtered = useMemo(() => {
+                const q = searchNorm(search.trim());
+                if (!q) return programs;
+                return programs.filter(p =>
+                    searchNorm(`${p.university_name} ${p.program_name} ${p.country}`).includes(q)
+                );
+            }, [programs, search]);
+
+            return (
+                <>
+                    <div className="filter-panel" style={{marginBottom: 20}}>
+                        <div className="filter-section">
+                            <label className="filter-label" htmlFor="f-seasonal-search">Search University or Program</label>
+                            <div className="input-field" style={{marginTop: 8}}>
+                                <input id="f-seasonal-search" type="text"
+                                    placeholder="Type university or program name…"
+                                    aria-label="Search seasonal programs by university or program name"
+                                    autoComplete="off" spellCheck={false}
+                                    value={search}
+                                    onChange={(e) => onSearchChange(e.target.value)} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="action-bar">
+                        <div className="result-count" aria-live="polite">
+                            Found <strong>{filtered.length}</strong> programs
+                        </div>
+                    </div>
+
+                    {filtered.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon" aria-hidden="true"><IconSearch /></div>
+                            <div className="empty-state-text">
+                                No programs match your search. Try a different keyword.
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="university-grid">
+                            {filtered.map(p => (
+                                <SeasonalCard key={p.slug} p={p} onOpenDetail={() => onOpenDetail(p)} />
+                            ))}
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        function SeasonalCard({ p, onOpenDetail }) {
+            const typeLabel = SeasonalLib.programTypeLabel(p.program_type);
+            const cover = p.cover_image_url;
+            return (
+                <div className="university-card">
+                    <div className={`seasonal-card-cover ${cover ? 'has-img' : ''}`}
+                        style={cover ? { backgroundImage: `url('${cover}')` } : undefined}>
+                        <span className={`seasonal-badge seasonal-badge--${p.program_type === 'VSP' ? 'vsp' : 'esp'}`}
+                            title={typeLabel.full}>
+                            {typeLabel.short}
+                        </span>
+                    </div>
+                    <div className="card-header">
+                        <div className="university-name">
+                            <div>{p.university_name}</div>
+                            <div style={{fontSize: 13, fontWeight: 500, color: 'var(--ink-muted)', marginTop: 2}}>
+                                {p.program_name}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card-meta">
+                        <div className="meta-item">
+                            <span className="meta-icon" aria-hidden="true">{COUNTRY_FLAGS[p.country] || <IconGlobe />}</span>
+                            {p.country}
+                        </div>
+                        {p.program_dates && (
+                            <div className="meta-item">
+                                <span className="meta-icon" aria-hidden="true"><IconCalendar /></span>
+                                {p.program_dates}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card-specs">
+                        <div className="spec-item">
+                            <div className="spec-label">Application Deadline</div>
+                            <div className="spec-value" style={{fontSize: 13}}>{p.application_deadline || 'TBA'}</div>
+                        </div>
+                        <div className="spec-item">
+                            <div className="spec-label">Quota</div>
+                            <div className="spec-value">{p.quota ?? 'N/A'} {p.quota_unit || ''}</div>
+                        </div>
+                    </div>
+
+                    <div style={{marginTop: 15, display: 'flex', gap: 10}}>
+                        <button className="btn btn-primary" style={{flex: 1, fontSize: 13, padding: '8px 12px'}}
+                            onClick={onOpenDetail}>
+                            View Details
+                        </button>
+                        {p.website && (
+                            <a href={safeHttpUrl(p.website)} target="_blank" rel="noopener noreferrer"
+                                className="btn btn-secondary" style={{flex: 1, fontSize: 13, padding: '8px 12px'}}>
                                 Website
                             </a>
                         )}
@@ -3372,6 +3592,215 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             </div>
                             {u.website && (
                                 <a href={safeHttpUrl(u.website)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                                    Visit Website
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // Seasonal (Summer/Winter) detail modal — fees + scholarship side by side,
+        // then requirements/housing/notes/map. Reuses the yz-* classes from the
+        // regular DetailModal for a consistent look; no tabs (single scroll body).
+        // =========================================================================
+        function SeasonalDetailModal({ p, onClose }) {
+            const modalRef = useModalFocus();
+            const typeLabel = SeasonalLib.programTypeLabel(p.program_type);
+            const cover = p.cover_image_url;
+            const isLogo = !!cover && p.cover_image_kind === 'logo';
+            const scholarship = SeasonalLib.scholarshipLines(p);
+            const hasMap = !!(p.campus_lat && p.campus_lng);
+            const mapSrc = hasMap ? CampusMap.osmSrc(p.campus_lat, p.campus_lng) : null;
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e)=>e.stopPropagation()}
+                        role="dialog" aria-modal="true" aria-label={p.university_name}
+                        tabIndex={-1} ref={modalRef}>
+                        <div className={`yz-cover ${cover ? (isLogo ? 'is-logo' : 'has-img') : ''}`}
+                            style={cover && !isLogo ? {
+                                backgroundImage: `linear-gradient(180deg, rgba(15,20,25,0.20) 0%, rgba(15,20,25,0.70) 100%), url('${cover}')`,
+                            } : undefined}>
+                            {isLogo && <img className="yz-cover-logo" src={cover} alt="" />}
+                            <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
+                            <div className="yz-cover-inner">
+                                <p className="yz-cover-eyebrow">{p.continent} · {p.country} · {typeLabel.short}</p>
+                                <h2 className="yz-cover-title">{p.university_name}</h2>
+                            </div>
+                            {p.cover_image_credit && <div className="yz-cover-credit">{p.cover_image_credit}</div>}
+                        </div>
+
+                        <dl className="yz-meta">
+                            <div className="yz-meta-stat"><dt>Program</dt><dd style={{fontSize:15}}>{p.program_name}</dd></div>
+                            <div className="yz-meta-stat"><dt>Quota</dt><dd>{p.quota ?? 'N/A'} {p.quota_unit || ''}</dd></div>
+                            <div className="yz-meta-sub"><dt>Program Dates</dt><dd>{p.program_dates || 'TBA'}</dd></div>
+                            <div className="yz-meta-sub"><dt>Application Deadline</dt><dd>{p.application_deadline || 'TBA'}</dd></div>
+                        </dl>
+
+                        <div className="yz-body modal-body">
+                            <div className="yz-sect">
+                                <div className="yz-sect-head">
+                                    <p className="yz-sect-label">Cost</p>
+                                    <h3 className="yz-sect-title">Fees &amp; scholarship</h3>
+                                </div>
+                                <div className="yz-req-grid">
+                                    <div className="yz-req">
+                                        <p className="yz-req-label">Program fees{p.currency ? ` (${p.currency})` : ''}</p>
+                                        <p className="yz-req-value muted" style={{whiteSpace:'pre-line'}}>
+                                            {p.program_fees || 'Not specified'}
+                                        </p>
+                                    </div>
+                                    <div className="yz-req">
+                                        <p className="yz-req-label">Scholarship</p>
+                                        {scholarship.length > 0 ? (
+                                            scholarship.map((line, i) => (
+                                                <p key={i} className="yz-req-value muted" style={{whiteSpace:'pre-line'}}>{line}</p>
+                                            ))
+                                        ) : (
+                                            <p className="yz-req-value muted">Not specified</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="yz-sect">
+                                <div className="yz-sect-head">
+                                    <p className="yz-sect-label">Requirements</p>
+                                    <h3 className="yz-sect-title">Eligibility</h3>
+                                </div>
+                                <div className="yz-req-grid">
+                                    <div className="yz-req">
+                                        <p className="yz-req-label">GPA Required (4.3)</p>
+                                        <p className="yz-req-value">{p.gpa_required ?? 'Not specified'}</p>
+                                    </div>
+                                    <div className="yz-req">
+                                        <p className="yz-req-label">TOEFL iBT</p>
+                                        <p className="yz-req-value">{p.toefl_total ?? 'Not specified'}</p>
+                                        {p.toefl_subscores && <p className="yz-req-note" style={{whiteSpace:'pre-line'}}>{p.toefl_subscores}</p>}
+                                    </div>
+                                </div>
+                                {(p.accepts_undergrad || p.accepts_grad) && (
+                                    <div className="yz-levels" style={{marginTop:10}}>
+                                        {p.accepts_undergrad && <span className="yz-level is-open">Undergraduate</span>}
+                                        {p.accepts_grad && <span className="yz-level is-open">Graduate</span>}
+                                    </div>
+                                )}
+                                {(p.language_of_instruction_1 || p.language_of_instruction_2) && (
+                                    <dl className="yz-kv" style={{marginTop:12}}>
+                                        <dt>Language of instruction</dt>
+                                        <dd>
+                                            {[p.language_of_instruction_1, p.language_of_instruction_2].filter(Boolean).join(' · ')}
+                                            {p.lang2_level && <span className="yz-kv-note"> — {p.lang2_level}</span>}
+                                        </dd>
+                                    </dl>
+                                )}
+                                {p.language_other_notes && (
+                                    <p className="yz-area-text" style={{marginTop:8}}>{p.language_other_notes}</p>
+                                )}
+                            </div>
+
+                            {(p.available_areas || p.restricted_areas || p.admission_notes) && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">Study areas</p>
+                                        <h3 className="yz-sect-title">Admission notes</h3>
+                                    </div>
+                                    {p.available_areas && (
+                                        <div className="yz-area">
+                                            <div className="yz-area-head"><span className="yz-area-badge">Available</span><p className="yz-area-title">Open areas</p></div>
+                                            <p className="yz-area-text">{p.available_areas}</p>
+                                        </div>
+                                    )}
+                                    {p.restricted_areas && (
+                                        <div className="yz-area">
+                                            <div className="yz-area-head"><span className="yz-area-badge">Restricted</span><p className="yz-area-title">Restrictions</p></div>
+                                            <p className="yz-area-text">{p.restricted_areas}</p>
+                                        </div>
+                                    )}
+                                    {p.admission_notes && (
+                                        <div className="yz-area">
+                                            <div className="yz-area-head"><span className="yz-area-badge">Notes</span><p className="yz-area-title">Admission notes</p></div>
+                                            <p className="yz-area-text" style={{whiteSpace:'pre-line'}}>{p.admission_notes}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {(p.housing_info || p.housing_guaranteed || p.academic_calendar) && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">Living</p>
+                                        <h3 className="yz-sect-title">Housing &amp; calendar</h3>
+                                    </div>
+                                    {p.housing_guaranteed && (
+                                        <p className="yz-area-text"><strong>Housing guaranteed:</strong> {p.housing_guaranteed}</p>
+                                    )}
+                                    {p.housing_info && (
+                                        <p className="yz-area-text" style={{whiteSpace:'pre-line', marginTop:6}}>{p.housing_info}</p>
+                                    )}
+                                    {p.academic_calendar && (
+                                        <p className="yz-area-text" style={{whiteSpace:'pre-line', marginTop:6}}>{p.academic_calendar}</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {hasMap && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">Location</p>
+                                        <h3 className="yz-sect-title">Campus map</h3>
+                                    </div>
+                                    <div className="yz-map">
+                                        <iframe src={mapSrc} loading="lazy" title={`Map of ${p.university_name}`}></iframe>
+                                    </div>
+                                </div>
+                            )}
+
+                            {p.transcript_info && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">After your program</p>
+                                        <h3 className="yz-sect-title">Transcript</h3>
+                                    </div>
+                                    <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.transcript_info}</p></div>
+                                </div>
+                            )}
+
+                            {p.notes && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">Notice</p>
+                                        <h3 className="yz-sect-title">From OIA</h3>
+                                    </div>
+                                    <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.notes}</p></div>
+                                </div>
+                            )}
+
+                            {p.recent_factsheet && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">Reference</p>
+                                        <h3 className="yz-sect-title">Factsheet</h3>
+                                    </div>
+                                    <div className="yz-links">
+                                        <a className="yz-link" href={safeHttpUrl(p.recent_factsheet)} target="_blank" rel="noopener noreferrer">
+                                            <span className="yz-link-icon"><IconFile /></span>
+                                            <div className="yz-link-body"><p className="yz-link-title">Factsheet</p>
+                                                <p className="yz-link-url">Detailed program information (PDF)</p></div>
+                                            <span className="yz-link-cta">Open ↗</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <div className="modal-nav-group"></div>
+                            {p.website && (
+                                <a href={safeHttpUrl(p.website)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
                                     Visit Website
                                 </a>
                             )}
