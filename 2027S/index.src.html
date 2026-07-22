@@ -295,21 +295,14 @@
             .cross-nav { flex: 1; justify-content: center; }
         }
 
-        /* Seasonal card cover — same navy-gradient fallback as the detail modal's
-           .yz-cover, scaled down and bled to the card edges. */
-        .seasonal-card-cover {
-            aspect-ratio: 16 / 9;
-            margin: -20px -20px 14px;
-            border-radius: 8px 8px 0 0;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
-        }
-        .seasonal-card-cover.has-img { background-size: cover; background-position: center; }
+        /* ESP/VSP badge — inline next to the university name (cards are
+           cover-free like the regular finder; the logo lives on the detail
+           modal's .yz-cover instead). */
         .seasonal-badge {
-            position: absolute; top: 10px; right: 10px;
+            display: inline-block; vertical-align: middle;
             padding: 4px 10px; border-radius: 999px;
             font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+            white-space: nowrap;
         }
         .seasonal-badge--esp { background: var(--brand-soft); color: var(--brand); }
         .seasonal-badge--vsp { background: var(--brand); color: #fff; }
@@ -3377,19 +3370,17 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
         function SeasonalCard({ p, onOpenDetail }) {
             const typeLabel = SeasonalLib.programTypeLabel(p.program_type);
-            const cover = p.cover_image_url;
             return (
                 <div className="university-card">
-                    <div className={`seasonal-card-cover ${cover ? 'has-img' : ''}`}
-                        style={cover ? { backgroundImage: `url('${cover}')` } : undefined}>
-                        <span className={`seasonal-badge seasonal-badge--${p.program_type === 'VSP' ? 'vsp' : 'esp'}`}
-                            title={typeLabel.full}>
-                            {typeLabel.short}
-                        </span>
-                    </div>
                     <div className="card-header">
                         <div className="university-name">
-                            <div>{p.university_name}</div>
+                            <div style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap'}}>
+                                <span>{p.university_name}</span>
+                                <span className={`seasonal-badge seasonal-badge--${p.program_type === 'VSP' ? 'vsp' : 'esp'}`}
+                                    title={typeLabel.full}>
+                                    {typeLabel.short}
+                                </span>
+                            </div>
                             <div style={{fontSize: 13, fontWeight: 500, color: 'var(--ink-muted)', marginTop: 2}}>
                                 {p.program_name}
                             </div>

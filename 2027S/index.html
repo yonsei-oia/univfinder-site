@@ -294,21 +294,14 @@
             .cross-nav { flex: 1; justify-content: center; }
         }
 
-        /* Seasonal card cover — same navy-gradient fallback as the detail modal's
-           .yz-cover, scaled down and bled to the card edges. */
-        .seasonal-card-cover {
-            aspect-ratio: 16 / 9;
-            margin: -20px -20px 14px;
-            border-radius: 8px 8px 0 0;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
-        }
-        .seasonal-card-cover.has-img { background-size: cover; background-position: center; }
+        /* ESP/VSP badge — inline next to the university name (cards are
+           cover-free like the regular finder; the logo lives on the detail
+           modal's .yz-cover instead). */
         .seasonal-badge {
-            position: absolute; top: 10px; right: 10px;
+            display: inline-block; vertical-align: middle;
             padding: 4px 10px; border-radius: 999px;
             font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+            white-space: nowrap;
         }
         .seasonal-badge--esp { background: var(--brand-soft); color: var(--brand); }
         .seasonal-badge--vsp { background: var(--brand); color: #fff; }
@@ -3455,22 +3448,23 @@ function SeasonalCard({
   onOpenDetail
 }) {
   const typeLabel = SeasonalLib.programTypeLabel(p.program_type);
-  const cover = p.cover_image_url;
   return React.createElement("div", {
     className: "university-card"
   }, React.createElement("div", {
-    className: `seasonal-card-cover ${cover ? 'has-img' : ''}`,
-    style: cover ? {
-      backgroundImage: `url('${cover}')`
-    } : undefined
-  }, React.createElement("span", {
-    className: `seasonal-badge seasonal-badge--${p.program_type === 'VSP' ? 'vsp' : 'esp'}`,
-    title: typeLabel.full
-  }, typeLabel.short)), React.createElement("div", {
     className: "card-header"
   }, React.createElement("div", {
     className: "university-name"
-  }, React.createElement("div", null, p.university_name), React.createElement("div", {
+  }, React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap'
+    }
+  }, React.createElement("span", null, p.university_name), React.createElement("span", {
+    className: `seasonal-badge seasonal-badge--${p.program_type === 'VSP' ? 'vsp' : 'esp'}`,
+    title: typeLabel.full
+  }, typeLabel.short)), React.createElement("div", {
     style: {
       fontSize: 13,
       fontWeight: 500,
