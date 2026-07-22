@@ -3506,7 +3506,7 @@ function SeasonalCard({
     className: "spec-label"
   }, "Quota"), React.createElement("div", {
     className: "spec-value"
-  }, p.quota ?? 'N/A', " ", p.quota_unit || ''))), React.createElement("div", {
+  }, p.quota ? `${p.quota} ${p.quota_unit || ''}`.trim() : 'TBA'))), React.createElement("div", {
     style: {
       marginTop: 15,
       display: 'flex',
@@ -4029,7 +4029,7 @@ function SeasonalDetailModal({
     }
   }, p.program_name)), React.createElement("div", {
     className: "yz-meta-stat"
-  }, React.createElement("dt", null, "Quota"), React.createElement("dd", null, p.quota ?? 'N/A', " ", p.quota_unit || '')), React.createElement("div", {
+  }, React.createElement("dt", null, "Quota"), React.createElement("dd", null, p.quota ? `${p.quota} ${p.quota_unit || ''}`.trim() : 'TBA')), React.createElement("div", {
     className: "yz-meta-sub"
   }, React.createElement("dt", null, "Program Dates"), React.createElement("dd", null, p.program_dates || 'TBA')), React.createElement("div", {
     className: "yz-meta-sub"
@@ -4080,9 +4080,9 @@ function SeasonalDetailModal({
     className: "yz-req"
   }, React.createElement("p", {
     className: "yz-req-label"
-  }, "GPA Required (4.3)"), React.createElement("p", {
+  }, "GPA Required"), React.createElement("p", {
     className: "yz-req-value"
-  }, p.gpa_required ?? 'Not specified')), React.createElement("div", {
+  }, p.gpa_required || 'Not specified')), React.createElement("div", {
     className: "yz-req"
   }, React.createElement("p", {
     className: "yz-req-label"
