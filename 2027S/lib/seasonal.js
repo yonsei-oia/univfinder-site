@@ -23,10 +23,10 @@
     function scholarshipLines(program) {
         var out = [];
         if (program && program.scholarship_settlement != null) {
-            out.push('Settlement grant: ' + formatWon(program.scholarship_settlement) + ' (정착지원금)');
+            out.push('Settlement grant (정착지원금): ' + formatWon(program.scholarship_settlement));
         }
         if (program && program.scholarship_tuition) {
-            out.push('Tuition subsidy: ' + program.scholarship_tuition + ' (등록금지원금)');
+            out.push('Tuition subsidy (등록금지원금): ' + program.scholarship_tuition);
         }
         return out;
     }
