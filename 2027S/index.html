@@ -42,6 +42,8 @@
          them out of <head> cuts ~440KB gzip of parser-blocking JS on first load. -->
     <!-- Pure term/deadline logic (unit-tested in 2027S/tests/term.test.js) -->
     <script src="lib/term.js"></script>
+    <!-- Pure seasonal (summer/winter) helpers (unit-tested in 2027S/tests/seasonal.test.js) -->
+    <script src="lib/seasonal.js"></script>
     <script src="lib/campus_map.js"></script>
     <script src="lib/hashroute.js"></script>
 
@@ -277,6 +279,39 @@
         .hero__meta dd { margin: 0; display: inline; font-variant-numeric: tabular-nums; }
 
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Cross-nav pill — regular <-> seasonal finder, same pill language as .site-nav__tab */
+        .cross-nav {
+            display: inline-flex; align-items: center;
+            padding: 9px 16px; font-size: 14px; font-weight: 600;
+            color: var(--brand); background: var(--brand-soft);
+            text-decoration: none; border-radius: 6px;
+            flex: 0 0 auto; white-space: nowrap;
+            transition: background-color 160ms ease, color 160ms ease;
+        }
+        .cross-nav:hover { background: var(--brand); color: #fff; }
+        @media (max-width: 540px) {
+            .cross-nav { flex: 1; justify-content: center; }
+        }
+
+        /* Seasonal card cover — same navy-gradient fallback as the detail modal's
+           .yz-cover, scaled down and bled to the card edges. */
+        .seasonal-card-cover {
+            aspect-ratio: 16 / 9;
+            margin: -20px -20px 14px;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+        }
+        .seasonal-card-cover.has-img { background-size: cover; background-position: center; }
+        .seasonal-badge {
+            position: absolute; top: 10px; right: 10px;
+            padding: 4px 10px; border-radius: 999px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+        }
+        .seasonal-badge--esp { background: var(--brand-soft); color: var(--brand); }
+        .seasonal-badge--vsp { background: var(--brand); color: #fff; }
 
         /* Notice */
         .notice-bar {
@@ -1377,6 +1412,8 @@ const SEMESTER = {
 document.title = 'Exchange University Finder | Yonsei OIA';
 const IS_LOCAL_DEV = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
 const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/main';
+const IS_SEASONAL = SeasonalLib.isSeasonalPath(window.location.pathname);
+const SEASONAL_URL = IS_LOCAL_DEV ? '../../20-univ-finder/data/seasonal-data.json' : `${DATA_RAW}/seasonal-data.json`;
 const VISIT_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbxWz4Emr0bL8PhlmmV_aPz3w-IArLBMFEjJpZdM1gLXa3K1TUQI-dVQTW2INeH6GqHuHQ/exec';
 const HEADER_LINKS = [{
   label: '2027S Info-Session',
@@ -2261,6 +2298,10 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [usingMock, setUsingMock] = useState(false);
+  const [programs, setPrograms] = useState([]);
+  const [seasonalConfig, setSeasonalConfig] = useState({});
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [programSearch, setProgramSearch] = useState('');
   const [filters, setFilters] = useState(() => {
     const fromSession = loadFromStorage(sessionStorage, `${TERM_SK}filters`, null);
     if (fromSession) return fromSession;
@@ -2305,12 +2346,12 @@ function App() {
   };
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   useEffect(() => {
-    const overlayOpen = isFilterDrawerOpen || !!selectedUniversity || showUpdateHistory;
+    const overlayOpen = isFilterDrawerOpen || !!selectedUniversity || showUpdateHistory || !!selectedProgram;
     document.body.style.overflow = overlayOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isFilterDrawerOpen, selectedUniversity, showUpdateHistory]);
+  }, [isFilterDrawerOpen, selectedUniversity, showUpdateHistory, selectedProgram]);
   useEffect(() => {
     sessionStorage.setItem(`${TERM_SK}filters`, JSON.stringify(filters));
   }, [filters]);
@@ -2361,6 +2402,12 @@ function App() {
     setLoading(true);
     setError(null);
     try {
+      if (IS_SEASONAL) {
+        const sj = await fetchJson(SEASONAL_URL);
+        setSeasonalConfig(sj.config || {});
+        setPrograms(Array.isArray(sj.programs) ? sj.programs : []);
+        return;
+      }
       const {
         masterRows,
         updates,
@@ -2494,7 +2541,7 @@ function App() {
     setCameFromUpdateHistory(false);
   }, [selectedUniversity, sortedUniversities]);
   useEffect(() => {
-    if (!selectedUniversity && !showUpdateHistory && !isFilterDrawerOpen) return;
+    if (!selectedUniversity && !showUpdateHistory && !isFilterDrawerOpen && !selectedProgram) return;
     const onKey = e => {
       if (e.key === 'Escape') {
         if (selectedUniversity) {
@@ -2504,6 +2551,8 @@ function App() {
           setShowUpdateHistory(false);
         } else if (isFilterDrawerOpen) {
           setIsFilterDrawerOpen(false);
+        } else if (selectedProgram) {
+          setSelectedProgram(null);
         }
         return;
       }
@@ -2520,7 +2569,7 @@ function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, navigateModal]);
+  }, [selectedUniversity, showUpdateHistory, isFilterDrawerOpen, navigateModal, selectedProgram]);
   const toggleFavorite = key => {
     setFavorites(prev => prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key]);
   };
@@ -2699,7 +2748,13 @@ function App() {
     className: "site-header__org-text"
   }, React.createElement("strong", null, SEMESTER.korean, " \uD574\uC678\uD30C\uACAC \uBC30\uC815 \uAC00\uB2A5 \uB300\uD559"), React.createElement("span", {
     translate: "no"
-  }, "Yonsei University \xB7 Office of International Affairs"))), HEADER_LINKS.length > 0 && React.createElement("nav", {
+  }, "Yonsei University \xB7 Office of International Affairs"))), IS_SEASONAL ? React.createElement("a", {
+    href: "/",
+    className: "cross-nav"
+  }, "\u2190 Regular semester exchange (University Finder)") : React.createElement("a", {
+    href: "/seasonal/",
+    className: "cross-nav"
+  }, "Summer / Winter programs (Seasonal Finder) \u2192"), HEADER_LINKS.length > 0 && React.createElement("nav", {
     className: "site-nav",
     "aria-label": "Related links"
   }, HEADER_LINKS.map(l => React.createElement("a", {
@@ -2732,7 +2787,7 @@ function App() {
     className: "hero__top"
   }, React.createElement("p", {
     className: "hero__eyebrow"
-  }, "Exchange University Finder \xB7 ", SEMESTER.full), visits && React.createElement("div", {
+  }, IS_SEASONAL ? 'Yonsei OIA · Seasonal Programs' : `Exchange University Finder · ${SEMESTER.full}`), visits && React.createElement("div", {
     className: "hero__counter",
     "aria-label": "Visitor count"
   }, React.createElement("span", {
@@ -2749,25 +2804,25 @@ function App() {
   }, "TOTAL"), React.createElement("strong", null, visits.total.toLocaleString())))), React.createElement("h1", {
     id: "page-title",
     className: "hero__title"
-  }, "\uD574\uC678\uD30C\uACAC \uD504\uB85C\uADF8\uB7A8 \uBC30\uC815 \uAC00\uB2A5 \uB300\uD559"), React.createElement("p", {
+  }, IS_SEASONAL ? seasonalConfig.season_label || 'Seasonal Program' : '해외파견 프로그램 배정 가능 대학'), React.createElement("p", {
     className: "hero__subtitle"
-  }, "List of Host Universities for Yonsei Outbound Exchange Program"), React.createElement("p", {
+  }, IS_SEASONAL ? 'Seasonal Program Finder' : 'List of Host Universities for Yonsei Outbound Exchange Program'), React.createElement("p", {
     className: "hero__lede"
-  }, "\uC5F0\uC138\uB300\uD559\uAD50 \uAD6D\uC81C\uCC98\uAC00 \uC6B4\uC601\uD558\uB294 \uAD50\uD658\uD559\uC0DD \uD504\uB85C\uADF8\uB7A8\uC5D0\uC11C \uC9C0\uC6D0 \uAC00\uB2A5\uD55C \uD574\uC678 \uD30C\uD2B8\uB108 \uB300\uD559 \uBA85\uB2E8\uC785\uB2C8\uB2E4. \uB300\uB959\xB7\uC5B8\uC5B4\xB7\uD559\uC810\xB7\uC5B4\uD559 \uC694\uAC74\uC73C\uB85C \uC881\uD600 \uAC80\uC0C9\uD558\uACE0, \uAD00\uC2EC \uD559\uAD50\uB294 \uC990\uACA8\uCC3E\uAE30\uC5D0 \uB2F4\uC544 \uBE44\uAD50\uD574 \uBCF4\uC138\uC694."), React.createElement("dl", {
+  }, IS_SEASONAL ? 'Short-term Summer and Winter programs at Yonsei OIA partner universities, separate from the regular semester exchange. Search by university or program name, and open a program for fees, scholarship, and eligibility details.' : '연세대학교 국제처가 운영하는 교환학생 프로그램에서 지원 가능한 해외 파트너 대학 명단입니다. 대륙·언어·학점·어학 요건으로 좁혀 검색하고, 관심 학교는 즐겨찾기에 담아 비교해 보세요.'), React.createElement("dl", {
     className: "hero__meta"
-  }, React.createElement("div", null, React.createElement("dt", null, "Total"), React.createElement("dd", null, stats.total)), React.createElement("div", null, React.createElement("dt", null, "Quota"), React.createElement("dd", null, stats.totalQuota)), React.createElement("div", null, React.createElement("dt", null, "Countries"), React.createElement("dd", null, stats.countries)), React.createElement("div", null, React.createElement("dt", null, "Americas"), React.createElement("dd", null, stats.americas)), React.createElement("div", null, React.createElement("dt", null, "Asia/Oceania"), React.createElement("dd", null, stats.asiaOceania)), React.createElement("div", null, React.createElement("dt", null, "Europe"), React.createElement("dd", null, stats.europe)), React.createElement("div", null, React.createElement("dt", null, "English"), React.createElement("dd", null, stats.english)), React.createElement("div", null, React.createElement("dt", null, "Non-English"), React.createElement("dd", null, stats.nonEnglish))))), React.createElement("div", {
+  }, IS_SEASONAL ? React.createElement(React.Fragment, null, React.createElement("div", null, React.createElement("dt", null, "Programs"), React.createElement("dd", null, programs.length)), React.createElement("div", null, React.createElement("dt", null, "Quota"), React.createElement("dd", null, programs.reduce((s, p) => s + (Number(p.quota) || 0), 0))), React.createElement("div", null, React.createElement("dt", null, "Countries"), React.createElement("dd", null, new Set(programs.map(p => p.country).filter(Boolean)).size))) : React.createElement(React.Fragment, null, React.createElement("div", null, React.createElement("dt", null, "Total"), React.createElement("dd", null, stats.total)), React.createElement("div", null, React.createElement("dt", null, "Quota"), React.createElement("dd", null, stats.totalQuota)), React.createElement("div", null, React.createElement("dt", null, "Countries"), React.createElement("dd", null, stats.countries)), React.createElement("div", null, React.createElement("dt", null, "Americas"), React.createElement("dd", null, stats.americas)), React.createElement("div", null, React.createElement("dt", null, "Asia/Oceania"), React.createElement("dd", null, stats.asiaOceania)), React.createElement("div", null, React.createElement("dt", null, "Europe"), React.createElement("dd", null, stats.europe)), React.createElement("div", null, React.createElement("dt", null, "English"), React.createElement("dd", null, stats.english)), React.createElement("div", null, React.createElement("dt", null, "Non-English"), React.createElement("dd", null, stats.nonEnglish)))))), React.createElement("div", {
     className: "notice-bar"
   }, React.createElement("div", {
     className: "notice-inner"
-  }, React.createElement("p", null, React.createElement("strong", null, "\uC720\uC758\uC0AC\uD56D:"), " \uC5F0\uC138\uB300\uD559\uAD50 \uAD6D\uC81C\uCC98\uC640 \uAD50\uD658\uD559\uC0DD \uD611\uC815\uC744 \uB9FA\uC740 \uD574\uC678 \uB300\uD559 \uBAA9\uB85D\uC785\uB2C8\uB2E4. \uC77C\uBD80 \uB2E8\uACFC\uB300\uD559 \uB2E8\uB3C5 \uAD50\uD658 \uD504\uB85C\uADF8\uB7A8\uC744 \uC6B4\uC601\uD558\uB294 \uB300\uD559\uC740 \uAC80\uC0C9\uB418\uC9C0 \uC54A\uC744 \uC218 \uC788\uC73C\uBBC0\uB85C, \uD574\uB2F9 \uACBD\uC6B0\uB294 \uC18C\uC18D \uB2E8\uACFC\uB300\uD559\uC73C\uB85C \uBB38\uC758 \uBC14\uB78D\uB2C8\uB2E4. \uAD50\uD658\uB300\uD559\uC758 \uBAA8\uC9D1 \uC778\uC6D0, \uC9C0\uC6D0 \uC790\uACA9, \uC138\uBD80 \uC870\uAC74\uC740 \uB9E4 \uD559\uAE30 \uBCC0\uACBD\uB420 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uB610\uD55C, \uC5EC\uAE30\uC5D0 \uC548\uB0B4\uB41C \uC5B4\uD559 \uC131\uC801 \uBC0F GPA \uAE30\uC900\uC740 \uCD5C\uC18C \uC694\uAC74\uC774\uBA70, \uCD5C\uC885 \uC120\uBC1C \uC5EC\uBD80\uB294 \uC0C1\uB300\uAD50\uC758 \uC2EC\uC0AC\uB97C \uD1B5\uD574 \uACB0\uC815\uB429\uB2C8\uB2E4."), React.createElement("p", null, React.createElement("strong", null, "Notice:"), " This list shows OIA partner universities with student exchange agreements through Yonsei University's Office of International Affairs. Some colleges or departments that operate exchange programs exclusively may not appear in this list; in such cases, please contact your college or department for further information. Exchange conditions may change each semester. The language proficiency and GPA requirements listed here represent the minimum requirements; final admission decisions are made by the host institution."), usingMock && React.createElement("p", {
+  }, IS_SEASONAL ? React.createElement(React.Fragment, null, React.createElement("p", null, React.createElement("strong", null, "\uC720\uC758\uC0AC\uD56D:"), " \uC774 \uBAA9\uB85D\uC740 \uD558\uACC4(Summer)\xB7\uB3D9\uACC4(Winter) \uACC4\uC808\uD559\uAE30 \uD504\uB85C\uADF8\uB7A8\uC73C\uB85C, \uC815\uADDC \uD559\uAE30 \uAD50\uD658\uD559\uC0DD(Regular semester exchange)\uACFC\uB294 \uBCC4\uB3C4\uB85C \uC6B4\uC601\uB429\uB2C8\uB2E4. \uD559\uBE44, \uC7A5\uD559\uAE08, \uB9C8\uAC10\uC77C \uB4F1 \uC138\uBD80 \uC870\uAC74\uC740 \uBCC0\uACBD\uB420 \uC218 \uC788\uC73C\uB2C8 \uC9C0\uC6D0 \uC804 \uAD6D\uC81C\uCC98 \uACF5\uC9C0\uC0AC\uD56D\uC744 \uD1B5\uD574 \uCD5C\uC885 \uD655\uC778\uD558\uC2DC\uAE30 \uBC14\uB78D\uB2C8\uB2E4."), React.createElement("p", null, React.createElement("strong", null, "Notice:"), " This list shows short-term Summer and Winter seasonal programs, separate from the regular semester exchange. Program fees, scholarships, and deadlines are subject to change; please confirm final details through the OIA notice board before applying.")) : React.createElement(React.Fragment, null, React.createElement("p", null, React.createElement("strong", null, "\uC720\uC758\uC0AC\uD56D:"), " \uC5F0\uC138\uB300\uD559\uAD50 \uAD6D\uC81C\uCC98\uC640 \uAD50\uD658\uD559\uC0DD \uD611\uC815\uC744 \uB9FA\uC740 \uD574\uC678 \uB300\uD559 \uBAA9\uB85D\uC785\uB2C8\uB2E4. \uC77C\uBD80 \uB2E8\uACFC\uB300\uD559 \uB2E8\uB3C5 \uAD50\uD658 \uD504\uB85C\uADF8\uB7A8\uC744 \uC6B4\uC601\uD558\uB294 \uB300\uD559\uC740 \uAC80\uC0C9\uB418\uC9C0 \uC54A\uC744 \uC218 \uC788\uC73C\uBBC0\uB85C, \uD574\uB2F9 \uACBD\uC6B0\uB294 \uC18C\uC18D \uB2E8\uACFC\uB300\uD559\uC73C\uB85C \uBB38\uC758 \uBC14\uB78D\uB2C8\uB2E4. \uAD50\uD658\uB300\uD559\uC758 \uBAA8\uC9D1 \uC778\uC6D0, \uC9C0\uC6D0 \uC790\uACA9, \uC138\uBD80 \uC870\uAC74\uC740 \uB9E4 \uD559\uAE30 \uBCC0\uACBD\uB420 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uB610\uD55C, \uC5EC\uAE30\uC5D0 \uC548\uB0B4\uB41C \uC5B4\uD559 \uC131\uC801 \uBC0F GPA \uAE30\uC900\uC740 \uCD5C\uC18C \uC694\uAC74\uC774\uBA70, \uCD5C\uC885 \uC120\uBC1C \uC5EC\uBD80\uB294 \uC0C1\uB300\uAD50\uC758 \uC2EC\uC0AC\uB97C \uD1B5\uD574 \uACB0\uC815\uB429\uB2C8\uB2E4."), React.createElement("p", null, React.createElement("strong", null, "Notice:"), " This list shows OIA partner universities with student exchange agreements through Yonsei University's Office of International Affairs. Some colleges or departments that operate exchange programs exclusively may not appear in this list; in such cases, please contact your college or department for further information. Exchange conditions may change each semester. The language proficiency and GPA requirements listed here represent the minimum requirements; final admission decisions are made by the host institution."), usingMock && React.createElement("p", {
     style: {
       marginTop: 8,
       color: '#a06000'
     }
-  }, React.createElement("strong", null, "(\uAC1C\uBC1C \uBAA8\uB4DC)"), " \uD604\uC7AC mock \uB370\uC774\uD130\uB85C \uB3D9\uC791 \uC911\uC785\uB2C8\uB2E4. Google Sheets URL\uC774 \uCF54\uB4DC\uC5D0 \uC124\uC815\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4."))), React.createElement("main", {
+  }, React.createElement("strong", null, "(\uAC1C\uBC1C \uBAA8\uB4DC)"), " \uD604\uC7AC mock \uB370\uC774\uD130\uB85C \uB3D9\uC791 \uC911\uC785\uB2C8\uB2E4. Google Sheets URL\uC774 \uCF54\uB4DC\uC5D0 \uC124\uC815\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.")))), React.createElement("main", {
     id: "main",
     className: "container"
-  }, showFirstVisitBanner && React.createElement("div", {
+  }, !IS_SEASONAL && React.createElement(React.Fragment, null, showFirstVisitBanner && React.createElement("div", {
     className: "first-visit-banner"
   }, React.createElement("span", {
     className: "first-visit-icon",
@@ -3151,7 +3206,13 @@ function App() {
     isFavorited: favorites.includes(favKey(u)),
     onToggleFavorite: () => toggleFavorite(favKey(u)),
     onOpenDetail: () => setSelectedUniversity(u)
-  })))), selectedUniversity && React.createElement(DetailModal, {
+  })))), IS_SEASONAL && React.createElement(SeasonalMain, {
+    programs: programs,
+    search: programSearch,
+    onSearchChange: setProgramSearch,
+    onOpenDetail: setSelectedProgram,
+    seasonalConfig: seasonalConfig
+  })), selectedUniversity && React.createElement(DetailModal, {
     u: selectedUniversity,
     onClose: () => {
       setSelectedUniversity(null);
@@ -3170,6 +3231,9 @@ function App() {
     hasNext: modalIdx >= 0 && modalIdx < sortedUniversities.length - 1,
     modalIdx: modalIdx,
     modalTotal: sortedUniversities.length
+  }), IS_SEASONAL && selectedProgram && React.createElement(SeasonalDetailModal, {
+    p: selectedProgram,
+    onClose: () => setSelectedProgram(null)
   }), showUpdateHistory && React.createElement(UpdateHistoryModal, {
     universities: universities,
     onClose: () => setShowUpdateHistory(false),
@@ -3305,6 +3369,159 @@ function UniversityCard({
     onClick: onOpenDetail
   }, "View Details"), u.website && React.createElement("a", {
     href: safeHttpUrl(u.website),
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "btn btn-secondary",
+    style: {
+      flex: 1,
+      fontSize: 13,
+      padding: '8px 12px'
+    }
+  }, "Website")));
+}
+function SeasonalMain({
+  programs,
+  search,
+  onSearchChange,
+  onOpenDetail,
+  seasonalConfig
+}) {
+  const filtered = useMemo(() => {
+    const q = searchNorm(search.trim());
+    if (!q) return programs;
+    return programs.filter(p => searchNorm(`${p.university_name} ${p.program_name} ${p.country}`).includes(q));
+  }, [programs, search]);
+  if (seasonalConfig && seasonalConfig.is_live === false) {
+    return React.createElement("div", {
+      className: "empty-state",
+      role: "status"
+    }, React.createElement("div", {
+      className: "empty-state-icon",
+      "aria-hidden": "true"
+    }, React.createElement(IconCalendar, null)), React.createElement("div", {
+      className: "empty-state-text"
+    }, React.createElement("strong", null, seasonalConfig.season_label || 'Seasonal Programs'), React.createElement("div", {
+      style: {
+        marginTop: 8
+      }
+    }, "The seasonal program list is being prepared. Please check back soon.")));
+  }
+  return React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "filter-panel",
+    style: {
+      marginBottom: 20
+    }
+  }, React.createElement("div", {
+    className: "filter-section"
+  }, React.createElement("label", {
+    className: "filter-label",
+    htmlFor: "f-seasonal-search"
+  }, "Search University or Program"), React.createElement("div", {
+    className: "input-field",
+    style: {
+      marginTop: 8
+    }
+  }, React.createElement("input", {
+    id: "f-seasonal-search",
+    type: "text",
+    placeholder: "Type university or program name\u2026",
+    "aria-label": "Search seasonal programs by university or program name",
+    autoComplete: "off",
+    spellCheck: false,
+    value: search,
+    onChange: e => onSearchChange(e.target.value)
+  })))), React.createElement("div", {
+    className: "action-bar"
+  }, React.createElement("div", {
+    className: "result-count",
+    "aria-live": "polite"
+  }, "Found ", React.createElement("strong", null, filtered.length), " programs")), filtered.length === 0 ? React.createElement("div", {
+    className: "empty-state"
+  }, React.createElement("div", {
+    className: "empty-state-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconSearch, null)), React.createElement("div", {
+    className: "empty-state-text"
+  }, "No programs match your search. Try a different keyword.")) : React.createElement("div", {
+    className: "university-grid"
+  }, filtered.map(p => React.createElement(SeasonalCard, {
+    key: p.slug,
+    p: p,
+    onOpenDetail: () => onOpenDetail(p)
+  }))));
+}
+function SeasonalCard({
+  p,
+  onOpenDetail
+}) {
+  const typeLabel = SeasonalLib.programTypeLabel(p.program_type);
+  const cover = p.cover_image_url;
+  return React.createElement("div", {
+    className: "university-card"
+  }, React.createElement("div", {
+    className: `seasonal-card-cover ${cover ? 'has-img' : ''}`,
+    style: cover ? {
+      backgroundImage: `url('${cover}')`
+    } : undefined
+  }, React.createElement("span", {
+    className: `seasonal-badge seasonal-badge--${p.program_type === 'VSP' ? 'vsp' : 'esp'}`,
+    title: typeLabel.full
+  }, typeLabel.short)), React.createElement("div", {
+    className: "card-header"
+  }, React.createElement("div", {
+    className: "university-name"
+  }, React.createElement("div", null, p.university_name), React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 500,
+      color: 'var(--ink-muted)',
+      marginTop: 2
+    }
+  }, p.program_name))), React.createElement("div", {
+    className: "card-meta"
+  }, React.createElement("div", {
+    className: "meta-item"
+  }, React.createElement("span", {
+    className: "meta-icon",
+    "aria-hidden": "true"
+  }, COUNTRY_FLAGS[p.country] || React.createElement(IconGlobe, null)), p.country), p.program_dates && React.createElement("div", {
+    className: "meta-item"
+  }, React.createElement("span", {
+    className: "meta-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconCalendar, null)), p.program_dates)), React.createElement("div", {
+    className: "card-specs"
+  }, React.createElement("div", {
+    className: "spec-item"
+  }, React.createElement("div", {
+    className: "spec-label"
+  }, "Application Deadline"), React.createElement("div", {
+    className: "spec-value",
+    style: {
+      fontSize: 13
+    }
+  }, p.application_deadline || 'TBA')), React.createElement("div", {
+    className: "spec-item"
+  }, React.createElement("div", {
+    className: "spec-label"
+  }, "Quota"), React.createElement("div", {
+    className: "spec-value"
+  }, p.quota ? `${p.quota} ${p.quota_unit || ''}`.trim() : 'TBA'))), React.createElement("div", {
+    style: {
+      marginTop: 15,
+      display: 'flex',
+      gap: 10
+    }
+  }, React.createElement("button", {
+    className: "btn btn-primary",
+    style: {
+      flex: 1,
+      fontSize: 13,
+      padding: '8px 12px'
+    },
+    onClick: onOpenDetail
+  }, "View Details"), p.website && React.createElement("a", {
+    href: safeHttpUrl(p.website),
     target: "_blank",
     rel: "noopener noreferrer",
     className: "btn btn-secondary",
@@ -3754,6 +3971,283 @@ function DetailModal({
     "aria-label": "Next university (\u2192 key)"
   }, "Next \u2192")), u.website && React.createElement("a", {
     href: safeHttpUrl(u.website),
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "btn btn-primary"
+  }, "Visit Website"))));
+}
+function SeasonalDetailModal({
+  p,
+  onClose
+}) {
+  const modalRef = useModalFocus();
+  const typeLabel = SeasonalLib.programTypeLabel(p.program_type);
+  const cover = p.cover_image_url;
+  const isLogo = !!cover && p.cover_image_kind === 'logo';
+  const scholarship = SeasonalLib.scholarshipLines(p);
+  const hasMap = !!(p.campus_lat && p.campus_lng);
+  const mapSrc = hasMap ? CampusMap.osmSrc(p.campus_lat, p.campus_lng) : null;
+  return React.createElement("div", {
+    className: "modal-overlay",
+    onClick: onClose
+  }, React.createElement("div", {
+    className: "modal",
+    onClick: e => e.stopPropagation(),
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": p.university_name,
+    tabIndex: -1,
+    ref: modalRef
+  }, React.createElement("div", {
+    className: `yz-cover ${cover ? isLogo ? 'is-logo' : 'has-img' : ''}`,
+    style: cover && !isLogo ? {
+      backgroundImage: `linear-gradient(180deg, rgba(15,20,25,0.20) 0%, rgba(15,20,25,0.70) 100%), url('${cover}')`
+    } : undefined
+  }, isLogo && React.createElement("img", {
+    className: "yz-cover-logo",
+    src: cover,
+    alt: ""
+  }), React.createElement("button", {
+    className: "modal-close-btn",
+    onClick: onClose,
+    "aria-label": "Close"
+  }, "\xD7"), React.createElement("div", {
+    className: "yz-cover-inner"
+  }, React.createElement("p", {
+    className: "yz-cover-eyebrow"
+  }, p.continent, " \xB7 ", p.country, " \xB7 ", typeLabel.short), React.createElement("h2", {
+    className: "yz-cover-title"
+  }, p.university_name)), p.cover_image_credit && React.createElement("div", {
+    className: "yz-cover-credit"
+  }, p.cover_image_credit)), React.createElement("dl", {
+    className: "yz-meta"
+  }, React.createElement("div", {
+    className: "yz-meta-stat"
+  }, React.createElement("dt", null, "Program"), React.createElement("dd", {
+    style: {
+      fontSize: 15
+    }
+  }, p.program_name)), React.createElement("div", {
+    className: "yz-meta-stat"
+  }, React.createElement("dt", null, "Quota"), React.createElement("dd", null, p.quota ? `${p.quota} ${p.quota_unit || ''}`.trim() : 'TBA')), React.createElement("div", {
+    className: "yz-meta-sub"
+  }, React.createElement("dt", null, "Program Dates"), React.createElement("dd", null, p.program_dates || 'TBA')), React.createElement("div", {
+    className: "yz-meta-sub"
+  }, React.createElement("dt", null, "Application Deadline"), React.createElement("dd", null, p.application_deadline || 'TBA'))), React.createElement("div", {
+    className: "yz-body modal-body"
+  }, React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Cost"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "Fees & scholarship")), React.createElement("div", {
+    className: "yz-req-grid"
+  }, React.createElement("div", {
+    className: "yz-req"
+  }, React.createElement("p", {
+    className: "yz-req-label"
+  }, "Program fees", p.currency ? ` (${p.currency})` : ''), React.createElement("p", {
+    className: "yz-req-value muted",
+    style: {
+      whiteSpace: 'pre-line'
+    }
+  }, p.program_fees || 'Not specified')), React.createElement("div", {
+    className: "yz-req"
+  }, React.createElement("p", {
+    className: "yz-req-label"
+  }, "Scholarship"), scholarship.length > 0 ? scholarship.map((line, i) => React.createElement("p", {
+    key: i,
+    className: "yz-req-value muted",
+    style: {
+      whiteSpace: 'pre-line'
+    }
+  }, line)) : React.createElement("p", {
+    className: "yz-req-value muted"
+  }, "Not specified")))), React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Requirements"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "Eligibility")), React.createElement("div", {
+    className: "yz-req-grid"
+  }, React.createElement("div", {
+    className: "yz-req"
+  }, React.createElement("p", {
+    className: "yz-req-label"
+  }, "GPA Required"), React.createElement("p", {
+    className: "yz-req-value"
+  }, p.gpa_required || 'Not specified')), React.createElement("div", {
+    className: "yz-req"
+  }, React.createElement("p", {
+    className: "yz-req-label"
+  }, "TOEFL iBT"), React.createElement("p", {
+    className: "yz-req-value"
+  }, p.toefl_total ?? 'Not specified'), p.toefl_subscores && React.createElement("p", {
+    className: "yz-req-note",
+    style: {
+      whiteSpace: 'pre-line'
+    }
+  }, p.toefl_subscores))), (p.accepts_undergrad || p.accepts_grad) && React.createElement("div", {
+    className: "yz-levels",
+    style: {
+      marginTop: 10
+    }
+  }, p.accepts_undergrad && React.createElement("span", {
+    className: "yz-level is-open"
+  }, "Undergraduate"), p.accepts_grad && React.createElement("span", {
+    className: "yz-level is-open"
+  }, "Graduate")), (p.language_of_instruction_1 || p.language_of_instruction_2) && React.createElement("dl", {
+    className: "yz-kv",
+    style: {
+      marginTop: 12
+    }
+  }, React.createElement("dt", null, "Language of instruction"), React.createElement("dd", null, [p.language_of_instruction_1, p.language_of_instruction_2].filter(Boolean).join(' · '), p.lang2_level && React.createElement("span", {
+    className: "yz-kv-note"
+  }, " \u2014 ", p.lang2_level))), p.language_other_notes && React.createElement("p", {
+    className: "yz-area-text",
+    style: {
+      marginTop: 8
+    }
+  }, p.language_other_notes)), (p.available_areas || p.restricted_areas || p.admission_notes) && React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Study areas"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "Admission notes")), p.available_areas && React.createElement("div", {
+    className: "yz-area"
+  }, React.createElement("div", {
+    className: "yz-area-head"
+  }, React.createElement("span", {
+    className: "yz-area-badge"
+  }, "Available"), React.createElement("p", {
+    className: "yz-area-title"
+  }, "Open areas")), React.createElement("p", {
+    className: "yz-area-text"
+  }, p.available_areas)), p.restricted_areas && React.createElement("div", {
+    className: "yz-area"
+  }, React.createElement("div", {
+    className: "yz-area-head"
+  }, React.createElement("span", {
+    className: "yz-area-badge"
+  }, "Restricted"), React.createElement("p", {
+    className: "yz-area-title"
+  }, "Restrictions")), React.createElement("p", {
+    className: "yz-area-text"
+  }, p.restricted_areas)), p.admission_notes && React.createElement("div", {
+    className: "yz-area"
+  }, React.createElement("div", {
+    className: "yz-area-head"
+  }, React.createElement("span", {
+    className: "yz-area-badge"
+  }, "Notes"), React.createElement("p", {
+    className: "yz-area-title"
+  }, "Admission notes")), React.createElement("p", {
+    className: "yz-area-text",
+    style: {
+      whiteSpace: 'pre-line'
+    }
+  }, p.admission_notes))), (p.housing_info || p.housing_guaranteed || p.academic_calendar) && React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Living"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "Housing & calendar")), p.housing_guaranteed && React.createElement("p", {
+    className: "yz-area-text"
+  }, React.createElement("strong", null, "Housing guaranteed:"), " ", p.housing_guaranteed), p.housing_info && React.createElement("p", {
+    className: "yz-area-text",
+    style: {
+      whiteSpace: 'pre-line',
+      marginTop: 6
+    }
+  }, p.housing_info), p.academic_calendar && React.createElement("p", {
+    className: "yz-area-text",
+    style: {
+      whiteSpace: 'pre-line',
+      marginTop: 6
+    }
+  }, p.academic_calendar)), hasMap && React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Location"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "Campus map")), React.createElement("div", {
+    className: "yz-map"
+  }, React.createElement("iframe", {
+    src: mapSrc,
+    loading: "lazy",
+    title: `Map of ${p.university_name}`
+  }))), p.transcript_info && React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "After your program"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "Transcript")), React.createElement("div", {
+    className: "yz-prose",
+    style: {
+      whiteSpace: 'pre-line'
+    }
+  }, React.createElement("p", null, p.transcript_info))), p.notes && React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Notice"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "From OIA")), React.createElement("div", {
+    className: "yz-prose",
+    style: {
+      whiteSpace: 'pre-line'
+    }
+  }, React.createElement("p", null, p.notes))), p.recent_factsheet && React.createElement("div", {
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Reference"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "Factsheet")), React.createElement("div", {
+    className: "yz-links"
+  }, React.createElement("a", {
+    className: "yz-link",
+    href: safeHttpUrl(p.recent_factsheet),
+    target: "_blank",
+    rel: "noopener noreferrer"
+  }, React.createElement("span", {
+    className: "yz-link-icon"
+  }, React.createElement(IconFile, null)), React.createElement("div", {
+    className: "yz-link-body"
+  }, React.createElement("p", {
+    className: "yz-link-title"
+  }, "Factsheet"), React.createElement("p", {
+    className: "yz-link-url"
+  }, "Detailed program information (PDF)")), React.createElement("span", {
+    className: "yz-link-cta"
+  }, "Open \u2197"))))), React.createElement("div", {
+    className: "modal-footer"
+  }, React.createElement("div", {
+    className: "modal-nav-group"
+  }), p.website && React.createElement("a", {
+    href: safeHttpUrl(p.website),
     target: "_blank",
     rel: "noopener noreferrer",
     className: "btn btn-primary"
