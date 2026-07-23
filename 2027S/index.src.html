@@ -196,7 +196,7 @@
         .site-header__external svg { width: 11px; height: 11px; opacity: 0.7; }
 
         /* Info-session banner tab — same pill as 27s-info-session's site-nav */
-        .site-nav { margin-left: auto; display: flex; gap: 4px; flex: 0 0 auto; }
+        .site-nav { margin-left: auto; display: flex; gap: 4px; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; }
         .site-nav__tab {
             display: inline-flex; align-items: center;
             padding: 9px 16px; font-size: 14px; font-weight: 600;
@@ -1428,10 +1428,22 @@
 
         // Header banner links (pill tabs next to the logo). Term-specific —
         // update labels/URLs each term; empty array hides the nav entirely.
-        const HEADER_LINKS = [
-            { label: '2027S Info-Session', url: 'https://oiaexchange.netlify.app/' },
-            { label: 'Application Guide', url: 'https://docs.google.com/document/d/1rUtUTPkHxSd-sgkwYybfkPF7_NbtY2WCnSflCnLrcK8/edit?usp=sharing' },
-        ];
+        // Header pill links. Regular and seasonal share OIA Program Info +
+        // Application Guide; the middle link differs (Info-Session vs Testimonial).
+        // The hardcoded "OIA Official Website" link (below the .map) is the 4th button.
+        const _OIA_PROGRAM_INFO = { label: 'OIA Program Info', url: 'https://drive.google.com/file/d/1nz3mrCmNgobhwyLkX87qTaeCofXbYo_2/view' };
+        const _APPLICATION_GUIDE = { label: 'Application Guide', url: 'https://docs.google.com/document/d/1rUtUTPkHxSd-sgkwYybfkPF7_NbtY2WCnSflCnLrcK8/edit?usp=sharing' };
+        const HEADER_LINKS = IS_SEASONAL
+            ? [
+                _OIA_PROGRAM_INFO,
+                { label: 'Short-term Testimonial', url: 'https://www.youtube.com/watch?v=zUqcDffPC8s&list=PLe_FpcsIxbJ-qdS4SpFvC6DP5-StUMHQE' },
+                _APPLICATION_GUIDE,
+              ]
+            : [
+                _OIA_PROGRAM_INFO,
+                { label: '2027S Info-Session', url: 'https://oiaexchange.netlify.app/' },
+                _APPLICATION_GUIDE,
+              ];
 
         const MASTER_JSON_URL = IS_LOCAL_DEV
             ? '../data/universities-data.json'
@@ -2704,13 +2716,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     className="site-header__logo"
                                     translate="no" />
                                 <div className="site-header__org-text">
-                                    <strong>{SEMESTER.korean} 해외파견 배정 가능 대학</strong>
+                                    <strong>{IS_SEASONAL ? '계절학기 해외파견 배정 가능 대학' : `${SEMESTER.korean} 해외파견 배정 가능 대학`}</strong>
                                     <span translate="no">Yonsei University · Office of International Affairs</span>
                                 </div>
                             </a>
                             {IS_SEASONAL
-                                ? <a href="/" className="cross-nav">&larr; Regular semester exchange (University Finder)</a>
-                                : <a href="/seasonal/" className="cross-nav">Summer / Winter programs (Seasonal Finder) &rarr;</a>}
+                                ? <a href="/" className="cross-nav">&larr; OIA UnivFinder</a>
+                                : <a href="/seasonal/" className="cross-nav">Summer/Winter Finder &rarr;</a>}
                             {HEADER_LINKS.length > 0 && (
                                 <nav className="site-nav" aria-label="Related links">
                                     {HEADER_LINKS.map(l => (
@@ -2769,11 +2781,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             </p>
                             <dl className="hero__meta">
                                 {IS_SEASONAL ? (
+                                    // Hide the program counts while the season is being prepared
+                                    // (is_live === false) — the list itself is already hidden below.
+                                    seasonalConfig && seasonalConfig.is_live === false ? null : (
                                     <>
                                         <div><dt>Programs</dt><dd>{programs.length}</dd></div>
                                         <div><dt>Quota</dt><dd>{programs.reduce((s,p)=>s+(Number(p.quota)||0), 0)}</dd></div>
                                         <div><dt>Countries</dt><dd>{new Set(programs.map(p=>p.country).filter(Boolean)).size}</dd></div>
                                     </>
+                                    )
                                 ) : (
                                     <>
                                         <div><dt>Total</dt><dd>{stats.total}</dd></div>

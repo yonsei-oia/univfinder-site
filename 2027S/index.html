@@ -195,7 +195,7 @@
         .site-header__external svg { width: 11px; height: 11px; opacity: 0.7; }
 
         /* Info-session banner tab — same pill as 27s-info-session's site-nav */
-        .site-nav { margin-left: auto; display: flex; gap: 4px; flex: 0 0 auto; }
+        .site-nav { margin-left: auto; display: flex; gap: 4px; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; }
         .site-nav__tab {
             display: inline-flex; align-items: center;
             padding: 9px 16px; font-size: 14px; font-weight: 600;
@@ -1408,13 +1408,21 @@ const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/m
 const IS_SEASONAL = SeasonalLib.isSeasonalPath(window.location.pathname);
 const SEASONAL_URL = IS_LOCAL_DEV ? '../../20-univ-finder/data/seasonal-data.json' : `${DATA_RAW}/seasonal-data.json`;
 const VISIT_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbxWz4Emr0bL8PhlmmV_aPz3w-IArLBMFEjJpZdM1gLXa3K1TUQI-dVQTW2INeH6GqHuHQ/exec';
-const HEADER_LINKS = [{
-  label: '2027S Info-Session',
-  url: 'https://oiaexchange.netlify.app/'
-}, {
+const _OIA_PROGRAM_INFO = {
+  label: 'OIA Program Info',
+  url: 'https://drive.google.com/file/d/1nz3mrCmNgobhwyLkX87qTaeCofXbYo_2/view'
+};
+const _APPLICATION_GUIDE = {
   label: 'Application Guide',
   url: 'https://docs.google.com/document/d/1rUtUTPkHxSd-sgkwYybfkPF7_NbtY2WCnSflCnLrcK8/edit?usp=sharing'
-}];
+};
+const HEADER_LINKS = IS_SEASONAL ? [_OIA_PROGRAM_INFO, {
+  label: 'Short-term Testimonial',
+  url: 'https://www.youtube.com/watch?v=zUqcDffPC8s&list=PLe_FpcsIxbJ-qdS4SpFvC6DP5-StUMHQE'
+}, _APPLICATION_GUIDE] : [_OIA_PROGRAM_INFO, {
+  label: '2027S Info-Session',
+  url: 'https://oiaexchange.netlify.app/'
+}, _APPLICATION_GUIDE];
 const MASTER_JSON_URL = IS_LOCAL_DEV ? '../data/universities-data.json' : `${DATA_RAW}/universities-data.json`;
 const UPDATES_JSON_URL = IS_LOCAL_DEV ? '../data/universities-updates.json' : `${DATA_RAW}/universities-updates.json`;
 const MOCK_MASTER = [{
@@ -2739,15 +2747,15 @@ function App() {
     translate: "no"
   }), React.createElement("div", {
     className: "site-header__org-text"
-  }, React.createElement("strong", null, SEMESTER.korean, " \uD574\uC678\uD30C\uACAC \uBC30\uC815 \uAC00\uB2A5 \uB300\uD559"), React.createElement("span", {
+  }, React.createElement("strong", null, IS_SEASONAL ? '계절학기 해외파견 배정 가능 대학' : `${SEMESTER.korean} 해외파견 배정 가능 대학`), React.createElement("span", {
     translate: "no"
   }, "Yonsei University \xB7 Office of International Affairs"))), IS_SEASONAL ? React.createElement("a", {
     href: "/",
     className: "cross-nav"
-  }, "\u2190 Regular semester exchange (University Finder)") : React.createElement("a", {
+  }, "\u2190 OIA UnivFinder") : React.createElement("a", {
     href: "/seasonal/",
     className: "cross-nav"
-  }, "Summer / Winter programs (Seasonal Finder) \u2192"), HEADER_LINKS.length > 0 && React.createElement("nav", {
+  }, "Summer/Winter Finder \u2192"), HEADER_LINKS.length > 0 && React.createElement("nav", {
     className: "site-nav",
     "aria-label": "Related links"
   }, HEADER_LINKS.map(l => React.createElement("a", {
@@ -2803,7 +2811,7 @@ function App() {
     className: "hero__lede"
   }, IS_SEASONAL ? 'Short-term Summer and Winter programs at Yonsei OIA partner universities, separate from the regular semester exchange. Search by university or program name, and open a program for fees, scholarship, and eligibility details.' : '연세대학교 국제처가 운영하는 교환학생 프로그램에서 지원 가능한 해외 파트너 대학 명단입니다. 대륙·언어·학점·어학 요건으로 좁혀 검색하고, 관심 학교는 즐겨찾기에 담아 비교해 보세요.'), React.createElement("dl", {
     className: "hero__meta"
-  }, IS_SEASONAL ? React.createElement(React.Fragment, null, React.createElement("div", null, React.createElement("dt", null, "Programs"), React.createElement("dd", null, programs.length)), React.createElement("div", null, React.createElement("dt", null, "Quota"), React.createElement("dd", null, programs.reduce((s, p) => s + (Number(p.quota) || 0), 0))), React.createElement("div", null, React.createElement("dt", null, "Countries"), React.createElement("dd", null, new Set(programs.map(p => p.country).filter(Boolean)).size))) : React.createElement(React.Fragment, null, React.createElement("div", null, React.createElement("dt", null, "Total"), React.createElement("dd", null, stats.total)), React.createElement("div", null, React.createElement("dt", null, "Quota"), React.createElement("dd", null, stats.totalQuota)), React.createElement("div", null, React.createElement("dt", null, "Countries"), React.createElement("dd", null, stats.countries)), React.createElement("div", null, React.createElement("dt", null, "Americas"), React.createElement("dd", null, stats.americas)), React.createElement("div", null, React.createElement("dt", null, "Asia/Oceania"), React.createElement("dd", null, stats.asiaOceania)), React.createElement("div", null, React.createElement("dt", null, "Europe"), React.createElement("dd", null, stats.europe)), React.createElement("div", null, React.createElement("dt", null, "English"), React.createElement("dd", null, stats.english)), React.createElement("div", null, React.createElement("dt", null, "Non-English"), React.createElement("dd", null, stats.nonEnglish)))))), React.createElement("div", {
+  }, IS_SEASONAL ? seasonalConfig && seasonalConfig.is_live === false ? null : React.createElement(React.Fragment, null, React.createElement("div", null, React.createElement("dt", null, "Programs"), React.createElement("dd", null, programs.length)), React.createElement("div", null, React.createElement("dt", null, "Quota"), React.createElement("dd", null, programs.reduce((s, p) => s + (Number(p.quota) || 0), 0))), React.createElement("div", null, React.createElement("dt", null, "Countries"), React.createElement("dd", null, new Set(programs.map(p => p.country).filter(Boolean)).size))) : React.createElement(React.Fragment, null, React.createElement("div", null, React.createElement("dt", null, "Total"), React.createElement("dd", null, stats.total)), React.createElement("div", null, React.createElement("dt", null, "Quota"), React.createElement("dd", null, stats.totalQuota)), React.createElement("div", null, React.createElement("dt", null, "Countries"), React.createElement("dd", null, stats.countries)), React.createElement("div", null, React.createElement("dt", null, "Americas"), React.createElement("dd", null, stats.americas)), React.createElement("div", null, React.createElement("dt", null, "Asia/Oceania"), React.createElement("dd", null, stats.asiaOceania)), React.createElement("div", null, React.createElement("dt", null, "Europe"), React.createElement("dd", null, stats.europe)), React.createElement("div", null, React.createElement("dt", null, "English"), React.createElement("dd", null, stats.english)), React.createElement("div", null, React.createElement("dt", null, "Non-English"), React.createElement("dd", null, stats.nonEnglish)))))), React.createElement("div", {
     className: "notice-bar"
   }, React.createElement("div", {
     className: "notice-inner"
