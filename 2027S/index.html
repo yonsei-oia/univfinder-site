@@ -195,7 +195,7 @@
         .site-header__external svg { width: 11px; height: 11px; opacity: 0.7; }
 
         /* Info-session banner tab — same pill as 27s-info-session's site-nav */
-        .site-nav { margin-left: auto; display: flex; gap: 4px; flex: 0 0 auto; }
+        .site-nav { margin-left: auto; display: flex; gap: 4px; flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; }
         .site-nav__tab {
             display: inline-flex; align-items: center;
             padding: 9px 16px; font-size: 14px; font-weight: 600;
@@ -1408,13 +1408,21 @@ const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/m
 const IS_SEASONAL = SeasonalLib.isSeasonalPath(window.location.pathname);
 const SEASONAL_URL = IS_LOCAL_DEV ? '../../20-univ-finder/data/seasonal-data.json' : `${DATA_RAW}/seasonal-data.json`;
 const VISIT_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbxWz4Emr0bL8PhlmmV_aPz3w-IArLBMFEjJpZdM1gLXa3K1TUQI-dVQTW2INeH6GqHuHQ/exec';
-const HEADER_LINKS = [{
-  label: '2027S Info-Session',
-  url: 'https://oiaexchange.netlify.app/'
-}, {
+const _OIA_PROGRAM_INFO = {
+  label: 'OIA Program Info',
+  url: 'https://drive.google.com/file/d/1nz3mrCmNgobhwyLkX87qTaeCofXbYo_2/view'
+};
+const _APPLICATION_GUIDE = {
   label: 'Application Guide',
   url: 'https://docs.google.com/document/d/1rUtUTPkHxSd-sgkwYybfkPF7_NbtY2WCnSflCnLrcK8/edit?usp=sharing'
-}];
+};
+const HEADER_LINKS = IS_SEASONAL ? [_OIA_PROGRAM_INFO, {
+  label: 'Short-term Testimonial',
+  url: 'https://www.youtube.com/watch?v=zUqcDffPC8s&list=PLe_FpcsIxbJ-qdS4SpFvC6DP5-StUMHQE'
+}, _APPLICATION_GUIDE] : [_OIA_PROGRAM_INFO, {
+  label: '2027S Info-Session',
+  url: 'https://oiaexchange.netlify.app/'
+}, _APPLICATION_GUIDE];
 const MASTER_JSON_URL = IS_LOCAL_DEV ? '../data/universities-data.json' : `${DATA_RAW}/universities-data.json`;
 const UPDATES_JSON_URL = IS_LOCAL_DEV ? '../data/universities-updates.json' : `${DATA_RAW}/universities-updates.json`;
 const MOCK_MASTER = [{
