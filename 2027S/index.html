@@ -3231,7 +3231,8 @@ function App() {
     search: programSearch,
     onSearchChange: setProgramSearch,
     onOpenDetail: setSelectedProgram,
-    seasonalConfig: seasonalConfig
+    seasonalConfig: seasonalConfig,
+    onOpenUpdateHistory: () => setShowUpdateHistory(true)
   })), selectedUniversity && React.createElement(DetailModal, {
     u: selectedUniversity,
     onClose: () => {
@@ -3254,7 +3255,14 @@ function App() {
   }), IS_SEASONAL && selectedProgram && React.createElement(SeasonalDetailModal, {
     p: selectedProgram,
     onClose: () => setSelectedProgram(null)
-  }), showUpdateHistory && React.createElement(UpdateHistoryModal, {
+  }), showUpdateHistory && (IS_SEASONAL ? React.createElement(SeasonalUpdateHistoryModal, {
+    programs: programs,
+    onClose: () => setShowUpdateHistory(false),
+    onPickProgram: p => {
+      setShowUpdateHistory(false);
+      setSelectedProgram(p);
+    }
+  }) : React.createElement(UpdateHistoryModal, {
     universities: universities,
     onClose: () => setShowUpdateHistory(false),
     onPickUniversity: u => {
@@ -3262,7 +3270,7 @@ function App() {
       setSelectedUniversity(u);
       setCameFromUpdateHistory(true);
     }
-  }), React.createElement("button", {
+  })), React.createElement("button", {
     className: `scroll-to-top ${showScrollTop ? 'visible' : ''}`,
     onClick: scrollToTop,
     "aria-label": "Scroll to top"
@@ -3404,7 +3412,8 @@ function SeasonalMain({
   search,
   onSearchChange,
   onOpenDetail,
-  seasonalConfig
+  seasonalConfig,
+  onOpenUpdateHistory
 }) {
   const filtered = useMemo(() => {
     const q = searchNorm(search.trim());
@@ -3455,7 +3464,10 @@ function SeasonalMain({
   }, React.createElement("div", {
     className: "result-count",
     "aria-live": "polite"
-  }, "Found ", React.createElement("strong", null, filtered.length), " programs")), filtered.length === 0 ? React.createElement("div", {
+  }, "Found ", React.createElement("strong", null, filtered.length), " programs"), programs.some(p => p.updates && p.updates.length > 0) && React.createElement("button", {
+    className: "btn btn-secondary",
+    onClick: () => onOpenUpdateHistory()
+  }, "Update History")), filtered.length === 0 ? React.createElement("div", {
     className: "empty-state"
   }, React.createElement("div", {
     className: "empty-state-icon",
@@ -3498,7 +3510,28 @@ function SeasonalCard({
       color: 'var(--ink-muted)',
       marginTop: 2
     }
-  }, p.program_name))), React.createElement("div", {
+  }, p.program_name), p.labels && p.labels.length > 0 && React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      flexWrap: 'wrap',
+      marginTop: 6
+    }
+  }, p.labels.map(l => React.createElement("span", {
+    key: l,
+    style: function (s) {
+      return {
+        background: s.bg,
+        color: s.color,
+        border: s.border,
+        fontSize: 11,
+        fontWeight: 700,
+        padding: '2px 8px',
+        borderRadius: 999,
+        display: 'inline-block'
+      };
+    }(UF.labelStyle(l))
+  }, l))))), React.createElement("div", {
     className: "card-meta"
   }, React.createElement("div", {
     className: "meta-item"
@@ -5134,6 +5167,69 @@ function UpdateHistoryModal({
     className: "btn btn-secondary",
     onClick: onClose
   }, "Close"))));
+}
+function SeasonalUpdateHistoryModal({
+  programs,
+  onClose,
+  onPickProgram
+}) {
+  const modalRef = useModalFocus();
+  const withUpdates = (programs || []).filter(p => p.updates && p.updates.length > 0).map(p => ({
+    p,
+    latest: p.updates[0].date
+  })).sort((a, b) => a.latest < b.latest ? 1 : -1);
+  return React.createElement("div", {
+    className: "modal-overlay",
+    onClick: onClose
+  }, React.createElement("div", {
+    className: "modal",
+    onClick: e => e.stopPropagation(),
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": "Update History",
+    tabIndex: -1,
+    ref: modalRef
+  }, React.createElement("div", {
+    className: "yz-cover is-logo"
+  }, React.createElement("button", {
+    className: "modal-close-btn",
+    onClick: onClose,
+    "aria-label": "Close"
+  }, "\xD7"), React.createElement("div", {
+    className: "yz-cover-inner"
+  }, React.createElement("p", {
+    className: "yz-cover-eyebrow"
+  }, "What changed"), React.createElement("h2", {
+    className: "yz-cover-title"
+  }, "Update History"))), React.createElement("div", {
+    className: "yz-body modal-body"
+  }, withUpdates.length === 0 ? React.createElement("p", {
+    className: "yz-prose"
+  }, "No recent changes.") : withUpdates.map(({
+    p
+  }) => React.createElement("div", {
+    key: p.slug,
+    className: "yz-sect"
+  }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, p.updates[0].date), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, React.createElement("a", {
+    href: "#",
+    onClick: e => {
+      e.preventDefault();
+      onPickProgram(p);
+    }
+  }, p.university_name, " \u2014 ", p.program_name))), React.createElement("div", {
+    className: "yz-prose"
+  }, p.updates.flatMap(u => SeasonalLib.seasonalDescribeEntry(u)).map((line, i) => React.createElement("p", {
+    key: i,
+    style: {
+      margin: '2px 0'
+    }
+  }, line))))))));
 }
 ReactDOM.render(React.createElement(App, null), document.getElementById('root'));
     </script>
