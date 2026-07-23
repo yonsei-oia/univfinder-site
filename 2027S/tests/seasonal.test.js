@@ -25,4 +25,26 @@ assert.strictEqual(lines[1], 'Tuition subsidy (등록금지원금): 등록금 �
 const none = S.scholarshipLines({ scholarship_settlement: null, scholarship_tuition: '' });
 assert.strictEqual(none.length, 0);
 
+// seasonalFieldLabel
+assert.strictEqual(S.seasonalFieldLabel('program_dates'), 'Program dates');
+assert.strictEqual(S.seasonalFieldLabel('scholarship_settlement'), 'Settlement grant');
+assert.strictEqual(S.seasonalFieldLabel('nope'), 'nope');
+
+// added → "New program"
+assert.deepStrictEqual(S.seasonalDescribeEntry({ kind: 'added', changes: [] }), ['New program']);
+// program_fees → "Fees updated" (no from/to)
+assert.deepStrictEqual(
+  S.seasonalDescribeEntry({ kind: 'changed', changes: [{ field: 'program_fees' }] }),
+  ['Fees updated']
+);
+// quota change → "Quota: 6 → 5"
+assert.deepStrictEqual(
+  S.seasonalDescribeEntry({ kind: 'changed', changes: [{ field: 'quota', from: 6, to: 5 }] }),
+  ['Quota: 6 → 5']
+);
+// boolean + empty formatting
+assert.deepStrictEqual(
+  S.seasonalDescribeEntry({ kind: 'changed', changes: [{ field: 'summer_open', from: false, to: true }] }),
+  ['Summer availability: No → Yes']
+);
 console.log('seasonal.test.js: all passed');
