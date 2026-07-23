@@ -2739,12 +2739,12 @@ function App() {
     translate: "no"
   }), React.createElement("div", {
     className: "site-header__org-text"
-  }, React.createElement("strong", null, SEMESTER.korean, " \uD574\uC678\uD30C\uACAC \uBC30\uC815 \uAC00\uB2A5 \uB300\uD559"), React.createElement("span", {
+  }, React.createElement("strong", null, IS_SEASONAL ? '계절학기 해외파견 배정 가능 대학' : `${SEMESTER.korean} 해외파견 배정 가능 대학`), React.createElement("span", {
     translate: "no"
   }, "Yonsei University \xB7 Office of International Affairs"))), IS_SEASONAL ? React.createElement("a", {
     href: "/",
     className: "cross-nav"
-  }, "\u2190 Regular semester exchange (University Finder)") : React.createElement("a", {
+  }, "\u2190 OIA UnivFinder") : React.createElement("a", {
     href: "/seasonal/",
     className: "cross-nav"
   }, "Summer/Winter Finder \u2192"), HEADER_LINKS.length > 0 && React.createElement("nav", {
