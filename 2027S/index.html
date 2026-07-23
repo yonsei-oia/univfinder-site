@@ -1407,6 +1407,7 @@ const IS_LOCAL_DEV = ['localhost', '127.0.0.1', ''].includes(window.location.hos
 const DATA_RAW = 'https://raw.githubusercontent.com/yonsei-oia/univfinder-data/main';
 const IS_SEASONAL = SeasonalLib.isSeasonalPath(window.location.pathname);
 const SEASONAL_URL = IS_LOCAL_DEV ? '../../20-univ-finder/data/seasonal-data.json' : `${DATA_RAW}/seasonal-data.json`;
+const SEASONAL_UPDATES_URL = IS_LOCAL_DEV ? '../../20-univ-finder/data/seasonal-updates.json' : `${DATA_RAW}/seasonal-updates.json`;
 const VISIT_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbxWz4Emr0bL8PhlmmV_aPz3w-IArLBMFEjJpZdM1gLXa3K1TUQI-dVQTW2INeH6GqHuHQ/exec';
 const _OIA_PROGRAM_INFO = {
   label: 'OIA Program Info',
@@ -2405,8 +2406,26 @@ function App() {
     try {
       if (IS_SEASONAL) {
         const sj = await fetchJson(SEASONAL_URL);
+        let updatesFeed = [];
+        try {
+          const uj = await fetchJson(SEASONAL_UPDATES_URL);
+          updatesFeed = Array.isArray(uj.updates) ? uj.updates : [];
+        } catch (_) {
+          updatesFeed = [];
+        }
+        const upBySlug = new Map();
+        for (const e of updatesFeed) {
+          if (!upBySlug.has(e.slug)) upBySlug.set(e.slug, []);
+          upBySlug.get(e.slug).push(e);
+        }
+        for (const list of upBySlug.values()) list.sort((a, b) => a.date < b.date ? 1 : -1);
+        const progs = (Array.isArray(sj.programs) ? sj.programs : []).map(p => ({
+          ...p,
+          updates: upBySlug.get(p.slug) || [],
+          labels: UF.deriveLabels('', upBySlug.get(p.slug), Date.now())
+        }));
         setSeasonalConfig(sj.config || {});
-        setPrograms(Array.isArray(sj.programs) ? sj.programs : []);
+        setPrograms(progs);
         return;
       }
       const {

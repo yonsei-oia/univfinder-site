@@ -1421,6 +1421,9 @@
         const SEASONAL_URL = IS_LOCAL_DEV
             ? '../../20-univ-finder/data/seasonal-data.json'
             : `${DATA_RAW}/seasonal-data.json`;
+        const SEASONAL_UPDATES_URL = IS_LOCAL_DEV
+            ? '../../20-univ-finder/data/seasonal-updates.json'
+            : `${DATA_RAW}/seasonal-updates.json`;
 
         // Visit counter (GAS web app, abroad@ — backoffice repo visit-counter-gas/).
         // Stores daily/total numbers only; '' disables the widget entirely.
@@ -2362,8 +2365,26 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         // regular Notion-pipeline JSONs. Returns early so the
                         // regular fetch below is never reached in this mode.
                         const sj = await fetchJson(SEASONAL_URL);
+                        // Update-history feed: absence/failure degrades to no
+                        // labels + no modal; the program list stays intact.
+                        let updatesFeed = [];
+                        try {
+                            const uj = await fetchJson(SEASONAL_UPDATES_URL);
+                            updatesFeed = Array.isArray(uj.updates) ? uj.updates : [];
+                        } catch (_) { updatesFeed = []; }
+                        const upBySlug = new Map();
+                        for (const e of updatesFeed) {
+                            if (!upBySlug.has(e.slug)) upBySlug.set(e.slug, []);
+                            upBySlug.get(e.slug).push(e);
+                        }
+                        for (const list of upBySlug.values()) list.sort((a, b) => (a.date < b.date ? 1 : -1));
+                        const progs = (Array.isArray(sj.programs) ? sj.programs : []).map(p => ({
+                            ...p,
+                            updates: upBySlug.get(p.slug) || [],
+                            labels: UF.deriveLabels('', upBySlug.get(p.slug), Date.now()),
+                        }));
                         setSeasonalConfig(sj.config || {});
-                        setPrograms(Array.isArray(sj.programs) ? sj.programs : []);
+                        setPrograms(progs);
                         return;
                     }
                     const { masterRows, updates, contentMap, mock } = await loadAllData();
