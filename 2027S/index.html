@@ -4037,7 +4037,20 @@ function SeasonalDetailModal({
     className: "yz-meta-sub"
   }, React.createElement("dt", null, "Application Deadline"), React.createElement("dd", null, p.application_deadline || 'TBA'))), React.createElement("div", {
     className: "yz-body modal-body"
+  }, p.notes && React.createElement("div", {
+    className: "yz-sect"
   }, React.createElement("div", {
+    className: "yz-sect-head"
+  }, React.createElement("p", {
+    className: "yz-sect-label"
+  }, "Notice"), React.createElement("h3", {
+    className: "yz-sect-title"
+  }, "From OIA")), React.createElement("div", {
+    className: "yz-prose",
+    style: {
+      whiteSpace: 'pre-line'
+    }
+  }, React.createElement("p", null, p.notes))), React.createElement("div", {
     className: "yz-sect"
   }, React.createElement("div", {
     className: "yz-sect-head"
@@ -4206,20 +4219,7 @@ function SeasonalDetailModal({
     style: {
       whiteSpace: 'pre-line'
     }
-  }, React.createElement("p", null, p.transcript_info))), p.notes && React.createElement("div", {
-    className: "yz-sect"
-  }, React.createElement("div", {
-    className: "yz-sect-head"
-  }, React.createElement("p", {
-    className: "yz-sect-label"
-  }, "Notice"), React.createElement("h3", {
-    className: "yz-sect-title"
-  }, "From OIA")), React.createElement("div", {
-    className: "yz-prose",
-    style: {
-      whiteSpace: 'pre-line'
-    }
-  }, React.createElement("p", null, p.notes))), p.recent_factsheet && React.createElement("div", {
+  }, React.createElement("p", null, p.transcript_info))), p.recent_factsheet && React.createElement("div", {
     className: "yz-sect"
   }, React.createElement("div", {
     className: "yz-sect-head"

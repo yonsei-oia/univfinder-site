@@ -3665,6 +3665,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </dl>
 
                         <div className="yz-body modal-body">
+                            {p.notes && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">Notice</p>
+                                        <h3 className="yz-sect-title">From OIA</h3>
+                                    </div>
+                                    <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.notes}</p></div>
+                                </div>
+                            )}
                             <div className="yz-sect">
                                 <div className="yz-sect-head">
                                     <p className="yz-sect-label">Cost</p>
@@ -3790,16 +3799,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         <h3 className="yz-sect-title">Transcript</h3>
                                     </div>
                                     <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.transcript_info}</p></div>
-                                </div>
-                            )}
-
-                            {p.notes && (
-                                <div className="yz-sect">
-                                    <div className="yz-sect-head">
-                                        <p className="yz-sect-label">Notice</p>
-                                        <h3 className="yz-sect-title">From OIA</h3>
-                                    </div>
-                                    <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.notes}</p></div>
                                 </div>
                             )}
 
