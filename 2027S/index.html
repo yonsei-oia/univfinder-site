@@ -5174,62 +5174,122 @@ function SeasonalUpdateHistoryModal({
   onPickProgram
 }) {
   const modalRef = useModalFocus();
-  const withUpdates = (programs || []).filter(p => p.updates && p.updates.length > 0).map(p => ({
-    p,
-    latest: p.updates[0].date
-  })).sort((a, b) => a.latest < b.latest ? 1 : -1);
+  const rows = (programs || []).flatMap(p => (p.updates || []).map(e => ({
+    entry: e,
+    p
+  }))).sort((a, b) => a.entry.date < b.entry.date ? 1 : -1).slice(0, 100);
   return React.createElement("div", {
     className: "modal-overlay",
     onClick: onClose
   }, React.createElement("div", {
     className: "modal",
     onClick: e => e.stopPropagation(),
+    style: {
+      maxWidth: 800
+    },
     role: "dialog",
     "aria-modal": "true",
     "aria-label": "Update History",
     tabIndex: -1,
     ref: modalRef
   }, React.createElement("div", {
-    className: "yz-cover is-logo"
+    className: "modal-header",
+    style: {
+      position: 'relative'
+    }
   }, React.createElement("button", {
     className: "modal-close-btn",
     onClick: onClose,
     "aria-label": "Close"
-  }, "\xD7"), React.createElement("div", {
-    className: "yz-cover-inner"
-  }, React.createElement("p", {
-    className: "yz-cover-eyebrow"
-  }, "What changed"), React.createElement("h2", {
-    className: "yz-cover-title"
-  }, "Update History"))), React.createElement("div", {
-    className: "yz-body modal-body"
-  }, withUpdates.length === 0 ? React.createElement("p", {
-    className: "yz-prose"
-  }, "No recent changes.") : withUpdates.map(({
-    p
-  }) => React.createElement("div", {
-    key: p.slug,
-    className: "yz-sect"
-  }, React.createElement("div", {
-    className: "yz-sect-head"
-  }, React.createElement("p", {
-    className: "yz-sect-label"
-  }, p.updates[0].date), React.createElement("h3", {
-    className: "yz-sect-title"
-  }, React.createElement("a", {
-    href: "#",
-    onClick: e => {
-      e.preventDefault();
-      onPickProgram(p);
+  }, "\xD7"), React.createElement("h2", {
+    style: {
+      fontSize: 20,
+      fontWeight: 700,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
     }
-  }, p.university_name, " \u2014 ", p.program_name))), React.createElement("div", {
-    className: "yz-prose"
-  }, p.updates.flatMap(u => SeasonalLib.seasonalDescribeEntry(u)).map((line, i) => React.createElement("p", {
+  }, React.createElement("span", {
+    className: "modal-title-icon",
+    "aria-hidden": "true"
+  }, React.createElement(IconClipboard, null)), "Update History")), React.createElement("div", {
+    className: "modal-body",
+    style: {
+      maxHeight: '60vh',
+      overflowY: 'auto'
+    }
+  }, rows.length === 0 ? React.createElement("p", {
+    style: {
+      textAlign: 'center',
+      color: 'var(--gray-500)',
+      padding: 40
+    }
+  }, "No update history available.") : React.createElement("table", {
+    style: {
+      width: '100%',
+      borderCollapse: 'collapse',
+      fontSize: 14
+    }
+  }, React.createElement("thead", null, React.createElement("tr", {
+    style: {
+      borderBottom: '2px solid var(--gray-300)',
+      textAlign: 'left'
+    }
+  }, React.createElement("th", {
+    style: {
+      padding: '12px 8px',
+      width: 120
+    }
+  }, "Date"), React.createElement("th", {
+    style: {
+      padding: '12px 8px'
+    }
+  }, "Program"), React.createElement("th", {
+    style: {
+      padding: '12px 8px'
+    }
+  }, "Description"))), React.createElement("tbody", null, rows.map(({
+    entry,
+    p
+  }, i) => React.createElement("tr", {
     key: i,
     style: {
-      margin: '2px 0'
+      borderBottom: '1px solid var(--gray-200)',
+      cursor: 'pointer'
+    },
+    role: "button",
+    tabIndex: 0,
+    "aria-label": `Open ${p.university_name} details`,
+    onClick: () => onPickProgram(p),
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onPickProgram(p);
+      }
+    },
+    onMouseEnter: e => e.currentTarget.style.backgroundColor = 'var(--gray-100)',
+    onMouseLeave: e => e.currentTarget.style.backgroundColor = 'transparent'
+  }, React.createElement("td", {
+    style: {
+      padding: '12px 8px',
+      color: 'var(--gray-500)'
     }
-  }, line))))))));
+  }, entry.date), React.createElement("td", {
+    style: {
+      padding: '12px 8px',
+      color: 'var(--yonsei-blue)',
+      fontWeight: 600
+    }
+  }, p.university_name, " \u2014 ", p.program_name), React.createElement("td", {
+    style: {
+      padding: '12px 8px'
+    }
+  }, SeasonalLib.seasonalDescribeEntry(entry).join('; '))))))), React.createElement("div", {
+    className: "modal-footer"
+  }, React.createElement("button", {
+    className: "btn btn-secondary",
+    onClick: onClose
+  }, "Close"))));
 }
 ReactDOM.render(React.createElement(App, null), document.getElementById('root'));
     </script>

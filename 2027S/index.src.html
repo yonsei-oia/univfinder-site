@@ -4533,47 +4533,72 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             );
         }
 
-        // Seasonal counterpart of UpdateHistoryModal — renders the seasonal feed
-        // via SeasonalLib.seasonalDescribeEntry; clicking a program opens its
-        // detail modal (same UX as regular). Regular modal stays untouched.
+        // Seasonal counterpart of UpdateHistoryModal — same table design as the
+        // regular modal (muted date, yonsei-blue name, clipboard header), fed by
+        // the seasonal feed via SeasonalLib.seasonalDescribeEntry. Clicking a row
+        // opens that program's detail modal. Regular modal stays untouched.
         function SeasonalUpdateHistoryModal({ programs, onClose, onPickProgram }) {
             const modalRef = useModalFocus();
-            const withUpdates = (programs || [])
-                .filter(p => p.updates && p.updates.length > 0)
-                .map(p => ({ p, latest: p.updates[0].date }))
-                .sort((a, b) => (a.latest < b.latest ? 1 : -1));
+            const rows = (programs || [])
+                .flatMap(p => (p.updates || []).map(e => ({ entry: e, p })))
+                .sort((a, b) => (a.entry.date < b.entry.date ? 1 : -1))
+                .slice(0, 100);
             return (
                 <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={(e)=>e.stopPropagation()}
+                    <div className="modal" onClick={(e)=>e.stopPropagation()} style={{maxWidth:800}}
                         role="dialog" aria-modal="true" aria-label="Update History"
                         tabIndex={-1} ref={modalRef}>
-                        <div className="yz-cover is-logo">
+                        <div className="modal-header" style={{position:'relative'}}>
                             <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
-                            <div className="yz-cover-inner">
-                                <p className="yz-cover-eyebrow">What changed</p>
-                                <h2 className="yz-cover-title">Update History</h2>
-                            </div>
+                            <h2 style={{fontSize:20, fontWeight:700, display:'flex', alignItems:'center', gap:8}}>
+                                <span className="modal-title-icon" aria-hidden="true"><IconClipboard /></span>
+                                Update History
+                            </h2>
                         </div>
-                        <div className="yz-body modal-body">
-                            {withUpdates.length === 0 ? (
-                                <p className="yz-prose">No recent changes.</p>
-                            ) : withUpdates.map(({ p }) => (
-                                <div key={p.slug} className="yz-sect">
-                                    <div className="yz-sect-head">
-                                        <p className="yz-sect-label">{p.updates[0].date}</p>
-                                        <h3 className="yz-sect-title">
-                                            <a href="#" onClick={(e)=>{e.preventDefault(); onPickProgram(p);}}>
-                                                {p.university_name} — {p.program_name}
-                                            </a>
-                                        </h3>
-                                    </div>
-                                    <div className="yz-prose">
-                                        {p.updates.flatMap(u => SeasonalLib.seasonalDescribeEntry(u)).map((line, i) => (
-                                            <p key={i} style={{margin:'2px 0'}}>{line}</p>
+                        <div className="modal-body" style={{maxHeight:'60vh', overflowY:'auto'}}>
+                            {rows.length === 0 ? (
+                                <p style={{textAlign:'center', color:'var(--gray-500)', padding:40}}>
+                                    No update history available.
+                                </p>
+                            ) : (
+                                <table style={{width:'100%', borderCollapse:'collapse', fontSize:14}}>
+                                    <thead>
+                                        <tr style={{borderBottom:'2px solid var(--gray-300)', textAlign:'left'}}>
+                                            <th style={{padding:'12px 8px', width:120}}>Date</th>
+                                            <th style={{padding:'12px 8px'}}>Program</th>
+                                            <th style={{padding:'12px 8px'}}>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {rows.map(({ entry, p }, i) => (
+                                            <tr key={i}
+                                                style={{borderBottom:'1px solid var(--gray-200)', cursor:'pointer'}}
+                                                role="button" tabIndex={0}
+                                                aria-label={`Open ${p.university_name} details`}
+                                                onClick={() => onPickProgram(p)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        onPickProgram(p);
+                                                    }
+                                                }}
+                                                onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='var(--gray-100)'}
+                                                onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='transparent'}>
+                                                <td style={{padding:'12px 8px', color:'var(--gray-500)'}}>{entry.date}</td>
+                                                <td style={{padding:'12px 8px', color:'var(--yonsei-blue)', fontWeight:600}}>
+                                                    {p.university_name} — {p.program_name}
+                                                </td>
+                                                <td style={{padding:'12px 8px'}}>
+                                                    {SeasonalLib.seasonalDescribeEntry(entry).join('; ')}
+                                                </td>
+                                            </tr>
                                         ))}
-                                    </div>
-                                </div>
-                            ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={onClose}>Close</button>
                         </div>
                     </div>
                 </div>
