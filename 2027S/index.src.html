@@ -1421,6 +1421,9 @@
         const SEASONAL_URL = IS_LOCAL_DEV
             ? '../../20-univ-finder/data/seasonal-data.json'
             : `${DATA_RAW}/seasonal-data.json`;
+        const SEASONAL_UPDATES_URL = IS_LOCAL_DEV
+            ? '../../20-univ-finder/data/seasonal-updates.json'
+            : `${DATA_RAW}/seasonal-updates.json`;
 
         // Visit counter (GAS web app, abroad@ — backoffice repo visit-counter-gas/).
         // Stores daily/total numbers only; '' disables the widget entirely.
@@ -1437,7 +1440,6 @@
             ? [
                 _OIA_PROGRAM_INFO,
                 { label: 'Short-term Testimonial', url: 'https://www.youtube.com/watch?v=zUqcDffPC8s&list=PLe_FpcsIxbJ-qdS4SpFvC6DP5-StUMHQE' },
-                _APPLICATION_GUIDE,
               ]
             : [
                 _OIA_PROGRAM_INFO,
@@ -2363,8 +2365,26 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         // regular Notion-pipeline JSONs. Returns early so the
                         // regular fetch below is never reached in this mode.
                         const sj = await fetchJson(SEASONAL_URL);
+                        // Update-history feed: absence/failure degrades to no
+                        // labels + no modal; the program list stays intact.
+                        let updatesFeed = [];
+                        try {
+                            const uj = await fetchJson(SEASONAL_UPDATES_URL);
+                            updatesFeed = Array.isArray(uj.updates) ? uj.updates : [];
+                        } catch (_) { updatesFeed = []; }
+                        const upBySlug = new Map();
+                        for (const e of updatesFeed) {
+                            if (!upBySlug.has(e.slug)) upBySlug.set(e.slug, []);
+                            upBySlug.get(e.slug).push(e);
+                        }
+                        for (const list of upBySlug.values()) list.sort((a, b) => (a.date < b.date ? 1 : -1));
+                        const progs = (Array.isArray(sj.programs) ? sj.programs : []).map(p => ({
+                            ...p,
+                            updates: upBySlug.get(p.slug) || [],
+                            labels: UF.deriveLabels('', upBySlug.get(p.slug), Date.now()),
+                        }));
                         setSeasonalConfig(sj.config || {});
-                        setPrograms(Array.isArray(sj.programs) ? sj.programs : []);
+                        setPrograms(progs);
                         return;
                     }
                     const { masterRows, updates, contentMap, mock } = await loadAllData();
@@ -3150,7 +3170,8 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             search={programSearch}
                             onSearchChange={setProgramSearch}
                             onOpenDetail={setSelectedProgram}
-                            seasonalConfig={seasonalConfig} />
+                            seasonalConfig={seasonalConfig}
+                            onOpenUpdateHistory={() => setShowUpdateHistory(true)} />
                       )}
                     </main>
 
@@ -3181,8 +3202,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             onClose={() => setSelectedProgram(null)} />
                     )}
 
-                    {/* ===== Update History Modal ===== */}
-                    {showUpdateHistory && (
+                    {/* ===== Update History Modal (seasonal uses its own; regular untouched) ===== */}
+                    {showUpdateHistory && (IS_SEASONAL ? (
+                        <SeasonalUpdateHistoryModal
+                            programs={programs}
+                            onClose={() => setShowUpdateHistory(false)}
+                            onPickProgram={(p) => { setShowUpdateHistory(false); setSelectedProgram(p); }} />
+                    ) : (
                         <UpdateHistoryModal
                             universities={universities}
                             onClose={() => setShowUpdateHistory(false)}
@@ -3191,7 +3217,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                 setSelectedUniversity(u);
                                 setCameFromUpdateHistory(true);
                             }} />
-                    )}
+                    ))}
 
                     <button className={`scroll-to-top ${showScrollTop?'visible':''}`} onClick={scrollToTop} aria-label="Scroll to top">
                         ↑
@@ -3318,7 +3344,7 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         // Mirrors the regular grid's visual language (university-card, card-meta,
         // card-specs, btn classes) but reads from `programs`, not `universities`.
         // =========================================================================
-        function SeasonalMain({ programs, search, onSearchChange, onOpenDetail, seasonalConfig }) {
+        function SeasonalMain({ programs, search, onSearchChange, onOpenDetail, seasonalConfig, onOpenUpdateHistory }) {
             const filtered = useMemo(() => {
                 const q = searchNorm(search.trim());
                 if (!q) return programs;
@@ -3364,6 +3390,11 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         <div className="result-count" aria-live="polite">
                             Found <strong>{filtered.length}</strong> programs
                         </div>
+                        {programs.some(p => p.updates && p.updates.length > 0) && (
+                            <button className="btn btn-secondary" onClick={()=>onOpenUpdateHistory()}>
+                                Update History
+                            </button>
+                        )}
                     </div>
 
                     {filtered.length === 0 ? (
@@ -3400,6 +3431,16 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                             <div style={{fontSize: 13, fontWeight: 500, color: 'var(--ink-muted)', marginTop: 2}}>
                                 {p.program_name}
                             </div>
+                            {(p.labels && p.labels.length > 0) && (
+                                <div style={{display:'flex', gap:6, flexWrap:'wrap', marginTop:6}}>
+                                    {p.labels.map(l => (
+                                        <span key={l} style={(function(s){return {
+                                            background:s.bg, color:s.color, border:s.border,
+                                            fontSize:11, fontWeight:700, padding:'2px 8px',
+                                            borderRadius:999, display:'inline-block'};})(UF.labelStyle(l))}>{l}</span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -3666,6 +3707,15 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         </dl>
 
                         <div className="yz-body modal-body">
+                            {p.notes && (
+                                <div className="yz-sect">
+                                    <div className="yz-sect-head">
+                                        <p className="yz-sect-label">Notice</p>
+                                        <h3 className="yz-sect-title">From OIA</h3>
+                                    </div>
+                                    <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.notes}</p></div>
+                                </div>
+                            )}
                             <div className="yz-sect">
                                 <div className="yz-sect-head">
                                     <p className="yz-sect-label">Cost</p>
@@ -3791,16 +3841,6 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                         <h3 className="yz-sect-title">Transcript</h3>
                                     </div>
                                     <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.transcript_info}</p></div>
-                                </div>
-                            )}
-
-                            {p.notes && (
-                                <div className="yz-sect">
-                                    <div className="yz-sect-head">
-                                        <p className="yz-sect-label">Notice</p>
-                                        <h3 className="yz-sect-title">From OIA</h3>
-                                    </div>
-                                    <div className="yz-prose" style={{whiteSpace:'pre-line'}}><p>{p.notes}</p></div>
                                 </div>
                             )}
 
@@ -4479,6 +4519,78 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                                 <td style={{padding:'12px 8px', color:'var(--yonsei-blue)', fontWeight:600}}>{u.name}</td>
                                                 <td style={{padding:'12px 8px'}}>{u.country || '-'}</td>
                                                 <td style={{padding:'12px 8px'}}>{UF.describeEntry(entry)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={onClose}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Seasonal counterpart of UpdateHistoryModal — same table design as the
+        // regular modal (muted date, yonsei-blue name, clipboard header), fed by
+        // the seasonal feed via SeasonalLib.seasonalDescribeEntry. Clicking a row
+        // opens that program's detail modal. Regular modal stays untouched.
+        function SeasonalUpdateHistoryModal({ programs, onClose, onPickProgram }) {
+            const modalRef = useModalFocus();
+            const rows = (programs || [])
+                .flatMap(p => (p.updates || []).map(e => ({ entry: e, p })))
+                .sort((a, b) => (a.entry.date < b.entry.date ? 1 : -1))
+                .slice(0, 100);
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={(e)=>e.stopPropagation()} style={{maxWidth:800}}
+                        role="dialog" aria-modal="true" aria-label="Update History"
+                        tabIndex={-1} ref={modalRef}>
+                        <div className="modal-header" style={{position:'relative'}}>
+                            <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
+                            <h2 style={{fontSize:20, fontWeight:700, display:'flex', alignItems:'center', gap:8}}>
+                                <span className="modal-title-icon" aria-hidden="true"><IconClipboard /></span>
+                                Update History
+                            </h2>
+                        </div>
+                        <div className="modal-body" style={{maxHeight:'60vh', overflowY:'auto'}}>
+                            {rows.length === 0 ? (
+                                <p style={{textAlign:'center', color:'var(--gray-500)', padding:40}}>
+                                    No update history available.
+                                </p>
+                            ) : (
+                                <table style={{width:'100%', borderCollapse:'collapse', fontSize:14}}>
+                                    <thead>
+                                        <tr style={{borderBottom:'2px solid var(--gray-300)', textAlign:'left'}}>
+                                            <th style={{padding:'12px 8px', width:120}}>Date</th>
+                                            <th style={{padding:'12px 8px'}}>Program</th>
+                                            <th style={{padding:'12px 8px'}}>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {rows.map(({ entry, p }, i) => (
+                                            <tr key={i}
+                                                style={{borderBottom:'1px solid var(--gray-200)', cursor:'pointer'}}
+                                                role="button" tabIndex={0}
+                                                aria-label={`Open ${p.university_name} details`}
+                                                onClick={() => onPickProgram(p)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        onPickProgram(p);
+                                                    }
+                                                }}
+                                                onMouseEnter={(e)=>e.currentTarget.style.backgroundColor='var(--gray-100)'}
+                                                onMouseLeave={(e)=>e.currentTarget.style.backgroundColor='transparent'}>
+                                                <td style={{padding:'12px 8px', color:'var(--gray-500)'}}>{entry.date}</td>
+                                                <td style={{padding:'12px 8px', color:'var(--yonsei-blue)', fontWeight:600}}>
+                                                    {p.university_name} — {p.program_name}
+                                                </td>
+                                                <td style={{padding:'12px 8px'}}>
+                                                    {SeasonalLib.seasonalDescribeEntry(entry).join('; ')}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
