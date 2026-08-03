@@ -3345,13 +3345,18 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
         // card-specs, btn classes) but reads from `programs`, not `universities`.
         // =========================================================================
         function SeasonalMain({ programs, search, onSearchChange, onOpenDetail, seasonalConfig, onOpenUpdateHistory }) {
+            // ESP/VSP type filter — '' = all (mirrors the regular Student Type
+            // toggle: single-select, click the active one again to clear).
+            const [typeFilter, setTypeFilter] = useState('');
             const filtered = useMemo(() => {
                 const q = searchNorm(search.trim());
-                if (!q) return programs;
-                return programs.filter(p =>
-                    searchNorm(`${p.university_name} ${p.program_name} ${p.country}`).includes(q)
-                );
-            }, [programs, search]);
+                return programs.filter(p => {
+                    const matchesSearch = !q ||
+                        searchNorm(`${p.university_name} ${p.program_name} ${p.country}`).includes(q);
+                    const matchesType = !typeFilter || SeasonalLib.seasonalTypeOf(p) === typeFilter;
+                    return matchesSearch && matchesType;
+                });
+            }, [programs, search, typeFilter]);
 
             // Spec §7: while a season is being prepared (config.is_live === false,
             // explicitly, not the {} default during initial load), show a coming-soon
@@ -3382,6 +3387,18 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                                     autoComplete="off" spellCheck={false}
                                     value={search}
                                     onChange={(e) => onSearchChange(e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="filter-section">
+                            <span className="filter-label" id="fl-seasonal-type">Program Type</span>
+                            <div className="filter-group" role="group" aria-labelledby="fl-seasonal-type">
+                                {['ESP', 'VSP'].map(t => (
+                                    <button key={t}
+                                        className={`filter-btn ${typeFilter === t ? 'active' : ''}`}
+                                        onClick={() => setTypeFilter(prev => prev === t ? '' : t)}>
+                                        {t}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>

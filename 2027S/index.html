@@ -3415,11 +3415,15 @@ function SeasonalMain({
   seasonalConfig,
   onOpenUpdateHistory
 }) {
+  const [typeFilter, setTypeFilter] = useState('');
   const filtered = useMemo(() => {
     const q = searchNorm(search.trim());
-    if (!q) return programs;
-    return programs.filter(p => searchNorm(`${p.university_name} ${p.program_name} ${p.country}`).includes(q));
-  }, [programs, search]);
+    return programs.filter(p => {
+      const matchesSearch = !q || searchNorm(`${p.university_name} ${p.program_name} ${p.country}`).includes(q);
+      const matchesType = !typeFilter || SeasonalLib.seasonalTypeOf(p) === typeFilter;
+      return matchesSearch && matchesType;
+    });
+  }, [programs, search, typeFilter]);
   if (seasonalConfig && seasonalConfig.is_live === false) {
     return React.createElement("div", {
       className: "empty-state",
@@ -3459,7 +3463,20 @@ function SeasonalMain({
     spellCheck: false,
     value: search,
     onChange: e => onSearchChange(e.target.value)
-  })))), React.createElement("div", {
+  }))), React.createElement("div", {
+    className: "filter-section"
+  }, React.createElement("span", {
+    className: "filter-label",
+    id: "fl-seasonal-type"
+  }, "Program Type"), React.createElement("div", {
+    className: "filter-group",
+    role: "group",
+    "aria-labelledby": "fl-seasonal-type"
+  }, ['ESP', 'VSP'].map(t => React.createElement("button", {
+    key: t,
+    className: `filter-btn ${typeFilter === t ? 'active' : ''}`,
+    onClick: () => setTypeFilter(prev => prev === t ? '' : t)
+  }, t))))), React.createElement("div", {
     className: "action-bar"
   }, React.createElement("div", {
     className: "result-count",

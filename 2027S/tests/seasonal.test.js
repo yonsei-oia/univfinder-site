@@ -47,4 +47,10 @@ assert.deepStrictEqual(
   S.seasonalDescribeEntry({ kind: 'changed', changes: [{ field: 'summer_open', from: false, to: true }] }),
   ['Summer availability: No → Yes']
 );
+// seasonalTypeOf — VSP only if program_type is VSP (case-insensitive); else ESP
+assert.strictEqual(S.seasonalTypeOf({ program_type: 'VSP' }), 'VSP');
+assert.strictEqual(S.seasonalTypeOf({ program_type: 'vsp' }), 'VSP');
+assert.strictEqual(S.seasonalTypeOf({ program_type: 'ESP' }), 'ESP');
+assert.strictEqual(S.seasonalTypeOf({}), 'ESP');
+
 console.log('seasonal.test.js: all passed');
