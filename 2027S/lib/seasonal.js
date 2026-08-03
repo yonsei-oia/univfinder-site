@@ -46,6 +46,12 @@
     function seasonalFieldLabel(field) {
         return _SEASONAL_FIELD_LABELS[field] || String(field);
     }
+    // Effective program type for the ESP/VSP filter. Mirrors programTypeLabel:
+    // VSP only when program_type is VSP (case-insensitive); everything else
+    // (including missing) is ESP.
+    function seasonalTypeOf(program) {
+        return String(program && program.program_type).toUpperCase() === 'VSP' ? 'VSP' : 'ESP';
+    }
     function _seasonalValueFmt(field, v) {
         if (v === null || v === undefined || v === '') return '—';
         if (v === true) return 'Yes';
@@ -66,7 +72,7 @@
     }
 
     var SeasonalLib = { isSeasonalPath, programTypeLabel, formatWon, scholarshipLines,
-                        seasonalFieldLabel, seasonalDescribeEntry };
+                        seasonalFieldLabel, seasonalDescribeEntry, seasonalTypeOf };
     if (typeof module !== 'undefined' && module.exports) module.exports = SeasonalLib;
     global.SeasonalLib = SeasonalLib;
 })(typeof window !== 'undefined' ? window : globalThis);
