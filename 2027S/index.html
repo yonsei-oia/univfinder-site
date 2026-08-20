@@ -945,6 +945,21 @@
             margin: 0;
             letter-spacing: 0.02em;
         }
+        /* 데이터 이용 고지 — 국문 원문 + 영문 병기 */
+        .site-footer p { line-height: 1.45; }
+        .site-footer p + p { margin-top: 5px; }
+        .site-footer .footer-notice {
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .site-footer .footer-notice-en { color: var(--ink-faint); }
+        .site-footer a {
+            color: var(--gray-700);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .site-footer a:hover { color: var(--brand); }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -3276,7 +3291,17 @@ function App() {
     "aria-label": "Scroll to top"
   }, "\u2191"), React.createElement("footer", {
     className: "site-footer"
-  }, React.createElement("p", null, "\xA9 2026 Yonsei University, Office of International Affairs \xB7 Developed by Seo-Ah Choi \uCD5C\uC11C\uC544")));
+  }, React.createElement("p", null, "\xA9 2026 Yonsei University, Office of International Affairs \xB7 Developed by Seo-Ah Choi \uCD5C\uC11C\uC544"), React.createElement("p", {
+    className: "footer-notice"
+  }, "\uBCF8 \uC0AC\uC774\uD2B8\uC758 \uD30C\uACAC\uAD50 \uB370\uC774\uD130\uB294 \uC5F0\uC138\uB300\uD559\uAD50 \uAD6D\uC81C\uCC98\uAC00 \uAD00\uB9AC\uD558\uBA70, \uC0AC\uC804 \uD5C8\uAC00 \uC5C6\uB294 \uC790\uB3D9 \uC218\uC9D1(\uD06C\uB864\uB9C1)\xB7\uBCF5\uC81C\xB7\uC7AC\uBC30\uD3EC\uB97C \uAE08\uC9C0\uD569\uB2C8\uB2E4."), React.createElement("p", {
+    className: "footer-notice footer-notice-en"
+  }, "Data is maintained by the Office of International Affairs, Yonsei University. Unauthorized crawling, reproduction, or redistribution is prohibited."), React.createElement("p", null, "\uBB38\uC758 Contact: ", React.createElement("a", {
+    href: "mailto:abroad@yonsei.ac.kr"
+  }, "abroad@yonsei.ac.kr"), ' · ', React.createElement("a", {
+    href: "/terms",
+    target: "_blank",
+    rel: "noopener noreferrer"
+  }, "\uC774\uC6A9\uC548\uB0B4 Terms of Use"))));
 }
 function Stat({
   label,

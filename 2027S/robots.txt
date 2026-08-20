@@ -1,0 +1,30 @@
+# Yonsei University, Office of International Affairs — UnivFinder
+# https://oiaunivfinder.netlify.app/
+#
+# 본 사이트의 파견교 데이터는 연세대학교 국제처가 관리하는 저작물입니다.
+# 사전 허가 없는 자동 수집(크롤링)·복제·재배포를 금지합니다.
+# 이용안내: https://oiaunivfinder.netlify.app/terms
+# 문의: abroad@yonsei.ac.kr
+#
+# Data is maintained by the Office of International Affairs, Yonsei University.
+# Automated collection, reproduction, or redistribution
+# without prior permission is prohibited. See /terms.
+
+User-agent: *
+
+# 학생이 찾아야 하는 공개 화면은 색인을 허용합니다.
+Allow: /$
+Allow: /seasonal/
+Allow: /terms
+
+# 데이터·부속 리소스 경로는 자동 수집을 허용하지 않습니다.
+Disallow: /archive/
+Disallow: /assets/universities/
+Disallow: /lib/
+Disallow: /data/
+Disallow: /*.json$
+Disallow: /*.csv$
+Disallow: /*.xlsx$
+Disallow: /*.xls$
+
+Crawl-delay: 10

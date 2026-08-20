@@ -1,2 +1,5 @@
 # Seasonal program finder shares the same SPA bundle; serve index for the route.
 /seasonal/*   /index.html   200
+
+# 이용안내(정적 페이지). Netlify pretty-URL 설정에 의존하지 않도록 명시한다.
+/terms        /terms.html   200

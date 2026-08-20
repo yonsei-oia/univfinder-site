@@ -946,6 +946,21 @@
             margin: 0;
             letter-spacing: 0.02em;
         }
+        /* 데이터 이용 고지 — 국문 원문 + 영문 병기 */
+        .site-footer p { line-height: 1.45; }
+        .site-footer p + p { margin-top: 5px; }
+        .site-footer .footer-notice {
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .site-footer .footer-notice-en { color: var(--ink-faint); }
+        .site-footer a {
+            color: var(--gray-700);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .site-footer a:hover { color: var(--brand); }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -3225,6 +3240,18 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
 
                     <footer className="site-footer">
                         <p>© 2026 Yonsei University, Office of International Affairs · Developed by Seo-Ah Choi 최서아</p>
+                        <p className="footer-notice">
+                            본 사이트의 파견교 데이터는 연세대학교 국제처가 관리하며, 사전 허가 없는 자동 수집(크롤링)·복제·재배포를 금지합니다.
+                        </p>
+                        <p className="footer-notice footer-notice-en">
+                            Data is maintained by the Office of International Affairs, Yonsei University.
+                            Unauthorized crawling, reproduction, or redistribution is prohibited.
+                        </p>
+                        <p>
+                            문의 Contact: <a href="mailto:abroad@yonsei.ac.kr">abroad@yonsei.ac.kr</a>
+                            {' · '}
+                            <a href="/terms" target="_blank" rel="noopener noreferrer">이용안내 Terms of Use</a>
+                        </p>
                     </footer>
                 </>
             );
