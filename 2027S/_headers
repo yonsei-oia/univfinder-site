@@ -1,0 +1,9 @@
+# Netlify custom headers.
+#
+# TDM(text and data mining) 예약 신호를 HTTP 헤더로도 남긴다.
+# robots.txt를 읽지 않는 수집기에 대비한 이중 표시이며, 표준 규격은
+# 아니지만 일부 수집기가 인식한다. 무엇보다 "명시적 반대 의사"를
+# 기술적으로 남겨 두는 것 자체가 이후 분쟁에서 증거가 된다.
+# 검색엔진은 모르는 토큰을 무시하므로 색인에는 영향이 없다.
+/*
+  X-Robots-Tag: noai, noimageai

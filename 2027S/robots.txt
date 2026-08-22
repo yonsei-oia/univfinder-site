@@ -1,15 +1,21 @@
 # Yonsei University, Office of International Affairs — UnivFinder
-# https://oiaunivfinder.netlify.app/
+# https://oia.yonsei.ac.kr/univfinder
 #
 # 본 사이트의 파견교 데이터는 연세대학교 국제처가 관리하는 저작물입니다.
-# 사전 허가 없는 자동 수집(크롤링)·복제·재배포를 금지합니다.
+# 사전 허가 없는 자동 수집(크롤링)·복제·재배포 및 AI 학습 목적의 이용을 금지합니다.
 # 이용안내: https://oiaunivfinder.netlify.app/terms
 # 문의: abroad@yonsei.ac.kr
 #
 # Data is maintained by the Office of International Affairs, Yonsei University.
-# Automated collection, reproduction, or redistribution
+# Automated collection, reproduction, redistribution, or use for AI training
 # without prior permission is prohibited. See /terms.
+#
+# TDM reservation: the rightsholder expressly reserves its rights against text
+# and data mining for the training or fine-tuning of AI models.
 
+# =============================================================================
+# 일반 크롤러 — 공개 화면은 색인 허용, 데이터·부속 리소스 경로만 차단
+# =============================================================================
 User-agent: *
 
 # 학생이 찾아야 하는 공개 화면은 색인을 허용합니다.
@@ -28,3 +34,57 @@ Disallow: /*.xlsx$
 Disallow: /*.xls$
 
 Crawl-delay: 10
+
+# =============================================================================
+# AI 학습 목적 크롤러 — 전면 차단
+#
+# 아래는 모델 학습·미세조정용 수집 봇입니다. 검색 색인과 무관하므로
+# 차단해도 Google·Bing·Naver 검색 노출에는 영향이 없습니다.
+# (예: Google-Extended는 Gemini 학습용이며 Googlebot 색인과 별개입니다.
+#  Applebot-Extended도 Applebot 검색과 별개입니다.)
+# =============================================================================
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+# =============================================================================
+# 검색·인용 봇은 의도적으로 차단하지 않습니다.
+#
+# Googlebot, Bingbot, Yeti(Naver), Daum 등 검색 크롤러와
+# OAI-SearchBot, PerplexityBot, ChatGPT-User 등 실시간 인용 봇은
+# 위 `User-agent: *` 규칙을 따릅니다.
+#
+# 이유: 학생이 검색이나 AI 어시스턴트로 교환학생 정보를 찾을 때 공식
+# 사이트가 노출되어야 합니다. 인용 경로까지 막으면 학생이 공식 자료를
+# 찾지 못하고 비공식 2차 가공물로 유입되어, 오히려 목적에 반합니다.
+# 데이터 경로는 이들에게도 위 규칙으로 동일하게 차단됩니다.
+# =============================================================================

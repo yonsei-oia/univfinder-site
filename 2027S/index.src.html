@@ -2606,6 +2606,40 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
             const exportFileBase = `${SEMESTER.yearPart}_exchange-universities`;
             const exportTitle    = `${SEMESTER.yearPart} Exchange Universities`;
 
+            // 다운로드 산출물 출처 표기 (헌법 9.1.1).
+            // 2차 가공물이 유통되더라도 출처와 '데이터 시점'이 파일 자체에 남아야
+            // /terms 5조(비공식 2차 가공물 면책)가 실효를 갖는다. 날짜가 없으면
+            // 언제 기준 데이터인지 증명할 수 없어 면책 주장이 무력해진다.
+            const SOURCE_URL = 'https://oia.yonsei.ac.kr/univfinder';
+            const downloadedOn = () => new Date().toISOString().slice(0, 10);
+            const attributionKo = () =>
+                `데이터 출처: 연세대학교 국제처 OIA UnivFinder (${SOURCE_URL}) · 다운로드 ${downloadedOn()} 기준 · ` +
+                `무단 전재·재배포 및 AI 학습 목적의 이용을 금지합니다 · ` +
+                `최신 정보는 국제처 공식 공지를 확인하시기 바랍니다 · 문의 abroad@yonsei.ac.kr`;
+            // jsPDF 기본 폰트에는 한글 글리프가 없어 그대로 넣으면 깨진다.
+            // 폰트 임베드는 수백 KB가 추가되므로 PDF 표기는 영문으로만 유지한다.
+            const attributionEn = () =>
+                `Source: Yonsei OIA UnivFinder (${SOURCE_URL}) · Downloaded ${downloadedOn()} · ` +
+                `Redistribution and use for AI training are prohibited · ` +
+                `Verify current data via official OIA announcements · abroad@yonsei.ac.kr`;
+            // 데이터 시트 1행은 지워질 수 있으므로 이용조건 전문은 별도 시트로도 남긴다.
+            const termsSheetRows = () => [
+                ['Yonsei OIA UnivFinder — 데이터 이용 조건 / Terms of Use'],
+                [],
+                ['데이터 출처 Source', '연세대학교 국제처(OIA) 공식 데이터'],
+                ['다운로드 일자 Downloaded', downloadedOn()],
+                ['출처 표기 Attribution', `데이터 출처: 연세대학교 국제처 OIA UnivFinder (${SOURCE_URL})`],
+                ['이용안내 전문 Full terms', `${SOURCE_URL} → 이용안내 (Terms of Use)`],
+                ['문의 Contact', 'abroad@yonsei.ac.kr'],
+                [],
+                ['1', '본 파일의 데이터는 연세대학교 국제처가 구축·관리하는 자료입니다. 사전 허가 없는 전재·재배포 및 AI 학습 목적의 이용을 금지합니다.'],
+                ['2', '파견교 정보(정원·지원요건 등)는 매 학기 변경됩니다. 최종 확인은 국제처 공식 공지 및 파견교 게시 내용을 기준으로 하시기 바랍니다.'],
+                ['3', '인용·2차 활용 시 사전에 국제처로 문의하시고 위 출처 표기를 포함하여 주시기 바랍니다.'],
+                ['4', '국제처가 제공하지 않은 비공식 2차 가공물의 정보 오류에 대하여 국제처는 책임지지 않습니다.'],
+                [],
+                ['EN', 'Data in this file is maintained by the Office of International Affairs, Yonsei University. Redistribution and use for AI training are prohibited without prior permission. Partner university information changes each semester; verify against official OIA announcements. For citation or secondary use, contact abroad@yonsei.ac.kr and include the attribution above.'],
+            ];
+
             // 'pdf' | 'excel' | null — first click also downloads the CDN lib (~1-2s)
             const [exporting, setExporting] = useState(null);
 
@@ -2642,6 +2676,17 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         body: tableData,
                         styles: { fontSize: 6 },
                         headStyles: { fillColor: [0, 56, 118] },
+                        margin: { bottom: 24 },   // 페이지 하단 출처 표기 자리
+                        // 출처 표기는 모든 페이지에. 일부 페이지만 캡처·발췌되어도 출처가 남는다.
+                        didDrawPage: (hook) => {
+                            const pw = doc.internal.pageSize.getWidth();
+                            const ph = doc.internal.pageSize.getHeight();
+                            doc.setFontSize(7);
+                            doc.setTextColor(120);
+                            doc.text(doc.splitTextToSize(attributionEn(), pw - 46), 14, ph - 14);
+                            doc.text(`Page ${hook.pageNumber}`, pw - 14, ph - 8, { align: 'right' });
+                            doc.setTextColor(0);
+                        },
                     });
                     doc.setFontSize(9);
                     doc.text('Full details (deadlines, areas, housing, notices) are available in the Excel download.',
@@ -2695,9 +2740,12 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                         'Factsheet': u.recentFactsheet,
                         'Detail Link': `${window.location.origin}${window.location.pathname}${HashRoute.hashForSlug(u.slug)}`,
                     }));
-                    const ws = XLSX.utils.json_to_sheet(data);
+                    // 1~2행 출처 표기, 3행 공백, 4행부터 기존 헤더·데이터.
+                    const ws = XLSX.utils.aoa_to_sheet([[attributionKo()], [attributionEn()], []]);
+                    XLSX.utils.sheet_add_json(ws, data, { origin: 'A4' });
                     const wb = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(wb, ws, 'Universities');
+                    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(termsSheetRows()), 'Terms of Use');
                     XLSX.writeFile(wb, `${exportFileBase}.xlsx`);
                 } catch (e) {
                     alert(`Excel download failed: ${e.message || e}`);
@@ -3239,13 +3287,13 @@ Plan Sorbonne-RdC-2024 | https://lettres.sorbonne-universite.fr/sites/default/fi
                     </button>
 
                     <footer className="site-footer">
-                        <p>© 2026 Yonsei University, Office of International Affairs · Developed by Seo-Ah Choi 최서아</p>
+                        <p>© 2026 Yonsei University, Office of International Affairs · Designed and developed by Seo-Ah Choi 최서아</p>
                         <p className="footer-notice">
-                            본 사이트의 파견교 데이터는 연세대학교 국제처가 관리하며, 사전 허가 없는 자동 수집(크롤링)·복제·재배포를 금지합니다.
+                            본 사이트의 파견교 데이터는 연세대학교 국제처가 관리하며, 사전 허가 없는 자동 수집(크롤링)·복제·재배포 및 AI 학습 목적의 이용을 금지합니다.
                         </p>
                         <p className="footer-notice footer-notice-en">
                             Data is maintained by the Office of International Affairs, Yonsei University.
-                            Unauthorized crawling, reproduction, or redistribution is prohibited.
+                            Unauthorized crawling, reproduction, redistribution, or use for AI training is prohibited.
                         </p>
                         <p>
                             문의 Contact: <a href="mailto:abroad@yonsei.ac.kr">abroad@yonsei.ac.kr</a>

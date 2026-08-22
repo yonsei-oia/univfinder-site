@@ -2643,6 +2643,11 @@ function App() {
   }), [universities]);
   const exportFileBase = `${SEMESTER.yearPart}_exchange-universities`;
   const exportTitle = `${SEMESTER.yearPart} Exchange Universities`;
+  const SOURCE_URL = 'https://oia.yonsei.ac.kr/univfinder';
+  const downloadedOn = () => new Date().toISOString().slice(0, 10);
+  const attributionKo = () => `데이터 출처: 연세대학교 국제처 OIA UnivFinder (${SOURCE_URL}) · 다운로드 ${downloadedOn()} 기준 · ` + `무단 전재·재배포 및 AI 학습 목적의 이용을 금지합니다 · ` + `최신 정보는 국제처 공식 공지를 확인하시기 바랍니다 · 문의 abroad@yonsei.ac.kr`;
+  const attributionEn = () => `Source: Yonsei OIA UnivFinder (${SOURCE_URL}) · Downloaded ${downloadedOn()} · ` + `Redistribution and use for AI training are prohibited · ` + `Verify current data via official OIA announcements · abroad@yonsei.ac.kr`;
+  const termsSheetRows = () => [['Yonsei OIA UnivFinder — 데이터 이용 조건 / Terms of Use'], [], ['데이터 출처 Source', '연세대학교 국제처(OIA) 공식 데이터'], ['다운로드 일자 Downloaded', downloadedOn()], ['출처 표기 Attribution', `데이터 출처: 연세대학교 국제처 OIA UnivFinder (${SOURCE_URL})`], ['이용안내 전문 Full terms', `${SOURCE_URL} → 이용안내 (Terms of Use)`], ['문의 Contact', 'abroad@yonsei.ac.kr'], [], ['1', '본 파일의 데이터는 연세대학교 국제처가 구축·관리하는 자료입니다. 사전 허가 없는 전재·재배포 및 AI 학습 목적의 이용을 금지합니다.'], ['2', '파견교 정보(정원·지원요건 등)는 매 학기 변경됩니다. 최종 확인은 국제처 공식 공지 및 파견교 게시 내용을 기준으로 하시기 바랍니다.'], ['3', '인용·2차 활용 시 사전에 국제처로 문의하시고 위 출처 표기를 포함하여 주시기 바랍니다.'], ['4', '국제처가 제공하지 않은 비공식 2차 가공물의 정보 오류에 대하여 국제처는 책임지지 않습니다.'], [], ['EN', 'Data in this file is maintained by the Office of International Affairs, Yonsei University. Redistribution and use for AI training are prohibited without prior permission. Partner university information changes each semester; verify against official OIA announcements. For citation or secondary use, contact abroad@yonsei.ac.kr and include the attribution above.']];
   const [exporting, setExporting] = useState(null);
   const exportToPDF = async () => {
     try {
@@ -2670,6 +2675,20 @@ function App() {
         },
         headStyles: {
           fillColor: [0, 56, 118]
+        },
+        margin: {
+          bottom: 24
+        },
+        didDrawPage: hook => {
+          const pw = doc.internal.pageSize.getWidth();
+          const ph = doc.internal.pageSize.getHeight();
+          doc.setFontSize(7);
+          doc.setTextColor(120);
+          doc.text(doc.splitTextToSize(attributionEn(), pw - 46), 14, ph - 14);
+          doc.text(`Page ${hook.pageNumber}`, pw - 14, ph - 8, {
+            align: 'right'
+          });
+          doc.setTextColor(0);
         }
       });
       doc.setFontSize(9);
@@ -2722,9 +2741,13 @@ function App() {
         'Factsheet': u.recentFactsheet,
         'Detail Link': `${window.location.origin}${window.location.pathname}${HashRoute.hashForSlug(u.slug)}`
       }));
-      const ws = XLSX.utils.json_to_sheet(data);
+      const ws = XLSX.utils.aoa_to_sheet([[attributionKo()], [attributionEn()], []]);
+      XLSX.utils.sheet_add_json(ws, data, {
+        origin: 'A4'
+      });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Universities');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(termsSheetRows()), 'Terms of Use');
       XLSX.writeFile(wb, `${exportFileBase}.xlsx`);
     } catch (e) {
       alert(`Excel download failed: ${e.message || e}`);
@@ -3291,11 +3314,11 @@ function App() {
     "aria-label": "Scroll to top"
   }, "\u2191"), React.createElement("footer", {
     className: "site-footer"
-  }, React.createElement("p", null, "\xA9 2026 Yonsei University, Office of International Affairs \xB7 Developed by Seo-Ah Choi \uCD5C\uC11C\uC544"), React.createElement("p", {
+  }, React.createElement("p", null, "\xA9 2026 Yonsei University, Office of International Affairs \xB7 Designed and developed by Seo-Ah Choi \uCD5C\uC11C\uC544"), React.createElement("p", {
     className: "footer-notice"
-  }, "\uBCF8 \uC0AC\uC774\uD2B8\uC758 \uD30C\uACAC\uAD50 \uB370\uC774\uD130\uB294 \uC5F0\uC138\uB300\uD559\uAD50 \uAD6D\uC81C\uCC98\uAC00 \uAD00\uB9AC\uD558\uBA70, \uC0AC\uC804 \uD5C8\uAC00 \uC5C6\uB294 \uC790\uB3D9 \uC218\uC9D1(\uD06C\uB864\uB9C1)\xB7\uBCF5\uC81C\xB7\uC7AC\uBC30\uD3EC\uB97C \uAE08\uC9C0\uD569\uB2C8\uB2E4."), React.createElement("p", {
+  }, "\uBCF8 \uC0AC\uC774\uD2B8\uC758 \uD30C\uACAC\uAD50 \uB370\uC774\uD130\uB294 \uC5F0\uC138\uB300\uD559\uAD50 \uAD6D\uC81C\uCC98\uAC00 \uAD00\uB9AC\uD558\uBA70, \uC0AC\uC804 \uD5C8\uAC00 \uC5C6\uB294 \uC790\uB3D9 \uC218\uC9D1(\uD06C\uB864\uB9C1)\xB7\uBCF5\uC81C\xB7\uC7AC\uBC30\uD3EC \uBC0F AI \uD559\uC2B5 \uBAA9\uC801\uC758 \uC774\uC6A9\uC744 \uAE08\uC9C0\uD569\uB2C8\uB2E4."), React.createElement("p", {
     className: "footer-notice footer-notice-en"
-  }, "Data is maintained by the Office of International Affairs, Yonsei University. Unauthorized crawling, reproduction, or redistribution is prohibited."), React.createElement("p", null, "\uBB38\uC758 Contact: ", React.createElement("a", {
+  }, "Data is maintained by the Office of International Affairs, Yonsei University. Unauthorized crawling, reproduction, redistribution, or use for AI training is prohibited."), React.createElement("p", null, "\uBB38\uC758 Contact: ", React.createElement("a", {
     href: "mailto:abroad@yonsei.ac.kr"
   }, "abroad@yonsei.ac.kr"), ' · ', React.createElement("a", {
     href: "/terms",
